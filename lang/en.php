@@ -95,5 +95,13 @@ return [
     'contact_form_name' => 'Your Name',
     'contact_form_email' => 'Your Email',
     'contact_form_message' => 'Your Message',
-    'contact_btn_send' => 'Send Message'
+    'contact_btn_send' => 'Send Message',
+    
+    // Footer & Common
+    'contact_us'   => 'Contact Us',
+    'services'     => 'Services',
+    'about_us'     => 'About Us',
+    'products'     => 'Products',
+    'portfolio'    => 'Portfolio',
+    'book_meeting' => 'Book Now',
 ];

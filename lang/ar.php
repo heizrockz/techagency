@@ -95,5 +95,13 @@ return [
     'contact_form_name' => 'الاسم',
     'contact_form_email' => 'البريد الإلكتروني',
     'contact_form_message' => 'رسالتك',
-    'contact_btn_send' => 'إرسال الرسالة'
+    'contact_btn_send' => 'إرسال الرسالة',
+    
+    // Footer & Common
+    'contact_us'   => 'اتصل بنا',
+    'services'     => 'خدماتنا',
+    'about_us'     => 'من نحن',
+    'products'     => 'منتجاتنا',
+    'portfolio'    => 'أعمالنا',
+    'book_meeting' => 'احجز الآن',
 ];

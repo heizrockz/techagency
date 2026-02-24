@@ -195,6 +195,7 @@ switch ($path) {
 
     default:
         http_response_code(404);
-        echo '<h1>404 — Page Not Found</h1>';
+        $viewFile = '404';
+        require __DIR__ . '/views/layouts/main.php';
         break;
 }
