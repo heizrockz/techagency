@@ -653,105 +653,134 @@ function adminTestimonials(): void {
 /* ═══ Chatbot Editor ═══ */
 function adminChatbot(): void {
     $db = getDB();
-    $saved = false;
-    $action = $_GET['action'] ?? 'list';
 
-    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-        $postAction = $_POST['action'] ?? '';
-        
-        if ($postAction === 'delete_node' && isset($_POST['node_id'])) {
-            $db->prepare('DELETE FROM chatbot_nodes WHERE id = ?')->execute([$_POST['node_id']]);
-            $saved = true;
-            $action = 'list';
-        } elseif ($postAction === 'delete_option' && isset($_POST['option_id'])) {
-            $db->prepare('DELETE FROM chatbot_options WHERE id = ?')->execute([$_POST['option_id']]);
-            $saved = true;
-        } elseif ($postAction === 'save_node') {
-            $id = intval($_POST['node_id'] ?? 0);
-            $name = trim($_POST['name'] ?? 'New Node');
-            $isRoot = isset($_POST['is_root']) ? 1 : 0;
-            
-            // Ensure only one root
-            if ($isRoot) {
-                $db->query('UPDATE chatbot_nodes SET is_root = 0');
-            }
+    // ── AJAX API Endpoints ──────────────────────────────────
+    if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['api_action'])) {
+        header('Content-Type: application/json');
+        $apiAction = $_POST['api_action'];
 
-            if ($id > 0) {
-                $db->prepare('UPDATE chatbot_nodes SET name = ?, is_root = ? WHERE id = ?')->execute([$name, $isRoot, $id]);
-            } else {
-                $db->prepare('INSERT INTO chatbot_nodes (name, is_root) VALUES (?, ?)')->execute([$name, $isRoot]);
-                $id = $db->lastInsertId();
-            }
+        try {
+            if ($apiAction === 'get_all') {
+                // Return all nodes with translations and options
+                $nodes = $db->query('SELECT n.* FROM chatbot_nodes n ORDER BY n.id')->fetchAll(PDO::FETCH_ASSOC);
+                $result = [];
+                foreach ($nodes as $node) {
+                    $trans = $db->prepare('SELECT locale, message FROM chatbot_node_translations WHERE node_id = ?');
+                    $trans->execute([$node['id']]);
+                    $node['translations'] = [];
+                    foreach ($trans->fetchAll(PDO::FETCH_ASSOC) as $t) {
+                        $node['translations'][$t['locale']] = $t['message'];
+                    }
 
-            foreach (SUPPORTED_LOCALES as $loc) {
-                $message = trim($_POST['message_' . $loc] ?? '');
-                $db->prepare('INSERT INTO chatbot_node_translations (node_id, locale, message) VALUES (?, ?, ?)
-                    ON DUPLICATE KEY UPDATE message = VALUES(message)')
-                   ->execute([$id, $loc, $message]);
-            }
-            $saved = true;
-            $action = 'edit';
-            $_GET['id'] = $id; // Keep editing
-        } elseif ($postAction === 'save_option') {
-            $id = intval($_POST['option_id'] ?? 0);
-            $nodeId = intval($_POST['node_id'] ?? 0);
-            $actionType = $_POST['action_type'] ?? 'goto_node';
-            $nextId = !empty($_POST['next_node_id']) ? intval($_POST['next_node_id']) : null;
-            $actionVal = trim($_POST['action_value'] ?? '');
-            $sort = intval($_POST['sort_order'] ?? 0);
+                    $optStmt = $db->prepare('SELECT o.id, o.node_id, o.next_node_id, o.action_type, o.action_value, o.sort_order FROM chatbot_options o WHERE o.node_id = ? ORDER BY o.sort_order');
+                    $optStmt->execute([$node['id']]);
+                    $node['options'] = [];
+                    foreach ($optStmt->fetchAll(PDO::FETCH_ASSOC) as $opt) {
+                        $otStmt = $db->prepare('SELECT locale, label FROM chatbot_option_translations WHERE option_id = ?');
+                        $otStmt->execute([$opt['id']]);
+                        $opt['translations'] = [];
+                        foreach ($otStmt->fetchAll(PDO::FETCH_ASSOC) as $ot) {
+                            $opt['translations'][$ot['locale']] = $ot['label'];
+                        }
+                        $node['options'][] = $opt;
+                    }
+                    $result[] = $node;
+                }
+                echo json_encode(['success' => true, 'nodes' => $result]);
+                exit;
 
-            if ($id > 0) {
-                $db->prepare('UPDATE chatbot_options SET action_type=?, next_node_id=?, action_value=?, sort_order=? WHERE id=?')
-                   ->execute([$actionType, $nextId, $actionVal, $sort, $id]);
-            } else {
-                $db->prepare('INSERT INTO chatbot_options (node_id, action_type, next_node_id, action_value, sort_order) VALUES (?, ?, ?, ?, ?)')
-                   ->execute([$nodeId, $actionType, $nextId, $actionVal, $sort]);
-                $id = $db->lastInsertId();
-            }
+            } elseif ($apiAction === 'save_node') {
+                $id = intval($_POST['node_id'] ?? 0);
+                $name = trim($_POST['name'] ?? 'New Node');
+                $isRoot = intval($_POST['is_root'] ?? 0);
+                $posX = intval($_POST['pos_x'] ?? 100);
+                $posY = intval($_POST['pos_y'] ?? 100);
+                $replyType = $_POST['reply_type'] ?? 'preset';
+                $inputVarName = trim($_POST['input_var_name'] ?? '');
 
-            foreach (SUPPORTED_LOCALES as $loc) {
-                $label = trim($_POST['label_' . $loc] ?? '');
-                $db->prepare('INSERT INTO chatbot_option_translations (option_id, locale, label) VALUES (?, ?, ?)
-                    ON DUPLICATE KEY UPDATE label = VALUES(label)')
-                   ->execute([$id, $loc, $label]);
+                if ($isRoot) {
+                    $db->query('UPDATE chatbot_nodes SET is_root = 0');
+                }
+
+                if ($id > 0) {
+                    $db->prepare('UPDATE chatbot_nodes SET name=?, is_root=?, pos_x=?, pos_y=?, reply_type=?, input_var_name=? WHERE id=?')
+                       ->execute([$name, $isRoot, $posX, $posY, $replyType, $inputVarName, $id]);
+                } else {
+                    $db->prepare('INSERT INTO chatbot_nodes (name, is_root, pos_x, pos_y, reply_type, input_var_name) VALUES (?,?,?,?,?,?)')
+                       ->execute([$name, $isRoot, $posX, $posY, $replyType, $inputVarName]);
+                    $id = $db->lastInsertId();
+                }
+
+                // Save translations
+                foreach (SUPPORTED_LOCALES as $loc) {
+                    $message = trim($_POST['message_' . $loc] ?? '');
+                    $db->prepare('INSERT INTO chatbot_node_translations (node_id, locale, message) VALUES (?, ?, ?)
+                        ON DUPLICATE KEY UPDATE message = VALUES(message)')
+                       ->execute([$id, $loc, $message]);
+                }
+                echo json_encode(['success' => true, 'id' => $id]);
+                exit;
+
+            } elseif ($apiAction === 'save_option') {
+                $id = intval($_POST['option_id'] ?? 0);
+                $nodeId = intval($_POST['node_id'] ?? 0);
+                $actionType = $_POST['action_type'] ?? 'goto_node';
+                $nextId = !empty($_POST['next_node_id']) ? intval($_POST['next_node_id']) : null;
+                $actionVal = trim($_POST['action_value'] ?? '');
+                $sort = intval($_POST['sort_order'] ?? 0);
+
+                if ($id > 0) {
+                    $db->prepare('UPDATE chatbot_options SET action_type=?, next_node_id=?, action_value=?, sort_order=? WHERE id=?')
+                       ->execute([$actionType, $nextId, $actionVal, $sort, $id]);
+                } else {
+                    $db->prepare('INSERT INTO chatbot_options (node_id, action_type, next_node_id, action_value, sort_order) VALUES (?,?,?,?,?)')
+                       ->execute([$nodeId, $actionType, $nextId, $actionVal, $sort]);
+                    $id = $db->lastInsertId();
+                }
+
+                foreach (SUPPORTED_LOCALES as $loc) {
+                    $label = trim($_POST['label_' . $loc] ?? '');
+                    $db->prepare('INSERT INTO chatbot_option_translations (option_id, locale, label) VALUES (?, ?, ?)
+                        ON DUPLICATE KEY UPDATE label = VALUES(label)')
+                       ->execute([$id, $loc, $label]);
+                }
+                echo json_encode(['success' => true, 'id' => $id]);
+                exit;
+
+            } elseif ($apiAction === 'delete_node') {
+                $nodeId = intval($_POST['node_id'] ?? 0);
+                if ($nodeId > 0) {
+                    $db->prepare('DELETE FROM chatbot_nodes WHERE id = ?')->execute([$nodeId]);
+                }
+                echo json_encode(['success' => true]);
+                exit;
+
+            } elseif ($apiAction === 'delete_option') {
+                $optId = intval($_POST['option_id'] ?? 0);
+                if ($optId > 0) {
+                    $db->prepare('DELETE FROM chatbot_options WHERE id = ?')->execute([$optId]);
+                }
+                echo json_encode(['success' => true]);
+                exit;
+
+            } elseif ($apiAction === 'save_positions') {
+                $positions = json_decode($_POST['positions'] ?? '[]', true);
+                if (is_array($positions)) {
+                    $stmt = $db->prepare('UPDATE chatbot_nodes SET pos_x = ?, pos_y = ? WHERE id = ?');
+                    foreach ($positions as $pos) {
+                        $stmt->execute([intval($pos['x']), intval($pos['y']), intval($pos['id'])]);
+                    }
+                }
+                echo json_encode(['success' => true]);
+                exit;
             }
-            $saved = true;
-            $action = 'edit';
-            $_GET['id'] = $nodeId;
+        } catch (Exception $e) {
+            echo json_encode(['success' => false, 'error' => $e->getMessage()]);
+            exit;
         }
     }
 
-    $editNode = null;
-    $nodeOptions = [];
-    if ($action === 'edit' && isset($_GET['id'])) {
-        $stmt = $db->prepare('SELECT * FROM chatbot_nodes WHERE id = ?');
-        $stmt->execute([intval($_GET['id'])]);
-        $editNode = $stmt->fetch();
-        if ($editNode) {
-            $stmt2 = $db->prepare('SELECT * FROM chatbot_node_translations WHERE node_id = ?');
-            $stmt2->execute([$editNode['id']]);
-            $editNode['translations'] = [];
-            foreach ($stmt2->fetchAll() as $t) {
-                $editNode['translations'][$t['locale']] = $t;
-            }
-
-            // Get options
-            $optStmt = $db->prepare('SELECT o.*, 
-                GROUP_CONCAT(CONCAT(ot.locale, ":", ot.label) SEPARATOR "|") as trans
-                FROM chatbot_options o 
-                LEFT JOIN chatbot_option_translations ot ON o.id = ot.option_id
-                WHERE o.node_id = ?
-                GROUP BY o.id ORDER BY o.sort_order');
-            $optStmt->execute([$editNode['id']]);
-            $nodeOptions = $optStmt->fetchAll();
-        }
-    }
-
-    // List all nodes for dropdowns and listing
-    $allNodes = $db->query('SELECT n.*, 
-        (SELECT message FROM chatbot_node_translations WHERE node_id = n.id AND locale="en") as en_msg 
-        FROM chatbot_nodes n ORDER BY n.id')->fetchAll();
-
+    // ── Render the visual builder page ───────────────────────
     require __DIR__ . '/../views/admin/chatbot.php';
 }
 

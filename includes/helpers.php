@@ -265,7 +265,7 @@ function getChatbotData(string $locale): array {
         $db = getDB();
         
         // Fetch all nodes with their translations
-        $stmt = $db->prepare('SELECT n.id, n.is_root, nt.message 
+        $stmt = $db->prepare('SELECT n.id, n.is_root, n.reply_type, n.input_var_name, nt.message 
             FROM chatbot_nodes n 
             JOIN chatbot_node_translations nt ON n.id = nt.node_id AND nt.locale = ?');
         $stmt->execute([$locale]);
@@ -288,6 +288,8 @@ function getChatbotData(string $locale): array {
             }
             $nodeMap[$node['id']] = [
                 'message' => $node['message'],
+                'reply_type' => $node['reply_type'] ?? 'preset',
+                'input_var_name' => $node['input_var_name'] ?? '',
                 'options' => []
             ];
         }

@@ -165,10 +165,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const chatClose = document.getElementById('chatbotClose');
     const chatMessages = document.getElementById('chatbotMessages');
     const chatOptions = document.getElementById('chatbotOptions');
+    const chatInputArea = document.getElementById('chatbotInputArea');
+    const chatInput = document.getElementById('chatbotInput');
+    const chatSendBtn = document.getElementById('chatbotSendBtn');
 
     if (chatToggle && chatPanel && window.chatbotData && window.chatbotData.start_node_id) {
         let chatInitialized = false;
         const chatData = window.chatbotData;
+        let chatTranscript = [];
+        let currentInputHandler = null; // Track current input handler
 
         // Toggle Chat
         chatToggle.addEventListener('click', () => {
@@ -185,157 +190,157 @@ document.addEventListener('DOMContentLoaded', () => {
             chatToggle.style.transform = 'scale(1)';
         });
 
+        function scrollToBottom() {
+            chatMessages.scrollTo({ top: chatMessages.scrollHeight, behavior: 'smooth' });
+        }
+
+        function recordAndShowUserMessage(text) {
+            const msgDiv = document.createElement('div');
+            msgDiv.className = 'chat-msg user';
+            msgDiv.textContent = text;
+            chatMessages.appendChild(msgDiv);
+            chatTranscript.push({ sender: 'user', message: text });
+            scrollToBottom();
+            saveTranscript();
+        }
+
+        function saveTranscript() {
+            if (chatTranscript.length === 0) return;
+            fetch(document.body.getAttribute('data-baseurl') + 'api/chatbot_save.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ transcript: chatTranscript })
+            }).catch(err => console.error('Chat save error:', err));
+        }
+
+        function handleOptionClick(opt) {
+            const allBtns = chatOptions.querySelectorAll('.chat-opt-btn');
+            allBtns.forEach(b => b.disabled = true);
+            recordAndShowUserMessage(opt.label);
+            chatOptions.innerHTML = '';
+
+            if (opt.action === 'goto_node' && opt.target) {
+                loadNode(opt.target);
+            } else if (opt.action === 'link' && opt.target) {
+                window.location.href = opt.target;
+            } else if (opt.action === 'call') {
+                saveTranscript();
+                let target = opt.target;
+                if (!target) {
+                    const fcb = document.querySelector('.floating-call-btn');
+                    if (fcb) target = fcb.getAttribute('href').replace('tel:', '');
+                }
+                if (target) {
+                    window.location.href = `tel:${target}`;
+                } else {
+                    const failMsg = document.createElement('div');
+                    failMsg.className = 'chat-msg bot';
+                    failMsg.textContent = 'Phone number not available.';
+                    chatMessages.appendChild(failMsg);
+                    chatTranscript.push({ sender: 'bot', message: 'Phone number not available.' });
+                    scrollToBottom();
+                }
+            }
+        }
+
         function loadNode(nodeId) {
             const node = chatData.nodes[nodeId];
             if (!node) return;
 
-            // Clear old options
+            // Clear old options and hide input
             chatOptions.innerHTML = '';
+            if (chatInputArea) chatInputArea.style.display = 'none';
+
+            // Remove previous input handler to avoid duplicate listeners
+            if (currentInputHandler && chatSendBtn) {
+                chatSendBtn.removeEventListener('click', currentInputHandler);
+                currentInputHandler = null;
+            }
 
             // Show typing indicator
             const typingIndicator = document.createElement('div');
             typingIndicator.className = 'chat-msg bot chat-typing';
-            let chatTranscript = []; // Store the full conversation
+            typingIndicator.innerHTML = '<span></span><span></span><span></span>';
+            chatMessages.appendChild(typingIndicator);
+            scrollToBottom();
 
-            // Handle Free Text Input Globally for this Widget
-            const chatInput = document.getElementById('chatbotInput');
-            const chatSendBtn = document.getElementById('chatbotSendBtn');
+            setTimeout(() => {
+                typingIndicator.remove();
 
-            function recordAndShowUserMessage(text) {
+                // Show bot message
                 const msgDiv = document.createElement('div');
-                msgDiv.className = 'chat-msg user';
-                msgDiv.textContent = text;
+                msgDiv.className = 'chat-msg bot';
+                msgDiv.innerHTML = node.message.replace(/\n/g, '<br>');
                 chatMessages.appendChild(msgDiv);
-                chatTranscript.push({ sender: 'user', message: text });
+                chatTranscript.push({ sender: 'bot', message: node.message });
                 scrollToBottom();
-                saveTranscript(); // Auto-save on every user interaction
-            }
 
-            if (chatInput && chatSendBtn) {
-                chatSendBtn.addEventListener('click', () => {
-                    const text = chatInput.value.trim();
-                    if (text) {
-                        recordAndShowUserMessage(text);
+                // ── Handle reply_type ──
+                if (node.reply_type === 'user_input') {
+                    // Show text input for user input questions
+                    if (chatInputArea) {
+                        chatInputArea.style.display = '';
                         chatInput.value = '';
+                        chatInput.placeholder = node.input_var_name
+                            ? `Enter your ${node.input_var_name.replace(/_/g, ' ')}...`
+                            : 'Type your answer...';
+                        chatInput.focus();
 
-                        // Simple simulated bot response for free text
-                        setTimeout(() => {
-                            const reply = "Thank you for your message. We have received it and our team will get back to you shortly.";
-                            const msgDiv = document.createElement('div');
-                            msgDiv.className = 'chat-msg bot';
-                            msgDiv.textContent = reply;
-                            chatMessages.appendChild(msgDiv);
-                            chatTranscript.push({ sender: 'bot', message: reply });
-                            scrollToBottom();
-                            saveTranscript();
+                        // Find the next_node_id from the first option (if any)
+                        const nextNodeId = (node.options && node.options.length > 0 && node.options[0].action === 'goto_node')
+                            ? node.options[0].target
+                            : null;
 
-                            // Clear options since user went off-script
-                            chatOptions.innerHTML = '';
-                        }, 1000);
+                        currentInputHandler = () => {
+                            const text = chatInput.value.trim();
+                            if (!text) return;
+                            recordAndShowUserMessage(text);
+                            chatInput.value = '';
+                            chatInputArea.style.display = 'none';
+
+                            if (nextNodeId) {
+                                loadNode(nextNodeId);
+                            } else {
+                                // Dead-end: show a thank you message
+                                setTimeout(() => {
+                                    const ty = document.createElement('div');
+                                    ty.className = 'chat-msg bot';
+                                    ty.textContent = 'Thank you! Our team will review your response.';
+                                    chatMessages.appendChild(ty);
+                                    chatTranscript.push({ sender: 'bot', message: 'Thank you! Our team will review your response.' });
+                                    scrollToBottom();
+                                    saveTranscript();
+                                }, 600);
+                            }
+                        };
+
+                        chatSendBtn.addEventListener('click', currentInputHandler);
+
+                        // Enter key handler
+                        const enterHandler = (e) => {
+                            if (e.key === 'Enter') {
+                                currentInputHandler();
+                                chatInput.removeEventListener('keypress', enterHandler);
+                            }
+                        };
+                        chatInput.addEventListener('keypress', enterHandler);
                     }
-                });
+                } else {
+                    // Preset buttons mode — hide input, show option buttons
+                    if (chatInputArea) chatInputArea.style.display = 'none';
 
-                chatInput.addEventListener('keypress', (e) => {
-                    if (e.key === 'Enter') {
-                        chatSendBtn.click();
-                    }
-                });
-            }
-
-            function saveTranscript() {
-                if (chatTranscript.length === 0) return;
-                fetch(document.body.getAttribute('data-baseurl') + 'api/chatbot_save.php', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ transcript: chatTranscript })
-                }).catch(err => console.error('Chat save error:', err));
-            }
-
-            function scrollToBottom() {
-                chatMessages.scrollTo({
-                    top: chatMessages.scrollHeight,
-                    behavior: 'smooth'
-                });
-            }
-
-            function handleOptionClick(opt, btn) {
-                // Disable all buttons instantly
-                const allBtns = chatOptions.querySelectorAll('.chat-opt-btn');
-                allBtns.forEach(b => b.disabled = true);
-
-                // Record user message
-                recordAndShowUserMessage(opt.label);
-
-                // Clear options area
-                chatOptions.innerHTML = '';
-                scrollToBottom();
-
-                // Handle Action
-                if (opt.action === 'goto_node' && opt.target) {
-                    loadNode(opt.target);
-                } else if (opt.action === 'link' && opt.target) {
-                    window.location.href = opt.target;
-                } else if (opt.action === 'call') {
-                    saveTranscript(); // Save before leaving
-                    let target = opt.target;
-                    if (!target) {
-                        const fcb = document.querySelector('.floating-call-btn');
-                        if (fcb) target = fcb.getAttribute('href').replace('tel:', '');
-                    }
-                    if (target) {
-                        window.location.href = `tel:${target}`;
-                    } else {
-                        const failMsg = document.createElement('div');
-                        failMsg.className = 'chat-msg bot';
-                        failMsg.textContent = 'Phone number not available.';
-                        chatMessages.appendChild(failMsg);
-                        chatTranscript.push({ sender: 'bot', message: 'Phone number not available.' });
-                        scrollToBottom();
-                    }
-                }
-            }
-
-            function loadNode(nodeId) {
-                const node = chatData.nodes[nodeId];
-                if (!node) return;
-
-                // Clear old options
-                chatOptions.innerHTML = '';
-
-                // Show typing indicator
-                const typingIndicator = document.createElement('div');
-                typingIndicator.className = 'chat-msg bot chat-typing';
-                typingIndicator.innerHTML = '<span></span><span></span><span></span>';
-                chatMessages.appendChild(typingIndicator);
-                scrollToBottom();
-
-                // Artificial delay for realism
-                setTimeout(() => {
-                    typingIndicator.remove();
-
-                    // Show bot message
-                    const msgDiv = document.createElement('div');
-                    msgDiv.className = 'chat-msg bot';
-                    msgDiv.innerHTML = node.message.replace(/\n/g, '<br>');
-                    chatMessages.appendChild(msgDiv);
-                    chatTranscript.push({ sender: 'bot', message: node.message });
-                    scrollToBottom();
-
-                    // Render options if any
                     if (node.options && node.options.length > 0) {
                         node.options.forEach((opt, index) => {
                             const btn = document.createElement('button');
                             btn.className = 'chat-opt-btn';
                             btn.style.animationDelay = `${index * 0.1}s`;
                             btn.textContent = opt.label;
-
-
-                            btn.addEventListener('click', () => handleOptionClick(opt, btn));
+                            btn.addEventListener('click', () => handleOptionClick(opt));
                             chatOptions.appendChild(btn);
                         });
                     }
-                }, 800);
-            }
+                }
+            }, 800);
         }
     }
 

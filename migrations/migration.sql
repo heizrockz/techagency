@@ -606,3 +606,11 @@ CREATE TABLE IF NOT EXISTS chatbot_messages (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (session_id) REFERENCES chatbot_sessions(id) ON DELETE CASCADE
 );
+
+-- ═══════════════════════════════════════════════════════════
+-- Visual Chatbot Flow Builder — Schema Additions
+-- ═══════════════════════════════════════════════════════════
+ALTER TABLE chatbot_nodes ADD COLUMN IF NOT EXISTS pos_x INT DEFAULT 100;
+ALTER TABLE chatbot_nodes ADD COLUMN IF NOT EXISTS pos_y INT DEFAULT 100;
+ALTER TABLE chatbot_nodes ADD COLUMN IF NOT EXISTS reply_type ENUM('preset','user_input') DEFAULT 'preset';
+ALTER TABLE chatbot_nodes ADD COLUMN IF NOT EXISTS input_var_name VARCHAR(100) DEFAULT '';
