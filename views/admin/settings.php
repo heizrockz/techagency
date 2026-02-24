@@ -48,6 +48,9 @@
                     <label style="cursor: pointer; display: flex; align-items: center; gap: 10px;">
                         <input type="checkbox" name="settings[show_testimonials]" <?= ($settings['show_testimonials']['setting_value'] ?? '1') === '1' ? 'checked' : '' ?>> Show "Testimonials" Section
                     </label>
+                    <label style="cursor: pointer; display: flex; align-items: center; gap: 10px;">
+                        <input type="checkbox" name="settings[show_blog_section]" <?= ($settings['show_blog_section']['setting_value'] ?? '1') === '1' ? 'checked' : '' ?>> Show "Blogs" Section
+                    </label>
                 </div>
             </div>
 

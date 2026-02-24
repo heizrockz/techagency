@@ -38,3 +38,27 @@ INSERT INTO contents (section_key, locale, value) VALUES
 ('blog_subtitle', 'en', 'Stay updated with our latest news and futuristic visions.'),
 ('blog_subtitle', 'ar', 'ابق على اطلاع بآخر أخبارنا ورؤانا المستقبلية.')
 ON DUPLICATE KEY UPDATE value = VALUES(value);
+
+-- 6. Insert content defaults for "Our Process" Section
+INSERT INTO contents (section_key, locale, value) VALUES
+('process_title', 'en', 'Our Engineering Process'),
+('process_title', 'ar', 'عملية الهندسة لدينا'),
+('process_subtitle', 'en', 'From concept to deployment, we follow a rigorous futuristic workflow.'),
+('process_subtitle', 'ar', 'من المفهوم إلى النشر، نتبع سير عمل مستقبلي صارم.'),
+('process_step1_title', 'en', 'Discovery & Analysis'),
+('process_step1_title', 'ar', 'الاستكشاف والتحليل'),
+('process_step1_desc', 'en', 'We dive deep into your requirements to define the technical roadmap.'),
+('process_step1_desc', 'ar', 'نغوص في متطلباتك لتحديد خارطة الطريق التقنية.'),
+('process_step2_title', 'en', 'Futuristic Design'),
+('process_step2_title', 'ar', 'التصميم المستقبلي'),
+('process_step2_desc', 'en', 'Crafting UI/UX that feels alive, interactive, and premium.'),
+('process_step2_desc', 'ar', 'صياغة تجربة مستخدم تشعر بالحيوية والتفاعل والفخامة.'),
+('process_step3_title', 'en', 'Agile Development'),
+('process_step3_title', 'ar', 'التطوير الرشيق'),
+('process_step3_desc', 'en', 'Building with scalable architectures and clean, modular code.'),
+('process_step3_desc', 'ar', 'البناء بهندسة قابلة للتوسع وكود نظيف ونمطي.'),
+('process_step4_title', 'en', 'Testing & Launch'),
+('process_step4_title', 'ar', 'الاختبار والإطلاق'),
+('process_step4_desc', 'en', 'Rigorous QA followed by a smooth global deployment.'),
+('process_step4_desc', 'ar', 'ضمان جودة صارم يليه نشر عالمي سلس.')
+ON DUPLICATE KEY UPDATE value = VALUES(value);

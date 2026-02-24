@@ -306,7 +306,11 @@ function adminSettings(): void {
                ->execute([$key, $value]);
         }
         // Handle checkboxes (sections toggles)
-        $toggles = ['show_clients_section','show_products_section','show_stats_section','show_marketing_section','show_team','show_testimonials'];
+        $toggles = [
+            'show_clients_section', 'show_products_section', 'show_stats_section', 
+            'show_marketing_section', 'show_team', 'show_testimonials',
+            'show_tagline_section', 'show_process_section', 'show_blog_section'
+        ];
         foreach ($toggles as $toggle) {
             $val = isset($_POST['settings'][$toggle]) ? '1' : '0';
             $db->prepare('INSERT INTO site_settings (setting_key, setting_value) VALUES (?, ?)

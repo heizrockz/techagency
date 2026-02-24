@@ -12,7 +12,9 @@ $showStats = getSetting('show_stats_section', '1') === '1';
 $showMarketing = getSetting('show_marketing_section', '1') === '1';
 $showTeam = getSetting('show_team', '1') === '1';
 $showTestimonials = getSetting('show_testimonials', '1') === '1';
+$showBlogs = getSetting('show_blog_section', '1') === '1';
 $siteName = getSetting('site_name', 'Mico Sage');
+$blogs = getBlogs();
 ?>
 
 <!-- ═══════════════════════════════════════════════════════════

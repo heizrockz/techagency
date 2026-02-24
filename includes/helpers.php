@@ -228,6 +228,24 @@ function getPortfolioProjects(?string $category = null): array {
     }
 }
 
+/* ── Blogs from DB ────────────────────────────── */
+function getBlogs(): array {
+    try {
+        $db = getDB();
+        $locale = getCurrentLocale();
+        $sql = 'SELECT b.*, bt.title, bt.description
+                FROM blogs b
+                LEFT JOIN blog_translations bt ON b.id = bt.blog_id AND bt.locale = ?
+                WHERE b.is_active = 1
+                ORDER BY b.sort_order ASC, b.created_at DESC';
+        $stmt = $db->prepare($sql);
+        $stmt->execute([$locale]);
+        return $stmt->fetchAll();
+    } catch (Exception $e) {
+        return [];
+    }
+}
+
 /* ── SVG Icon helper (inline SVGs for service/product cards) ── */
 function getIconSvg(string $icon, string $color = 'cobalt'): string {
     $colors = [
