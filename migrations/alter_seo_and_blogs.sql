@@ -62,3 +62,18 @@ INSERT INTO contents (section_key, locale, value) VALUES
 ('process_step4_desc', 'en', 'Rigorous QA followed by a smooth global deployment.'),
 ('process_step4_desc', 'ar', 'ضمان جودة صارم يليه نشر عالمي سلس.')
 ON DUPLICATE KEY UPDATE value = VALUES(value);
+
+-- 7. Insert Sample Blogs to ensure visibility on User Side
+INSERT IGNORE INTO blogs (id, slug, media_type, media_url, sort_order, is_active) VALUES
+(1, 'future-of-ai-engineering', 'image', 'assets/images/placeholder.webp', 1, 1),
+(2, 'modern-windows-ui-design', 'video_link', 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', 2, 1),
+(3, 'digital-marketing-trends-2026', 'image', 'assets/images/placeholder.webp', 3, 1);
+
+INSERT IGNORE INTO blog_translations (blog_id, locale, title, description) VALUES
+(1, 'en', 'The Future of AI Engineering', 'Exploring how neural architectures and agentic AI are transforming the way we build modern software systems.'),
+(1, 'ar', 'مستقبل هندسة الذكاء الاصطناعي', 'استكشاف كيف تغير البنيات العصبية والذكاء الاصطناعي الوكيل طريقة بناء أنظمة البرمجيات الحديثة.'),
+(2, 'en', 'Modern Windows UI Design', 'A deep dive into creating premium glassmorphic interfaces for desktop applications using the latest .NET technologies.'),
+(2, 'ar', 'تصميم واجهة مستخدم ويندوز الحديثة', 'تعمق في إنشاء واجهات زجاجية متميزة لتطبيقات سطح المكتب باستخدام أحدث تقنيات .NET.'),
+(3, 'en', 'Digital Marketing Trends 2026', 'Why data-driven growth and hyper-personalization are the keys to dominating the digital landscape this year.'),
+(3, 'ar', 'اتجاهات التسويق الرقمي 2026', 'لماذا يعد النمو المدفوع بالبيانات والتخصيص الفائق مفاتيح السيطرة على المشهد الرقمي هذا العام.');
+

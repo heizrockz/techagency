@@ -435,6 +435,70 @@ $blogs = getBlogs();
 <?php endif; ?>
 
 <!-- ═══════════════════════════════════════════════════════════
+     Blog Section (Futuristic Glassmorphism UI)
+     ═══════════════════════════════════════════════════════════ -->
+<?php if ($showBlogs && !empty($blogs)): ?>
+<section class="blog-section" id="blogs" style="position: relative; overflow: hidden; padding: 100px 0;">
+    <!-- Abstract neural particles for background -->
+    <div class="blog-background-effects" style="position:absolute; inset:0; pointer-events:none; z-index:0;">
+        <div style="position:absolute; top:-10%; left:-10%; width:40%; height:40%; background:radial-gradient(circle, rgba(var(--neon-violet-rgb), 0.1) 0%, transparent 70%); filter:blur(100px);"></div>
+        <div style="position:absolute; bottom:-10%; right:-10%; width:40%; height:40%; background:radial-gradient(circle, rgba(var(--neon-emerald-rgb), 0.1) 0%, transparent 70%); filter:blur(100px);"></div>
+    </div>
+    
+    <div class="section-container" style="position: relative; z-index: 1;">
+        <div class="section-heading animate-on-scroll">
+            <h2><?= e(getContent('blog_title')) ?></h2>
+            <p><?= e(getContent('blog_subtitle')) ?></p>
+            <div class="heading-line" style="margin: 20px auto; width: 60px; height: 3px; background: linear-gradient(90deg, var(--neon-cyan), var(--neon-violet));"></div>
+        </div>
+
+        <div class="blog-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; margin-top: 60px;">
+            <?php foreach ($blogs as $i => $blog): ?>
+            <div class="blog-card animate-on-scroll" style="animation-delay: <?= $i * 0.1 ?>s; background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255,255,255,0.08); border-radius: 20px; overflow: hidden; backdrop-filter: blur(12px); transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);">
+                
+                <div class="blog-media" style="position: relative; height: 200px; overflow: hidden; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                    <?php if ($blog['media_type'] === 'video' && !empty($blog['media_url'])): ?>
+                        <video autoplay loop muted playsinline style="width: 100%; height: 100%; object-fit: cover; opacity: 0.8; transition: transform 0.8s ease;">
+                            <source src="<?= baseUrl($blog['media_url']) ?>" type="video/<?= pathinfo($blog['media_url'], PATHINFO_EXTENSION) ?>">
+                        </video>
+                    <?php elseif ($blog['media_type'] === 'video_link' && !empty($blog['media_url'])): ?>
+                        <div style="width: 100%; height: 100%; background: #0a0f18; display:flex; align-items:center; justify-content:center;">
+                            <a href="<?= e($blog['media_url']) ?>" target="_blank" style="color:var(--neon-pink); opacity:0.8; transition:transform 0.3s ease;" onmouseover="this.style.transform='scale(1.2)'" onmouseout="this.style.transform='scale(1)'">
+                                <svg width="50" height="50" viewBox="0 0 24 24" fill="currentColor"><path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"/></svg>
+                            </a>
+                        </div>
+                    <?php else: ?>
+                        <img src="<?= !empty($blog['media_url']) ? baseUrl($blog['media_url']) : baseUrl('assets/images/placeholder.webp') ?>" alt="<?= e($blog['title'] ?? '') ?>" style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.8s ease; opacity: 0.9;">
+                    <?php endif; ?>
+                    <div style="position:absolute; top:0; left:0; width:100%; height:100%; background:linear-gradient(to bottom, transparent 60%, rgba(0,0,0,0.4));"></div>
+                </div>
+
+                <div class="blog-content" style="padding: 25px;">
+                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
+                        <span style="padding: 4px 10px; background: rgba(var(--neon-cyan-rgb),0.1); color: var(--neon-cyan); font-size: 0.65rem; border-radius: 4px; font-weight: 700; letter-spacing: 1px;"><?= strtoupper(date('M d', strtotime($blog['created_at']))) ?></span>
+                    </div>
+                    <h3 style="font-size: 1.2rem; margin: 0 0 12px 0; color: #fff; line-height: 1.4; font-weight: 600;"><?= e($blog['title'] ?? '') ?></h3>
+                    <p style="color: rgba(255,255,255,0.5); font-size: 0.85rem; line-height: 1.6; margin-bottom: 25px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;"><?= e($blog['description'] ?? '') ?></p>
+                    
+                    <a href="<?= baseUrl('blog/' . e($blog['slug'])) ?>" class="blog-nav-link" style="color: var(--neon-emerald); font-size: 0.8rem; font-weight: 800; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; letter-spacing: 1px;">
+                        READ PROJECT
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                    </a>
+                </div>
+            </div>
+            <?php endforeach; ?>
+        </div>
+    </div>
+    
+    <style>
+        .blog-card:hover { transform: translateY(-12px); background: rgba(255,255,255,0.05); border-color: rgba(var(--neon-emerald-rgb), 0.4); box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); }
+        .blog-card:hover img, .blog-card:hover video { transform: scale(1.1); }
+        .blog-nav-link:hover { color: #fff; gap: 10px; }
+    </style>
+</section>
+<?php endif; ?>
+
+<!-- ═══════════════════════════════════════════════════════════
      Booking Section (Dynamic Fields)
      ═══════════════════════════════════════════════════════════ -->
 <section class="booking-section" id="booking">
