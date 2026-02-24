@@ -16,7 +16,8 @@ try {
         'blogs' => ['id', 'slug', 'is_active'],
         'chatbot_sessions' => ['id', 'user_ip', 'status', 'user_email', 'user_phone'],
         'chatbot_messages' => ['id', 'session_id', 'sender', 'message'],
-        'chatbot_nodes' => ['id', 'pos_x', 'pos_y', 'reply_type']
+        'chatbot_nodes' => ['id', 'pos_x', 'pos_y', 'reply_type'],
+        'blog_translations' => ['id', 'blog_id', 'locale', 'content']
     ];
 
     foreach ($tables as $table => $cols) {

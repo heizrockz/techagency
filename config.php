@@ -14,7 +14,7 @@ if ($isLocal) {
     define('DB_NAME', 'tech_agency');
     define('DB_USER', 'root');
     define('DB_PASS', '');
-    define('BASE_URL', '/tech-agency');  // local subdirectory
+    define('BASE_URL', '');  // local root
     error_reporting(E_ALL);
     ini_set('display_errors', '1');
 } else {

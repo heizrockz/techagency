@@ -972,23 +972,9 @@ function adminChatbot(): void {
 function adminInbox(): void {
     $db = getDB();
     $action = $_GET['action'] ?? 'list';
+    $selectedId = isset($_GET['id']) ? intval($_GET['id']) : null;
 
-    if ($action === 'view' && isset($_GET['id'])) {
-        $sessionId = intval($_GET['id']);
-        $session = $db->prepare('SELECT * FROM chatbot_sessions WHERE id = ?');
-        $session->execute([$sessionId]);
-        $sessionData = $session->fetch();
-
-        if ($sessionData) {
-            $messagesStmt = $db->prepare('SELECT * FROM chatbot_messages WHERE session_id = ? ORDER BY created_at ASC');
-            $messagesStmt->execute([$sessionId]);
-            $messages = $messagesStmt->fetchAll();
-            require __DIR__ . '/../views/admin/inbox_view.php';
-            return;
-        }
-    }
-
-    // List sessions
+    // Fetch all sessions for the sidebar
     $sessions = $db->query('
         SELECT s.*, count(m.id) as msg_count 
         FROM chatbot_sessions s 
@@ -996,6 +982,21 @@ function adminInbox(): void {
         GROUP BY s.id 
         ORDER BY s.updated_at DESC
     ')->fetchAll();
+
+    $sessionData = null;
+    $messages = [];
+
+    if ($selectedId) {
+        $session = $db->prepare('SELECT * FROM chatbot_sessions WHERE id = ?');
+        $session->execute([$selectedId]);
+        $sessionData = $session->fetch();
+
+        if ($sessionData) {
+            $messagesStmt = $db->prepare('SELECT * FROM chatbot_messages WHERE session_id = ? ORDER BY created_at ASC');
+            $messagesStmt->execute([$selectedId]);
+            $messages = $messagesStmt->fetchAll();
+        }
+    }
 
     require __DIR__ . '/../views/admin/inbox.php';
 }
