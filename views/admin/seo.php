@@ -24,7 +24,40 @@
             <div class="alert alert-success"><?= t('admin_saved') ?></div>
         <?php endif; ?>
 
-        <form method="POST" action="<?= baseUrl('admin/seo') ?>">
+        <form method="POST" action="<?= baseUrl('admin/seo') ?>" enctype="multipart/form-data">
+            <div class="content-section">
+                <h3>🌍 Global SEO Settings</h3>
+                <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 20px;">Settings that apply site-wide, such as the browser tab icon and link sharing images.</p>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div class="admin-form-group" style="display: flex; align-items: center; gap: 20px;">
+                        <div style="flex:1;">
+                            <label>Favicon (Browser Tab Icon)</label>
+                            <input type="file" name="seo_favicon" class="form-input" accept="image/*,.ico">
+                            <small style="color:var(--text-muted); display:block; margin-top:5px;">Recommended format: ICO or completely square PNG.</small>
+                        </div>
+                        <?php if(!empty($globalSeo['seo_favicon'])): ?>
+                            <div style="background: rgba(255,255,255,0.05); padding: 10px; border-radius: 8px; border: 1px solid var(--glass-border);">
+                                <img src="<?= baseUrl($globalSeo['seo_favicon']) ?>" alt="Current Favicon" style="max-height: 48px; max-width: 48px;">
+                            </div>
+                        <?php endif; ?>
+                    </div>
+
+                    <div class="admin-form-group" style="display: flex; align-items: center; gap: 20px;">
+                        <div style="flex:1;">
+                            <label>OpenGraph Image (Link Sharing Preview)</label>
+                            <input type="file" name="seo_og_image" class="form-input" accept="image/*">
+                            <small style="color:var(--text-muted); display:block; margin-top:5px;">Image that shows when your site is shared on WhatsApp, Facebook, etc.</small>
+                        </div>
+                        <?php if(!empty($globalSeo['seo_og_image'])): ?>
+                            <div style="background: rgba(255,255,255,0.05); padding: 10px; border-radius: 8px; border: 1px solid var(--glass-border);">
+                                <img src="<?= baseUrl($globalSeo['seo_og_image']) ?>" alt="Current OG Image" style="max-height: 48px;">
+                            </div>
+                        <?php endif; ?>
+                    </div>
+                </div>
+            </div>
+
             <?php foreach ($seoData as $page => $locales): ?>
                 <div class="content-section">
                     <h3 style="text-transform: capitalize;">📄 <?= e($page) ?></h3>

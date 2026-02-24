@@ -642,6 +642,18 @@ INSERT INTO contents (section_key, locale, value) VALUES
 ON DUPLICATE KEY UPDATE value = VALUES(value);
 
 -- ═══════════════════════════════════════════════════════════
+-- Success Page Content Seeds
+-- ═══════════════════════════════════════════════════════════
+INSERT INTO contents (section_key, locale, value) VALUES
+('success_page_title', 'en', 'Success!'),
+('success_page_title', 'ar', 'تم بنجاح!'),
+('success_page_message', 'en', 'Thank you! Your booking request has been submitted. Our team will contact you shortly.'),
+('success_page_message', 'ar', 'شكراً لك! تم استلام الطلب وسنتواصل معك قريباً.'),
+('success_page_button', 'en', 'Return to Home'),
+('success_page_button', 'ar', 'العودة للرئيسية')
+ON DUPLICATE KEY UPDATE value = VALUES(value);
+
+-- ═══════════════════════════════════════════════════════════
 -- Tagline Section Content Seeds
 -- ═══════════════════════════════════════════════════════════
 INSERT INTO contents (section_key, locale, value) VALUES

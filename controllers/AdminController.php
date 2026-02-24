@@ -314,8 +314,8 @@ function adminSettings(): void {
                ->execute([$toggle, $val]);
         }
 
-        // Handle File Uploads (Logo, Favicon, OG Image)
-        $uploadFields = ['site_logo', 'seo_favicon', 'seo_og_image'];
+        // Handle File Uploads (Logo)
+        $uploadFields = ['site_logo'];
         $uploadDir = __DIR__ . '/../assets/uploads/';
         
         foreach ($uploadFields as $field) {
@@ -388,6 +388,31 @@ function adminSeo(): void {
                    ->execute([$page, $locale, $fields['title'] ?? '', $fields['description'] ?? '', $fields['keywords'] ?? '']);
             }
         }
+        
+        // Handle global SEO files and string values into site_settings
+        $uploadFields = ['seo_favicon', 'seo_og_image'];
+        $uploadDir = __DIR__ . '/../assets/uploads/';
+        
+        foreach ($uploadFields as $field) {
+            if (!empty($_FILES[$field]['name'])) {
+                if (!is_dir($uploadDir)) mkdir($uploadDir, 0777, true);
+                
+                $fileInfo = pathinfo($_FILES[$field]['name']);
+                $ext = strtolower($fileInfo['extension'] ?? '');
+                if (in_array($ext, ['jpg', 'jpeg', 'png', 'svg', 'webp', 'gif', 'ico'])) {
+                    $filename = $field . '_' . time() . '.' . $ext;
+                    $targetFile = $uploadDir . $filename;
+                    
+                    if (move_uploaded_file($_FILES[$field]['tmp_name'], $targetFile)) {
+                        $fileUrl = 'assets/uploads/' . $filename;
+                        $db->prepare('INSERT INTO site_settings (setting_key, setting_value) VALUES (?, ?)
+                            ON DUPLICATE KEY UPDATE setting_value = VALUES(setting_value)')
+                           ->execute([$field, $fileUrl]);
+                    }
+                }
+            }
+        }
+        
         $saved = true;
     }
 
@@ -395,6 +420,13 @@ function adminSeo(): void {
     $seoData = [];
     foreach ($rows as $row) {
         $seoData[$row['page']][$row['locale']] = $row;
+    }
+    
+    // Also fetch global seo settings to display
+    $globalSeoStmt = $db->query("SELECT setting_key, setting_value FROM site_settings WHERE setting_key IN ('seo_favicon', 'seo_og_image')");
+    $globalSeo = [];
+    foreach ($globalSeoStmt->fetchAll() as $r) {
+        $globalSeo[$r['setting_key']] = $r['setting_value'];
     }
     require __DIR__ . '/../views/admin/seo.php';
 }

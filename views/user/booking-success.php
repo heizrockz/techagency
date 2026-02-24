@@ -164,10 +164,10 @@
                     <path class="checkmark-check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
                 </svg>
             </div>
-            <h1><?= getCurrentLocale() === 'ar' ? 'تم بنجاح!' : 'Success!' ?></h1>
-            <p><?= t('booking_success') ?></p>
+            <h1><?= e(getContent('success_page_title', getCurrentLocale()) !== 'success_page_title' ? getContent('success_page_title', getCurrentLocale()) : (getCurrentLocale() === 'ar' ? 'تم بنجاح!' : 'Success!')) ?></h1>
+            <p><?= e(getContent('success_page_message', getCurrentLocale()) !== 'success_page_message' ? getContent('success_page_message', getCurrentLocale()) : t('booking_success')) ?></p>
             <a href="<?= baseUrl('/') ?>" class="btn-home">
-                <?= t('nav_home') ?>
+                <?= e(getContent('success_page_button', getCurrentLocale()) !== 'success_page_button' ? getContent('success_page_button', getCurrentLocale()) : t('nav_home')) ?>
             </a>
         </div>
     </div>

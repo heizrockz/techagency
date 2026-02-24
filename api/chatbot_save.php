@@ -51,7 +51,7 @@ try {
     }
 
     // Try to find an existing active session for this IP (within the last 2 hours) to append to
-    $stmt = $db->prepare("SELECT id FROM chatbot_sessions WHERE user_ip = ? AND status = 'Open' AND updated_at > datetime('now', '-2 hours') ORDER BY updated_at DESC LIMIT 1");
+    $stmt = $db->prepare("SELECT id FROM chatbot_sessions WHERE user_ip = ? AND status = 'Open' AND updated_at > NOW() - INTERVAL 2 HOUR ORDER BY updated_at DESC LIMIT 1");
     $stmt->execute([$ip]);
     $existingSession = $stmt->fetch();
 
