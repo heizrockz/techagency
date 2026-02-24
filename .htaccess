@@ -1,4 +1,5 @@
 RewriteEngine On
+RewriteBase /
 
 # If the file or directory exists, serve it directly
 RewriteCond %{REQUEST_FILENAME} !-f
@@ -6,3 +7,4 @@ RewriteCond %{REQUEST_FILENAME} !-d
 
 # Otherwise, route everything through index.php
 RewriteRule ^(.*)$ index.php [QSA,L]
+

@@ -24,8 +24,8 @@ if ($isLocal) {
     define('DB_USER', 'dbu2080337');
     define('DB_PASS', '=p.bAN.a5%4rbbd');
     define('BASE_URL', '');             // site is at domain root
-    error_reporting(0);
-    ini_set('display_errors', '0');
+    error_reporting(E_ALL);
+    ini_set('display_errors', '1');
 }
 
 // App
