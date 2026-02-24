@@ -22,6 +22,14 @@ if (isset($_GET['lang']) && in_array($_GET['lang'], SUPPORTED_LOCALES)) {
     exit;
 }
 
+// Handle dynamic blog route: /blog/{slug}
+if (preg_match('~^/blog/([^/]+)$~', $path, $matches)) {
+    $blogSlug = $matches[1];
+    require __DIR__ . '/controllers/BlogController.php';
+    showBlogDetail($blogSlug);
+    exit;
+}
+
 // ─── Routing ──────────────────────────────────────────────
 switch ($path) {
 

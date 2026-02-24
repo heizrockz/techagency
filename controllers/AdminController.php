@@ -309,7 +309,8 @@ function adminSettings(): void {
         $toggles = [
             'show_clients_section', 'show_products_section', 'show_stats_section', 
             'show_marketing_section', 'show_team', 'show_testimonials',
-            'show_tagline_section', 'show_process_section', 'show_blog_section'
+            'show_tagline_section', 'show_process_section', 'show_blog_section',
+            'show_booking_section', 'show_contact_section'
         ];
         foreach ($toggles as $toggle) {
             $val = isset($_POST['settings'][$toggle]) ? '1' : '0';
@@ -399,7 +400,8 @@ function adminContent(): void {
         'process_step3_title', 'process_step3_desc',
         'process_step4_title', 'process_step4_desc',
         'success_page_title', 'success_page_message', 'success_page_button',
-        'footer_text'
+        'blog_title', 'blog_subtitle',
+        'contact_us', 'contact_title', 'contact_subtitle', 'footer_tagline', 'footer_text'
     ];
 
     foreach ($expectedKeys as $key) {

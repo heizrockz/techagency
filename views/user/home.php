@@ -501,6 +501,7 @@ $blogs = getBlogs();
 <!-- ═══════════════════════════════════════════════════════════
      Booking Section (Dynamic Fields)
      ═══════════════════════════════════════════════════════════ -->
+<?php if (getSetting('show_booking_section', '1') === '1'): ?>
 <section class="booking-section" id="booking">
     <div class="section-container">
         <div class="section-heading animate-on-scroll">
@@ -552,6 +553,7 @@ $blogs = getBlogs();
         </div>
     </div>
 </section>
+<?php endif; ?>
 
 <?php
 /* ── Helper: Render a single booking form field ─────────── */

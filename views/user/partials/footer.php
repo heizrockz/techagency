@@ -32,6 +32,7 @@
         </div>
 
         <!-- Contact Info -->
+        <?php if (getSetting('show_contact_section', '1') === '1'): ?>
         <div class="footer-col">
             <h4><?= t('contact_us') ?></h4>
             <ul class="footer-links">
@@ -46,6 +47,7 @@
                 <?php endif; ?>
             </ul>
         </div>
+        <?php endif; ?>
 
         <!-- Quick Links -->
         <div class="footer-col">
