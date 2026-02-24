@@ -5,7 +5,8 @@
 
 // ─── Environment Detection ─────────────────────────────────
 $isLocal = in_array($_SERVER['SERVER_NAME'] ?? '', ['localhost', '127.0.0.1'])
-        || (($_SERVER['SERVER_ADDR'] ?? '') === '127.0.0.1');
+        || (($_SERVER['SERVER_ADDR'] ?? '') === '127.0.0.1')
+        || (php_sapi_name() === 'cli' && (!isset($_SERVER['REMOTE_ADDR']))); 
 
 if ($isLocal) {
     // ── Local Development ──

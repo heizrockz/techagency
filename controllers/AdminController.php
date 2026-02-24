@@ -586,6 +586,7 @@ function adminPortfolio(): void {
             $db->prepare('INSERT INTO portfolio_project_translations (project_id, locale, title, description, client_name, tags)
                 VALUES (?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE title = VALUES(title), description = VALUES(description), client_name = VALUES(client_name), tags = VALUES(tags)')
                ->execute([$id, $loc, $title, $desc, $clientName, $tags]);
+        }
         $saved = true;
         $action = 'list';
     }
