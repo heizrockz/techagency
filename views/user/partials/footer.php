@@ -1,12 +1,18 @@
 <!-- Footer -->
 <footer class="footer">
-<footer class="footer">
     <div class="footer-grid section-container">
         <!-- Brand & Tagline -->
         <div class="footer-col branding">
+            <?php $footerLogo = getSetting('site_logo'); ?>
+            <?php if(!empty($footerLogo)): ?>
+            <div class="footer-logo">
+                <img src="<?= baseUrl($footerLogo) ?>" alt="<?= e(getSetting('site_name', APP_NAME)) ?>" style="max-height:40px;">
+            </div>
+            <?php else: ?>
             <h3 class="footer-logo">
                 <span class="gradient-text"><?= e(getSetting('site_name', APP_NAME)) ?></span>
             </h3>
+            <?php endif; ?>
             <p class="footer-tagline">⚡ <?= getContent('footer_tagline', getCurrentLocale()) !== 'footer_tagline' ? e(getContent('footer_tagline', getCurrentLocale())) : e(t('footer_tagline')) ?></p>
             
             <div class="footer-socials">

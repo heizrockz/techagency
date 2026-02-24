@@ -37,6 +37,12 @@
                         <input type="checkbox" name="settings[show_marketing_section]" <?= ($settings['show_marketing_section']['setting_value'] ?? '1') === '1' ? 'checked' : '' ?>> Show "Digital Marketing" Section
                     </label>
                     <label style="cursor: pointer; display: flex; align-items: center; gap: 10px;">
+                        <input type="checkbox" name="settings[show_tagline_section]" <?= ($settings['show_tagline_section']['setting_value'] ?? '1') === '1' ? 'checked' : '' ?>> Show "Fast·Dynamic·Scalable" Tagline
+                    </label>
+                    <label style="cursor: pointer; display: flex; align-items: center; gap: 10px;">
+                        <input type="checkbox" name="settings[show_process_section]" <?= ($settings['show_process_section']['setting_value'] ?? '1') === '1' ? 'checked' : '' ?>> Show "Our Process" Section
+                    </label>
+                    <label style="cursor: pointer; display: flex; align-items: center; gap: 10px;">
                         <input type="checkbox" name="settings[show_team]" <?= ($settings['show_team']['setting_value'] ?? '1') === '1' ? 'checked' : '' ?>> Show "Our Team" Section
                     </label>
                     <label style="cursor: pointer; display: flex; align-items: center; gap: 10px;">

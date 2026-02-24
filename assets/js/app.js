@@ -168,12 +168,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const chatInputArea = document.getElementById('chatbotInputArea');
     const chatInput = document.getElementById('chatbotInput');
     const chatSendBtn = document.getElementById('chatbotSendBtn');
+    const chatNewBtn = document.getElementById('chatbotNewChat');
+    const chatEndBtn = document.getElementById('chatbotEndChat');
 
     if (chatToggle && chatPanel && window.chatbotData && window.chatbotData.start_node_id) {
         let chatInitialized = false;
+        let chatEnded = false;
         const chatData = window.chatbotData;
         let chatTranscript = [];
-        let currentInputHandler = null; // Track current input handler
+        let currentInputHandler = null;
 
         // Toggle Chat
         chatToggle.addEventListener('click', () => {
@@ -189,6 +192,45 @@ document.addEventListener('DOMContentLoaded', () => {
             chatPanel.classList.remove('active');
             chatToggle.style.transform = 'scale(1)';
         });
+
+        // ── New Chat ──
+        if (chatNewBtn) {
+            chatNewBtn.addEventListener('click', () => {
+                chatMessages.innerHTML = '';
+                chatOptions.innerHTML = '';
+                if (chatInputArea) chatInputArea.style.display = 'none';
+                chatTranscript = [];
+                chatEnded = false;
+                if (chatEndBtn) chatEndBtn.disabled = false;
+                if (currentInputHandler && chatSendBtn) {
+                    chatSendBtn.removeEventListener('click', currentInputHandler);
+                    currentInputHandler = null;
+                }
+                loadNode(chatData.start_node_id);
+            });
+        }
+
+        // ── End Chat ──
+        if (chatEndBtn) {
+            chatEndBtn.addEventListener('click', () => {
+                if (chatEnded) return;
+                chatEnded = true;
+                chatOptions.innerHTML = '';
+                if (chatInputArea) chatInputArea.style.display = 'none';
+                if (currentInputHandler && chatSendBtn) {
+                    chatSendBtn.removeEventListener('click', currentInputHandler);
+                    currentInputHandler = null;
+                }
+                chatEndBtn.disabled = true;
+                const endMsg = document.createElement('div');
+                endMsg.className = 'chat-msg bot';
+                endMsg.innerHTML = '👋 Chat ended. Thank you for chatting with us!';
+                chatMessages.appendChild(endMsg);
+                chatTranscript.push({ sender: 'bot', message: 'Chat ended.' });
+                scrollToBottom();
+                saveTranscript();
+            });
+        }
 
         function scrollToBottom() {
             chatMessages.scrollTo({ top: chatMessages.scrollHeight, behavior: 'smooth' });
@@ -214,6 +256,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         function handleOptionClick(opt) {
+            if (chatEnded) return;
             const allBtns = chatOptions.querySelectorAll('.chat-opt-btn');
             allBtns.forEach(b => b.disabled = true);
             recordAndShowUserMessage(opt.label);
@@ -244,6 +287,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         function loadNode(nodeId) {
+            if (chatEnded) return;
             const node = chatData.nodes[nodeId];
             if (!node) return;
 

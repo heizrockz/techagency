@@ -61,27 +61,29 @@ $siteName = getSetting('site_name', 'Mico Sage');
 <!-- ═══════════════════════════════════════════════════════════
      Tagline Section (Fast. Dynamic. Scalable.)
      ═══════════════════════════════════════════════════════════ -->
+<?php if(getSetting('show_tagline_section', '1') === '1'): ?>
 <section class="tagline-section" id="tagline">
     <div class="section-container">
         <div class="tagline-grid">
             <div class="tagline-card animate-on-scroll" style="animation-delay: 0s;">
-                <div class="tagline-icon">⚡</div>
-                <h3><?= getCurrentLocale() === 'ar' ? 'سريع' : 'Fast' ?></h3>
-                <p><?= getCurrentLocale() === 'ar' ? 'أداء محسّن لسرعات تحميل قصوى وتجربة مستخدم سلسة.' : 'Optimized performance for lightning-fast load times and smooth UX.' ?></p>
+                <div class="tagline-icon"><?= e(getContent('tagline1_icon')) ?></div>
+                <h3><?= e(getContent('tagline1_title')) ?></h3>
+                <p><?= e(getContent('tagline1_desc')) ?></p>
             </div>
             <div class="tagline-card animate-on-scroll" style="animation-delay: 0.15s;">
-                <div class="tagline-icon">🔄</div>
-                <h3><?= getCurrentLocale() === 'ar' ? 'ديناميكي' : 'Dynamic' ?></h3>
-                <p><?= getCurrentLocale() === 'ar' ? 'حلول تفاعلية تتكيف مع احتياجات عملك المتطورة في الوقت الفعلي.' : 'Interactive solutions that adapt to your evolving business needs in real-time.' ?></p>
+                <div class="tagline-icon"><?= e(getContent('tagline2_icon')) ?></div>
+                <h3><?= e(getContent('tagline2_title')) ?></h3>
+                <p><?= e(getContent('tagline2_desc')) ?></p>
             </div>
             <div class="tagline-card animate-on-scroll" style="animation-delay: 0.3s;">
-                <div class="tagline-icon">📈</div>
-                <h3><?= getCurrentLocale() === 'ar' ? 'قابل للتوسع' : 'Scalable' ?></h3>
-                <p><?= getCurrentLocale() === 'ar' ? 'بُنية تحتية مصممة للنمو مع أعمالك، تدعم ملايين المستخدمين.' : 'Architecture built to grow with your business, supporting millions of users.' ?></p>
+                <div class="tagline-icon"><?= e(getContent('tagline3_icon')) ?></div>
+                <h3><?= e(getContent('tagline3_title')) ?></h3>
+                <p><?= e(getContent('tagline3_desc')) ?></p>
             </div>
         </div>
     </div>
 </section>
+<?php endif; ?>
 
 <!-- ═══════════════════════════════════════════════════════════
      Services Section (Dynamic from DB)
@@ -111,11 +113,12 @@ $siteName = getSetting('site_name', 'Mico Sage');
 <!-- ═══════════════════════════════════════════════════════════
      Our Process Section
      ═══════════════════════════════════════════════════════════ -->
+<?php if(getSetting('show_process_section', '1') === '1'): ?>
 <section class="process-section" id="process">
     <div class="section-container">
         <div class="section-heading animate-on-scroll">
-            <h2><?= getCurrentLocale() === 'ar' ? 'آلية العمل' : 'Our Process' ?></h2>
-            <p><?= getCurrentLocale() === 'ar' ? 'من الفكرة إلى الإطلاق، نضمن تجربة سلسة خطوة بخطوة.' : 'From idea to launch, we ensure a seamless step-by-step experience.' ?></p>
+            <h2><?= e(getContent('process_title')) ?></h2>
+            <p><?= e(getContent('process_subtitle')) ?></p>
             <div class="heading-line"></div>
         </div>
 
@@ -125,37 +128,38 @@ $siteName = getSetting('site_name', 'Mico Sage');
             <div class="process-step" data-step="1">
                 <div class="step-circle">1</div>
                 <div class="step-content">
-                    <h3><?= getCurrentLocale() === 'ar' ? 'استكشاف الفكرة' : 'Discovery' ?></h3>
-                    <p><?= getCurrentLocale() === 'ar' ? 'نفهم أهدافك، نحلل السوق، ونضع استراتيجية واضحة للنجاح.' : 'We understand your goals, analyze the market, and build a clear strategy.' ?></p>
+                    <h3><?= e(getContent('process_step1_title')) ?></h3>
+                    <p><?= e(getContent('process_step1_desc')) ?></p>
                 </div>
             </div>
 
             <div class="process-step" data-step="2">
                 <div class="step-circle">2</div>
                 <div class="step-content">
-                    <h3><?= getCurrentLocale() === 'ar' ? 'التصميم' : 'Design' ?></h3>
-                    <p><?= getCurrentLocale() === 'ar' ? 'نصمم واجهات مستخدم مذهلة تركز على تجربة المستخدم (UX/UI).' : 'We craft stunning, user-centric (UX/UI) interfaces tailored for engagement.' ?></p>
+                    <h3><?= e(getContent('process_step2_title')) ?></h3>
+                    <p><?= e(getContent('process_step2_desc')) ?></p>
                 </div>
             </div>
 
             <div class="process-step" data-step="3">
                 <div class="step-circle">3</div>
                 <div class="step-content">
-                    <h3><?= getCurrentLocale() === 'ar' ? 'التطوير' : 'Development' ?></h3>
-                    <p><?= getCurrentLocale() === 'ar' ? 'نكتب أكواد برمجية نظيفة وحديثة لبناء حلول سريعة وآمنة.' : 'We write clean, modern code to build fast, secure, and robust solutions.' ?></p>
+                    <h3><?= e(getContent('process_step3_title')) ?></h3>
+                    <p><?= e(getContent('process_step3_desc')) ?></p>
                 </div>
             </div>
 
             <div class="process-step" data-step="4">
                 <div class="step-circle">4</div>
                 <div class="step-content">
-                    <h3><?= getCurrentLocale() === 'ar' ? 'الإطلاق' : 'Deployment' ?></h3>
-                    <p><?= getCurrentLocale() === 'ar' ? 'نختبر، ونحسّن، ثم نطلق منتجك الرقمي بثقة للعالم.' : 'We test, optimize, and confidently launch your digital product to the world.' ?></p>
+                    <h3><?= e(getContent('process_step4_title')) ?></h3>
+                    <p><?= e(getContent('process_step4_desc')) ?></p>
                 </div>
             </div>
         </div>
     </div>
 </section>
+<?php endif; ?>
 
 <!-- ═══════════════════════════════════════════════════════════
      About Section (Dynamic Stats)

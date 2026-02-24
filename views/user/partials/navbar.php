@@ -1,6 +1,11 @@
 <!-- Floating Island Navbar -->
 <nav class="navbar-island" id="mainNavbar">
-    <span class="nav-logo">⚡ <?= e(getSetting('site_name', APP_NAME)) ?></span>
+    <?php $navLogo = getSetting('site_logo'); ?>
+    <?php if(!empty($navLogo)): ?>
+        <a href="<?= baseUrl('/') ?>" class="nav-logo"><img src="<?= baseUrl($navLogo) ?>" alt="<?= e(getSetting('site_name', APP_NAME)) ?>" style="max-height:32px;"></a>
+    <?php else: ?>
+        <a href="<?= baseUrl('/') ?>" class="nav-logo">⚡ <?= e(getSetting('site_name', APP_NAME)) ?></a>
+    <?php endif; ?>
 
     <ul class="nav-links">
         <li><a href="<?= baseUrl('/') ?>#hero"><?= t('nav_home') ?></a></li>

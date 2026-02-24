@@ -100,6 +100,11 @@
                 Call Us
             </a>
             <?php endif; ?>
+            <?php if(getSetting('show_phone_in_cta', '0') === '1' && !empty($phone)): ?>
+            <div style="padding:8px 16px; font-size:0.82rem; color:rgba(255,255,255,0.6); text-align:center; border-top:1px solid rgba(255,255,255,0.06); direction:ltr;">
+                <?= e($phone) ?>
+            </div>
+            <?php endif; ?>
         </div>
     </div>
     <?php endif; ?>
@@ -123,9 +128,14 @@
                         </div>
                     </div>
                 </div>
-                <button class="chatbot-close" id="chatbotClose" aria-label="Close Chat">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-                </button>
+                <div style="display:flex; gap:6px; align-items:center;">
+                    <button class="chatbot-action-btn" id="chatbotNewChat" aria-label="New Chat" title="New Chat">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"></polyline><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path></svg>
+                    </button>
+                    <button class="chatbot-close" id="chatbotClose" aria-label="Close Chat">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                    </button>
+                </div>
             </div>
             <div class="chatbot-messages" id="chatbotMessages">
                 <!-- Messages will be injected here automatically -->
@@ -140,7 +150,7 @@
                 </button>
             </div>
             <div class="chatbot-footer">
-                Powered by <strong style="color:var(--neon-cyan);"><?= APP_NAME ?></strong>
+                <button id="chatbotEndChat" class="chatbot-end-btn">End Chat</button>
             </div>
         </div>
     </div>

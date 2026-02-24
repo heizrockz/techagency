@@ -614,3 +614,62 @@ ALTER TABLE chatbot_nodes ADD COLUMN IF NOT EXISTS pos_x INT DEFAULT 100;
 ALTER TABLE chatbot_nodes ADD COLUMN IF NOT EXISTS pos_y INT DEFAULT 100;
 ALTER TABLE chatbot_nodes ADD COLUMN IF NOT EXISTS reply_type ENUM('preset','user_input') DEFAULT 'preset';
 ALTER TABLE chatbot_nodes ADD COLUMN IF NOT EXISTS input_var_name VARCHAR(100) DEFAULT '';
+
+-- ═══════════════════════════════════════════════════════════
+-- Process Section Content Seeds
+-- ═══════════════════════════════════════════════════════════
+INSERT INTO contents (section_key, locale, value) VALUES
+('process_title', 'en', 'Our Process'),
+('process_title', 'ar', 'آلية العمل'),
+('process_subtitle', 'en', 'From idea to launch, we ensure a seamless step-by-step experience.'),
+('process_subtitle', 'ar', 'من الفكرة إلى الإطلاق، نضمن تجربة سلسة خطوة بخطوة.'),
+('process_step1_title', 'en', 'Discovery'),
+('process_step1_title', 'ar', 'استكشاف الفكرة'),
+('process_step1_desc', 'en', 'We understand your goals, analyze the market, and build a clear strategy.'),
+('process_step1_desc', 'ar', 'نفهم أهدافك، نحلل السوق، ونضع استراتيجية واضحة للنجاح.'),
+('process_step2_title', 'en', 'Design'),
+('process_step2_title', 'ar', 'التصميم'),
+('process_step2_desc', 'en', 'We craft stunning, user-centric (UX/UI) interfaces tailored for engagement.'),
+('process_step2_desc', 'ar', 'نصمم واجهات مستخدم مذهلة تركز على تجربة المستخدم (UX/UI).'),
+('process_step3_title', 'en', 'Development'),
+('process_step3_title', 'ar', 'التطوير'),
+('process_step3_desc', 'en', 'We write clean, modern code to build fast, secure, and robust solutions.'),
+('process_step3_desc', 'ar', 'نكتب أكواد برمجية نظيفة وحديثة لبناء حلول سريعة وآمنة.'),
+('process_step4_title', 'en', 'Deployment'),
+('process_step4_title', 'ar', 'الإطلاق'),
+('process_step4_desc', 'en', 'We test, optimize, and confidently launch your digital product to the world.'),
+('process_step4_desc', 'ar', 'نختبر، ونحسّن، ثم نطلق منتجك الرقمي بثقة للعالم.')
+ON DUPLICATE KEY UPDATE value = VALUES(value);
+
+-- ═══════════════════════════════════════════════════════════
+-- Tagline Section Content Seeds
+-- ═══════════════════════════════════════════════════════════
+INSERT INTO contents (section_key, locale, value) VALUES
+('tagline1_icon', 'en', '⚡'),
+('tagline1_icon', 'ar', '⚡'),
+('tagline1_title', 'en', 'Fast'),
+('tagline1_title', 'ar', 'سريع'),
+('tagline1_desc', 'en', 'Optimized performance for lightning-fast load times and smooth UX.'),
+('tagline1_desc', 'ar', 'أداء محسّن لسرعات تحميل قصوى وتجربة مستخدم سلسة.'),
+('tagline2_icon', 'en', '🔄'),
+('tagline2_icon', 'ar', '🔄'),
+('tagline2_title', 'en', 'Dynamic'),
+('tagline2_title', 'ar', 'ديناميكي'),
+('tagline2_desc', 'en', 'Interactive solutions that adapt to your evolving business needs in real-time.'),
+('tagline2_desc', 'ar', 'حلول تفاعلية تتكيف مع احتياجات عملك المتطورة في الوقت الفعلي.'),
+('tagline3_icon', 'en', '📈'),
+('tagline3_icon', 'ar', '📈'),
+('tagline3_title', 'en', 'Scalable'),
+('tagline3_title', 'ar', 'قابل للتوسع'),
+('tagline3_desc', 'en', 'Architecture built to grow with your business, supporting millions of users.'),
+('tagline3_desc', 'ar', 'بُنية تحتية مصممة للنمو مع أعمالك، تدعم ملايين المستخدمين.')
+ON DUPLICATE KEY UPDATE value = VALUES(value);
+
+-- ═══════════════════════════════════════════════════════════
+-- Section Toggles + CTA Settings
+-- ═══════════════════════════════════════════════════════════
+INSERT INTO site_settings (setting_key, setting_value, setting_type, setting_group) VALUES
+('show_tagline_section', '1', 'boolean', 'sections'),
+('show_process_section', '1', 'boolean', 'sections'),
+('show_phone_in_cta', '1', 'boolean', 'sections')
+ON DUPLICATE KEY UPDATE setting_value = VALUES(setting_value);
