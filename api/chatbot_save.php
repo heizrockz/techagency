@@ -51,7 +51,8 @@ try {
     }
 
     // Try to find an existing active session for this IP (within the last 2 hours) to append to
-    $stmt = $db->prepare("SELECT id FROM chatbot_sessions WHERE user_ip = ? AND status = 'Open' AND updated_at > NOW() - INTERVAL 2 HOUR ORDER BY updated_at DESC LIMIT 1");
+    // Use a simpler time check to be more robust across different DB timezone settings
+    $stmt = $db->prepare("SELECT id FROM chatbot_sessions WHERE user_ip = ? AND status = 'Open' AND updated_at > (NOW() - INTERVAL 4 HOUR) ORDER BY updated_at DESC LIMIT 1");
     $stmt->execute([$ip]);
     $existingSession = $stmt->fetch();
 
@@ -79,8 +80,8 @@ try {
         
     } else {
         // Create a new session
-        $stmt = $db->prepare('INSERT INTO chatbot_sessions (user_email, user_phone, user_ip, user_agent) VALUES (?, ?, ?, ?)');
-        $stmt->execute([$userEmail, $userPhone, $ip, $userAgent]);
+        $stmt = $db->prepare('INSERT INTO chatbot_sessions (user_email, user_phone, user_ip, user_agent, status) VALUES (?, ?, ?, ?, ?)');
+        $stmt->execute([$userEmail, $userPhone, $ip, $userAgent, 'Open']);
         $sessionId = $db->lastInsertId();
     }
 
@@ -104,7 +105,10 @@ try {
     if ($db->inTransaction()) {
         $db->rollBack();
     }
-    error_log("Chatbot Save Error: " . $e->getMessage());
+    // Log to a file instead of just error_log
+    $logMsg = date('[Y-m-d H:i:s] ') . "Chatbot Save Error (" . $ip . "): " . $e->getMessage() . "\n";
+    file_put_contents(__DIR__ . '/chatbot_errors.log', $logMsg, FILE_APPEND);
+    
     http_response_code(500);
-    echo json_encode(['error' => 'Database error']);
+    echo json_encode(['error' => 'Database error', 'details' => $e->getMessage()]);
 }

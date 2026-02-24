@@ -11,8 +11,17 @@ require_once __DIR__ . '/includes/auth.php';
 // Parse request URI
 $requestUri = $_SERVER['REQUEST_URI'];
 $basePath   = BASE_URL;
-$path       = parse_url($requestUri, PHP_URL_PATH);
-$path       = '/' . trim(str_replace($basePath, '', $path), '/');
+
+// Extract path part (remove query string)
+$path = parse_url($requestUri, PHP_URL_PATH);
+
+// If base path is specified and present at start of path, strip it
+if (!empty($basePath) && strpos($path, $basePath) === 0) {
+    $path = substr($path, strlen($basePath));
+}
+
+// Ensure path starts with / and is trimmed
+$path = '/' . trim($path, '/');
 
 // Handle locale switch
 if (isset($_GET['lang']) && in_array($_GET['lang'], SUPPORTED_LOCALES)) {
