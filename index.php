@@ -186,6 +186,12 @@ switch ($path) {
         adminTranslations();
         break;
 
+    case '/admin/sitemap':
+        requireAdmin();
+        require __DIR__ . '/controllers/AdminController.php';
+        adminSitemap();
+        break;
+
     case '/admin/portfolio':
         requireAdmin();
         require __DIR__ . '/controllers/AdminController.php';

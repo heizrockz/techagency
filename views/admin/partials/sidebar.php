@@ -56,6 +56,7 @@
                 <a href="<?= baseUrl('admin/settings') ?>" class="<?= $currentPage === 'settings' ? 'active' : '' ?>">⚙️ Site Settings</a>
                 <a href="<?= baseUrl('admin/chatbot') ?>" class="<?= $currentPage === 'chatbot' ? 'active' : '' ?>">🤖 Chatbot Builder</a>
                 <a href="<?= baseUrl('admin/translations') ?>" class="<?= $currentPage === 'translations' ? 'active' : '' ?>">🌐 Translations</a>
+                <a href="<?= baseUrl('admin/sitemap') ?>" class="<?= $currentPage === 'sitemap' ? 'active' : '' ?>">🗺️ Sitemap</a>
             </div>
         </div>
         

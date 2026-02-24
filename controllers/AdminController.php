@@ -3,6 +3,8 @@
  * Mico Sage — Admin Controller (all admin panel actions)
  */
 require_once __DIR__ . '/../includes/db.php';
+require_once __DIR__ . '/../includes/helpers.php';
+require_once __DIR__ . '/../includes/sitemap_generator.php';
 
 /* ═══ Login ═══ */
 function adminLogin(): void {
@@ -1214,4 +1216,27 @@ function adminProfile(): void {
     }
 
     require __DIR__ . '/../views/admin/profile.php';
+}
+/* ═══ Sitemap Editor ═══ */
+function adminSitemap(): void {
+    $db = getDB();
+    $saved = false;
+    $sitemapPath = __DIR__ . '/../sitemap.xml';
+
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        $action = $_POST['action'] ?? 'save';
+        
+        if ($action === 'regenerate') {
+            $xml = generateDynamicSitemap();
+            file_put_contents($sitemapPath, $xml);
+            $saved = true;
+        } elseif ($action === 'save') {
+            $content = $_POST['sitemap_content'] ?? '';
+            file_put_contents($sitemapPath, $content);
+            $saved = true;
+        }
+    }
+
+    $currentContent = file_exists($sitemapPath) ? file_get_contents($sitemapPath) : '';
+    require __DIR__ . '/../views/admin/sitemap.php';
 }
