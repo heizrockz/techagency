@@ -40,6 +40,7 @@
                 <a href="<?= baseUrl('admin/testimonials') ?>" class="<?= $currentPage === 'testimonials' ? 'active' : '' ?>">💬 Testimonials</a>
                 <a href="<?= baseUrl('admin/content') ?>" class="<?= $currentPage === 'content' ? 'active' : '' ?>">✏️ <?= t('admin_content') ?></a>
                 <a href="<?= baseUrl('admin/seo') ?>" class="<?= $currentPage === 'seo' ? 'active' : '' ?>">🔍 <?= t('admin_seo') ?></a>
+                <a href="<?= baseUrl('admin/blogs') ?>" class="<?= $currentPage === 'blogs' ? 'active' : '' ?>">📰 Blogs</a>
             </div>
         </div>
 

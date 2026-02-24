@@ -371,6 +371,47 @@ function adminContent(): void {
     foreach ($rows as $row) {
         $contents[$row['section_key']][$row['locale']] = $row['value'];
     }
+
+    // Ensure all critical sections exist in the array so they render in the admin panel
+    $expectedKeys = [
+        'hero_title', 'hero_subtitle', 'hero_cta',
+        'about_title', 'about_text',
+        'services_title', 'clients_title', 'products_title', 'products_subtitle',
+        'team_title', 'team_subtitle',
+        'testimonials_title', 'testimonials_subtitle',
+        'booking_title', 'booking_subtitle',
+        'marketing_title', 'marketing_subtitle',
+        'marketing_seo_title', 'marketing_seo_desc',
+        'marketing_social_title', 'marketing_social_desc',
+        'marketing_ppc_title', 'marketing_ppc_desc',
+        'marketing_brand_title', 'marketing_brand_desc',
+        'portfolio_title', 'portfolio_subtitle',
+        'tagline1_icon', 'tagline1_title', 'tagline1_desc',
+        'tagline2_icon', 'tagline2_title', 'tagline2_desc',
+        'tagline3_icon', 'tagline3_title', 'tagline3_desc',
+        'process_title', 'process_subtitle',
+        'process_step1_title', 'process_step1_desc',
+        'process_step2_title', 'process_step2_desc',
+        'process_step3_title', 'process_step3_desc',
+        'process_step4_title', 'process_step4_desc',
+        'success_page_title', 'success_page_message', 'success_page_button',
+        'footer_text'
+    ];
+
+    foreach ($expectedKeys as $key) {
+        if (!isset($contents[$key])) {
+            $contents[$key] = [];
+            foreach (SUPPORTED_LOCALES as $loc) {
+                $contents[$key][$loc] = '';
+            }
+        } else {
+            foreach (SUPPORTED_LOCALES as $loc) {
+                if (!isset($contents[$key][$loc])) {
+                    $contents[$key][$loc] = '';
+                }
+            }
+        }
+    }
     require __DIR__ . '/../views/admin/content.php';
 }
 
@@ -383,9 +424,9 @@ function adminSeo(): void {
         $items = $_POST['seo'] ?? [];
         foreach ($items as $page => $locales) {
             foreach ($locales as $locale => $fields) {
-                $db->prepare('INSERT INTO seo_meta (page, locale, title, description, keywords) VALUES (?, ?, ?, ?, ?)
-                    ON DUPLICATE KEY UPDATE title = VALUES(title), description = VALUES(description), keywords = VALUES(keywords)')
-                   ->execute([$page, $locale, $fields['title'] ?? '', $fields['description'] ?? '', $fields['keywords'] ?? '']);
+                $db->prepare('INSERT INTO seo_meta (page, locale, title, description, keywords, canonical_link) VALUES (?, ?, ?, ?, ?, ?)
+                    ON DUPLICATE KEY UPDATE title = VALUES(title), description = VALUES(description), keywords = VALUES(keywords), canonical_link = VALUES(canonical_link)')
+                   ->execute([$page, $locale, $fields['title'] ?? '', $fields['description'] ?? '', $fields['keywords'] ?? '', $fields['canonical_link'] ?? '']);
             }
         }
         
@@ -420,6 +461,27 @@ function adminSeo(): void {
     $seoData = [];
     foreach ($rows as $row) {
         $seoData[$row['page']][$row['locale']] = $row;
+    }
+    
+    // Ensure critical pages always show up
+    $expectedPages = ['home', 'portfolio', 'contact'];
+    foreach ($expectedPages as $page) {
+        if (!isset($seoData[$page])) {
+            $seoData[$page] = [];
+            foreach (SUPPORTED_LOCALES as $loc) {
+                $seoData[$page][$loc] = ['title' => '', 'description' => '', 'keywords' => '', 'canonical_link' => ''];
+            }
+        } else {
+            foreach (SUPPORTED_LOCALES as $loc) {
+                if (!isset($seoData[$page][$loc])) {
+                    $seoData[$page][$loc] = ['title' => '', 'description' => '', 'keywords' => '', 'canonical_link' => ''];
+                }
+                // Ensure canonical link exists
+                if(!isset($seoData[$page][$loc]['canonical_link'])) {
+                    $seoData[$page][$loc]['canonical_link'] = '';
+                }
+            }
+        }
     }
     
     // Also fetch global seo settings to display
@@ -520,7 +582,6 @@ function adminPortfolio(): void {
             $db->prepare('INSERT INTO portfolio_project_translations (project_id, locale, title, description, client_name, tags)
                 VALUES (?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE title = VALUES(title), description = VALUES(description), client_name = VALUES(client_name), tags = VALUES(tags)')
                ->execute([$id, $loc, $title, $desc, $clientName, $tags]);
-        }
         $saved = true;
         $action = 'list';
     }
@@ -547,6 +608,90 @@ function adminPortfolio(): void {
         GROUP BY p.id ORDER BY p.sort_order')->fetchAll();
 
     require __DIR__ . '/../views/admin/portfolio.php';
+}
+
+/* ═══ Blogs CRUD ═══ */
+function adminBlogs(): void {
+    $db = getDB();
+    $saved = false;
+    $action = $_GET['action'] ?? 'list';
+
+    if ($action === 'delete' && isset($_GET['id'])) {
+        $db->prepare('DELETE FROM blogs WHERE id = ?')->execute([intval($_GET['id'])]);
+        header('Location: ' . baseUrl('admin/blogs'));
+        exit;
+    }
+
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        $id = intval($_POST['id'] ?? 0);
+        $slug = trim($_POST['slug'] ?? '');
+        $mediaType = trim($_POST['media_type'] ?? 'image');
+        $mediaUrl = trim($_POST['media_url'] ?? '');
+        $sortOrder = intval($_POST['sort_order'] ?? 0);
+        $isActive = isset($_POST['is_active']) ? 1 : 0;
+
+        // Handle file upload
+        if (isset($_FILES['media_file']) && $_FILES['media_file']['error'] === UPLOAD_ERR_OK) {
+            $uploadDir = __DIR__ . '/../assets/uploads/';
+            if (!is_dir($uploadDir)) mkdir($uploadDir, 0777, true);
+            
+            $fileInfo = pathinfo($_FILES['media_file']['name']);
+            $ext = strtolower($fileInfo['extension']);
+            if (in_array($ext, ['jpg', 'jpeg', 'png', 'svg', 'webp', 'gif', 'mp4', 'webm'])) {
+                $filename = 'blog_' . time() . '.' . $ext;
+                $targetFile = $uploadDir . $filename;
+                if (move_uploaded_file($_FILES['media_file']['tmp_name'], $targetFile)) {
+                    $mediaUrl = 'assets/uploads/' . $filename;
+                }
+            }
+        }
+
+        if (empty($slug)) {
+            $slug = strtolower(preg_replace('/[^a-zA-Z0-9]+/', '-', trim($_POST['title_en'] ?? 'blog-' . time())));
+        }
+
+        if ($id > 0) {
+            $db->prepare('UPDATE blogs SET slug=?, media_type=?, media_url=?, sort_order=?, is_active=? WHERE id=?')
+               ->execute([$slug, $mediaType, $mediaUrl, $sortOrder, $isActive, $id]);
+        } else {
+            $db->prepare('INSERT INTO blogs (slug, media_type, media_url, sort_order, is_active) VALUES (?, ?, ?, ?, ?)')
+               ->execute([$slug, $mediaType, $mediaUrl, $sortOrder, $isActive]);
+            $id = $db->lastInsertId();
+        }
+
+        foreach (SUPPORTED_LOCALES as $loc) {
+            $title = trim($_POST['title_' . $loc] ?? '');
+            $desc  = trim($_POST['desc_' . $loc] ?? '');
+            $db->prepare('INSERT INTO blog_translations (blog_id, locale, title, description)
+                VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE title = VALUES(title), description = VALUES(description)')
+               ->execute([$id, $loc, $title, $desc]);
+        }
+        $saved = true;
+        // if want to redirect instead of stay: 
+        header('Location: ' . baseUrl('admin/blogs'));
+        exit;
+    }
+
+    $editBlog = null;
+    if ($action === 'edit' && isset($_GET['id'])) {
+        $stmt = $db->prepare('SELECT * FROM blogs WHERE id = ?');
+        $stmt->execute([intval($_GET['id'])]);
+        $editBlog = $stmt->fetch();
+        if ($editBlog) {
+            $stmt2 = $db->prepare('SELECT * FROM blog_translations WHERE blog_id = ?');
+            $stmt2->execute([$editBlog['id']]);
+            $editBlog['translations'] = [];
+            foreach ($stmt2->fetchAll() as $t) {
+                $editBlog['translations'][$t['locale']] = $t;
+            }
+        }
+    }
+
+    $blogs = $db->query('SELECT b.*, GROUP_CONCAT(CONCAT(bt.locale,":",bt.title) SEPARATOR "|") as trans
+        FROM blogs b LEFT JOIN blog_translations bt ON b.id = bt.blog_id
+        GROUP BY b.id ORDER BY b.sort_order')->fetchAll();
+
+    require __DIR__ . '/../views/admin/blogs.php';
 }
 
 /* ═══ Team Members CRUD ═══ */

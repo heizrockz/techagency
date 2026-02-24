@@ -175,6 +175,12 @@ switch ($path) {
         adminPortfolio();
         break;
 
+    case '/admin/blogs':
+        requireAdmin();
+        require __DIR__ . '/controllers/AdminController.php';
+        adminBlogs();
+        break;
+
     case '/api/chatbot_save.php':
         require __DIR__ . '/api/chatbot_save.php';
         break;

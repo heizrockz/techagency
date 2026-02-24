@@ -7,7 +7,9 @@
     <meta name="description" content="<?= e($seo['description'] ?? '') ?>">
     <meta name="keywords" content="<?= e($seo['keywords'] ?? '') ?>">
     
-    <?php if($canonical = getSetting('seo_canonical')): ?>
+    <?php if(!empty($seo['canonical_link'])): ?>
+        <link rel="canonical" href="<?= e($seo['canonical_link']) ?>">
+    <?php elseif($canonical = getSetting('seo_canonical')): ?>
         <link rel="canonical" href="<?= e($canonical) ?>">
     <?php endif; ?>
     

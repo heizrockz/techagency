@@ -68,20 +68,31 @@
                                 <?= $loc === 'en' ? '🇬🇧 English' : '🇸🇦 Arabic' ?>
                             </p>
                             <div class="admin-form-group">
-                                <label>Title</label>
+                                <label>SEO Title</label>
                                 <input type="text"
                                        name="seo[<?= e($page) ?>][<?= $loc ?>][title]"
                                        value="<?= e($locales[$loc]['title'] ?? '') ?>"
+                                       class="form-input"
                                        dir="<?= $loc === 'ar' ? 'rtl' : 'ltr' ?>">
                             </div>
                             <div class="admin-form-group">
-                                <label>Description</label>
+                                <label>Canonical Link (Optional)</label>
+                                <input type="url"
+                                       name="seo[<?= e($page) ?>][<?= $loc ?>][canonical_link]"
+                                       value="<?= e($locales[$loc]['canonical_link'] ?? '') ?>"
+                                       class="form-input"
+                                       dir="ltr"
+                                       placeholder="https://example.com/...">
+                                <small style="color:var(--text-muted);">Leave blank unless you are resolving duplicate content issues on another domain.</small>
+                            </div>
+                            <div class="admin-form-group">
+                                <label>Meta Description</label>
                                 <textarea name="seo[<?= e($page) ?>][<?= $loc ?>][description]"
                                           rows="2"
                                           dir="<?= $loc === 'ar' ? 'rtl' : 'ltr' ?>"><?= e($locales[$loc]['description'] ?? '') ?></textarea>
                             </div>
                             <div class="admin-form-group">
-                                <label>Keywords</label>
+                                <label>Meta Keywords</label>
                                 <input type="text"
                                        name="seo[<?= e($page) ?>][<?= $loc ?>][keywords]"
                                        value="<?= e($locales[$loc]['keywords'] ?? '') ?>"
