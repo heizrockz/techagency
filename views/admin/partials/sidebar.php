@@ -67,12 +67,20 @@
 
         <!-- User Profile Section -->
         <?php
-            $db = getDB();
-            $adminStmt = $db->prepare('SELECT avatar_emoji, full_name FROM admins WHERE id = ?');
-            $adminStmt->execute([$_SESSION['admin_id'] ?? 0]);
-            $adminData = $adminStmt->fetch();
-            $emoji = $adminData['avatar_emoji'] ?? '👤';
-            $displayName = $adminData['full_name'] ?? getAdminUser() ?? 'Admin';
+            $emoji = '👤';
+            $displayName = getAdminUser() ?? 'Admin';
+            try {
+                $db = getDB();
+                $adminStmt = $db->prepare('SELECT avatar_emoji, full_name FROM admins WHERE id = ?');
+                $adminStmt->execute([$_SESSION['admin_id'] ?? 0]);
+                $adminData = $adminStmt->fetch();
+                if ($adminData) {
+                    $emoji = $adminData['avatar_emoji'] ?? '👤';
+                    $displayName = $adminData['full_name'] ?? $displayName;
+                }
+            } catch (Exception $e) {
+                // Columns may not exist yet — use defaults
+            }
         ?>
         <div style="margin-top:15px; padding:12px 15px; background: rgba(255,255,255,0.03); border-radius: 10px; border: 1px solid var(--glass-border);">
             <div style="display:flex; align-items:center; gap:10px; cursor:pointer;" onclick="document.getElementById('profile-menu').classList.toggle('show')">

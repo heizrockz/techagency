@@ -9,7 +9,7 @@ try {
         "ALTER TABLE admins ADD COLUMN recovery_email VARCHAR(255) DEFAULT NULL",
         "ALTER TABLE admins ADD COLUMN recovery_phone VARCHAR(50) DEFAULT NULL",
         "ALTER TABLE admins ADD COLUMN full_name VARCHAR(100) DEFAULT NULL",
-        "ALTER TABLE admins ADD COLUMN avatar_emoji VARCHAR(10) DEFAULT '👤'",
+        "ALTER TABLE admins ADD COLUMN avatar_emoji VARCHAR(10) DEFAULT NULL",
         
         "CREATE TABLE IF NOT EXISTS contacts (
             id INT AUTO_INCREMENT PRIMARY KEY,
