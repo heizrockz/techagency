@@ -30,7 +30,10 @@ $currentPage = 'invoices';
             <?php if (empty($invoices)): ?>
                 <p style="color: var(--text-muted); text-align: center; padding: 40px 0;">No invoices or quotes found. Create your first one!</p>
             <?php else: ?>
-                <table class="admin-table">
+                <div style="display: flex; justify-content: flex-end; margin-bottom: 15px;">
+                    <input type="text" id="invoiceSearch" class="form-input" placeholder="Search invoices..." style="max-width: 300px;">
+                </div>
+                <table class="admin-table" id="invoicesTable">
                     <thead>
                         <tr>
                             <th>Number</th>
@@ -77,6 +80,18 @@ $currentPage = 'invoices';
                         <?php endforeach; ?>
                     </tbody>
                 </table>
+                
+                <script>
+                document.getElementById('invoiceSearch').addEventListener('input', function() {
+                    const searchTerm = this.value.toLowerCase();
+                    const rows = document.querySelectorAll('#invoicesTable tbody tr');
+                    
+                    rows.forEach(row => {
+                        const text = row.textContent.toLowerCase();
+                        row.style.display = text.includes(searchTerm) ? '' : 'none';
+                    });
+                });
+                </script>
             <?php endif; ?>
         </div>
     </div>

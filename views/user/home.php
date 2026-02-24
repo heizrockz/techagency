@@ -59,6 +59,31 @@ $siteName = getSetting('site_name', 'Mico Sage');
 </section>
 
 <!-- ═══════════════════════════════════════════════════════════
+     Tagline Section (Fast. Dynamic. Scalable.)
+     ═══════════════════════════════════════════════════════════ -->
+<section class="tagline-section" id="tagline">
+    <div class="section-container">
+        <div class="tagline-grid">
+            <div class="tagline-card animate-on-scroll" style="animation-delay: 0s;">
+                <div class="tagline-icon">⚡</div>
+                <h3><?= getCurrentLocale() === 'ar' ? 'سريع' : 'Fast' ?></h3>
+                <p><?= getCurrentLocale() === 'ar' ? 'أداء محسّن لسرعات تحميل قصوى وتجربة مستخدم سلسة.' : 'Optimized performance for lightning-fast load times and smooth UX.' ?></p>
+            </div>
+            <div class="tagline-card animate-on-scroll" style="animation-delay: 0.15s;">
+                <div class="tagline-icon">🔄</div>
+                <h3><?= getCurrentLocale() === 'ar' ? 'ديناميكي' : 'Dynamic' ?></h3>
+                <p><?= getCurrentLocale() === 'ar' ? 'حلول تفاعلية تتكيف مع احتياجات عملك المتطورة في الوقت الفعلي.' : 'Interactive solutions that adapt to your evolving business needs in real-time.' ?></p>
+            </div>
+            <div class="tagline-card animate-on-scroll" style="animation-delay: 0.3s;">
+                <div class="tagline-icon">📈</div>
+                <h3><?= getCurrentLocale() === 'ar' ? 'قابل للتوسع' : 'Scalable' ?></h3>
+                <p><?= getCurrentLocale() === 'ar' ? 'بُنية تحتية مصممة للنمو مع أعمالك، تدعم ملايين المستخدمين.' : 'Architecture built to grow with your business, supporting millions of users.' ?></p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════
      Services Section (Dynamic from DB)
      ═══════════════════════════════════════════════════════════ -->
 <section class="services-section" id="services">
@@ -79,6 +104,55 @@ $siteName = getSetting('site_name', 'Mico Sage');
                 <p><?= e($svc['description'] ?? '') ?></p>
             </div>
             <?php endforeach; ?>
+        </div>
+    </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════
+     Our Process Section
+     ═══════════════════════════════════════════════════════════ -->
+<section class="process-section" id="process">
+    <div class="section-container">
+        <div class="section-heading animate-on-scroll">
+            <h2><?= getCurrentLocale() === 'ar' ? 'آلية العمل' : 'Our Process' ?></h2>
+            <p><?= getCurrentLocale() === 'ar' ? 'من الفكرة إلى الإطلاق، نضمن تجربة سلسة خطوة بخطوة.' : 'From idea to launch, we ensure a seamless step-by-step experience.' ?></p>
+            <div class="heading-line"></div>
+        </div>
+
+        <div class="process-timeline animate-on-scroll">
+            <div class="process-line"></div>
+            
+            <div class="process-step" data-step="1">
+                <div class="step-circle">1</div>
+                <div class="step-content">
+                    <h3><?= getCurrentLocale() === 'ar' ? 'استكشاف الفكرة' : 'Discovery' ?></h3>
+                    <p><?= getCurrentLocale() === 'ar' ? 'نفهم أهدافك، نحلل السوق، ونضع استراتيجية واضحة للنجاح.' : 'We understand your goals, analyze the market, and build a clear strategy.' ?></p>
+                </div>
+            </div>
+
+            <div class="process-step" data-step="2">
+                <div class="step-circle">2</div>
+                <div class="step-content">
+                    <h3><?= getCurrentLocale() === 'ar' ? 'التصميم' : 'Design' ?></h3>
+                    <p><?= getCurrentLocale() === 'ar' ? 'نصمم واجهات مستخدم مذهلة تركز على تجربة المستخدم (UX/UI).' : 'We craft stunning, user-centric (UX/UI) interfaces tailored for engagement.' ?></p>
+                </div>
+            </div>
+
+            <div class="process-step" data-step="3">
+                <div class="step-circle">3</div>
+                <div class="step-content">
+                    <h3><?= getCurrentLocale() === 'ar' ? 'التطوير' : 'Development' ?></h3>
+                    <p><?= getCurrentLocale() === 'ar' ? 'نكتب أكواد برمجية نظيفة وحديثة لبناء حلول سريعة وآمنة.' : 'We write clean, modern code to build fast, secure, and robust solutions.' ?></p>
+                </div>
+            </div>
+
+            <div class="process-step" data-step="4">
+                <div class="step-circle">4</div>
+                <div class="step-content">
+                    <h3><?= getCurrentLocale() === 'ar' ? 'الإطلاق' : 'Deployment' ?></h3>
+                    <p><?= getCurrentLocale() === 'ar' ? 'نختبر، ونحسّن، ثم نطلق منتجك الرقمي بثقة للعالم.' : 'We test, optimize, and confidently launch your digital product to the world.' ?></p>
+                </div>
+            </div>
         </div>
     </div>
 </section>

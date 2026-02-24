@@ -122,8 +122,11 @@ $action = $action ?? 'list';
                 <?php if (empty($contacts)): ?>
                     <p style="color: var(--text-muted); text-align: center; padding: 40px;">No contacts yet. Create your first contact to get started.</p>
                 <?php else: ?>
+                    <div style="display: flex; justify-content: flex-end; margin-bottom: 15px;">
+                        <input type="text" id="contactSearch" class="form-input" placeholder="Search contacts..." style="max-width: 300px;">
+                    </div>
                     <div style="overflow-x: auto;">
-                        <table class="admin-table">
+                        <table class="admin-table" id="contactsTable">
                             <thead>
                                 <tr>
                                     <th>#</th>
@@ -157,6 +160,18 @@ $action = $action ?? 'list';
                             </tbody>
                         </table>
                     </div>
+                    
+                    <script>
+                    document.getElementById('contactSearch').addEventListener('input', function() {
+                        const searchTerm = this.value.toLowerCase();
+                        const rows = document.querySelectorAll('#contactsTable tbody tr');
+                        
+                        rows.forEach(row => {
+                            const text = row.textContent.toLowerCase();
+                            row.style.display = text.includes(searchTerm) ? '' : 'none';
+                        });
+                    });
+                    </script>
                 <?php endif; ?>
             </div>
         <?php endif; ?>

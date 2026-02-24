@@ -6,6 +6,27 @@
     <title><?= e($seo['title'] ?? APP_NAME) ?></title>
     <meta name="description" content="<?= e($seo['description'] ?? '') ?>">
     <meta name="keywords" content="<?= e($seo['keywords'] ?? '') ?>">
+    
+    <?php if($canonical = getSetting('seo_canonical')): ?>
+        <link rel="canonical" href="<?= e($canonical) ?>">
+    <?php endif; ?>
+    
+    <?php if($ogUrl = getSetting('seo_og_url')): ?>
+        <meta property="og:url" content="<?= e($ogUrl) ?>">
+    <?php endif; ?>
+    <?php if($ogSiteName = getSetting('seo_og_sitename')): ?>
+        <meta property="og:site_name" content="<?= e($ogSiteName) ?>">
+    <?php endif; ?>
+    <?php if($ogImage = getSetting('seo_og_image')): ?>
+        <meta property="og:image" content="<?= baseUrl($ogImage) ?>">
+    <?php endif; ?>
+    <?php if($ogDesc = getSetting('seo_og_desc')): ?>
+        <meta property="og:description" content="<?= e($ogDesc) ?>">
+    <?php endif; ?>
+
+    <?php if($favicon = getSetting('seo_favicon')): ?>
+        <link rel="icon" type="image/x-icon" href="<?= baseUrl($favicon) ?>">
+    <?php endif; ?>
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -55,24 +76,32 @@
     <!-- Footer -->
     <?php require __DIR__ . '/../user/partials/footer.php'; ?>
 
-    <!-- Floating Call Button -->
-    <?php $phone = getSetting('contact_phone', ''); if(!empty($phone) && $page !== 'contact'): ?>
-    <a href="tel:<?= e(preg_replace('/[^0-9+]/', '', $phone)) ?>" class="floating-call-btn" aria-label="Call Us">
-        <div class="fcb-pulse"></div>
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
-        </svg>
-    </a>
-    <?php endif; ?>
-
-    <!-- Floating WhatsApp Button -->
-    <?php $wa = getSetting('whatsapp_number', ''); if(!empty($wa) && $page !== 'contact'): ?>
-    <a href="https://wa.me/<?= e(preg_replace('/[^0-9]/', '', $wa)) ?>?text=Hello%20<?= urlencode(APP_NAME) ?>!" target="_blank" class="floating-wa-btn" aria-label="WhatsApp Us">
-        <div class="fcb-pulse"></div>
-        <svg width="28" height="28" viewBox="0 0 24 24" fill="white" stroke="none">
-            <path d="M12.031 2.01c-5.518 0-9.998 4.48-9.998 9.998 0 1.763.46 3.486 1.332 5.006L2 22l5.12-1.341c1.472.825 3.149 1.26 4.908 1.26h.005c5.517 0 9.995-4.478 9.995-9.995 0-5.517-4.478-9.996-9.997-9.996zm5.498 14.414c-.22.62-1.28 1.189-1.789 1.246-.464.053-1.056.126-3.32-.813-2.887-1.196-4.735-4.14-4.877-4.329-.142-.189-1.163-1.547-1.163-2.95 0-1.403.734-2.095.992-2.383.258-.288.563-.36.75-.36s.374-.005.541.002c.181.01.425-.07.662.502.247.596.598 1.458.649 1.562.052.104.086.225.015.367-.07.142-.104.231-.208.354-.104.122-.218.261-.31.365-.104.116-.214.244-.092.455.122.21 5.4 5.4 5.611 5.722z"/>
-        </svg>
-    </a>
+    <!-- Floating CTA Button -->
+    <?php $phone = getSetting('contact_phone', ''); $wa = getSetting('whatsapp_number', ''); ?>
+    <?php if((!empty($phone) || !empty($wa)) && $page !== 'contact'): ?>
+    <div class="floating-cta-wrapper">
+        <button class="floating-cta-btn" aria-label="Talk to our expert" id="floatingCtaBtn">
+            <div class="fcb-pulse"></div>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+            </svg>
+            <span class="cta-text">Talk to our expert</span>
+        </button>
+        <div class="floating-cta-popup" id="floatingCtaPopup">
+            <?php if(!empty($wa)): ?>
+            <a href="https://wa.me/<?= e(preg_replace('/[^0-9]/', '', $wa)) ?>?text=Hello%20<?= urlencode(APP_NAME) ?>!" target="_blank" class="cta-popup-item wa">
+               <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12.031 2.01c-5.518 0-9.998 4.48-9.998 9.998 0 1.763.46 3.486 1.332 5.006L2 22l5.12-1.341c1.472.825 3.149 1.26 4.908 1.26h.005c5.517 0 9.995-4.478 9.995-9.995 0-5.517-4.478-9.996-9.997-9.996zm5.498 14.414c-.22.62-1.28 1.189-1.789 1.246-.464.053-1.056.126-3.32-.813-2.887-1.196-4.735-4.14-4.877-4.329-.142-.189-1.163-1.547-1.163-2.95 0-1.403.734-2.095.992-2.383.258-.288.563-.36.75-.36s.374-.005.541.002c.181.01.425-.07.662.502.247.596.598 1.458.649 1.562.052.104.086.225.015.367-.07.142-.104.231-.208.354-.104.122-.218.261-.31.365-.104.116-.214.244-.092.455.122.21 5.4 5.4 5.611 5.722z"/></svg>
+               WhatsApp Us
+            </a>
+            <?php endif; ?>
+            <?php if(!empty($phone)): ?>
+            <a href="tel:<?= e(preg_replace('/[^0-9+]/', '', $phone)) ?>" class="cta-popup-item call">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                Call Us
+            </a>
+            <?php endif; ?>
+        </div>
+    </div>
     <?php endif; ?>
 
     <!-- Chatbot Widget -->
@@ -111,7 +140,7 @@
                 </button>
             </div>
             <div class="chatbot-footer">
-                Powered by <strong style="color:var(--neon-cyan);"><?= APP_NAME ?> AI</strong>
+                Powered by <strong style="color:var(--neon-cyan);"><?= APP_NAME ?></strong>
             </div>
         </div>
     </div>

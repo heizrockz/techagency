@@ -9,15 +9,18 @@ document.addEventListener('DOMContentLoaded', () => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
                 entry.target.classList.add('visible');
-                observer.unobserve(entry.target);
+                // Don't unobserve timeline so it can be re-triggered if wanted, or just trigger once
+                if (!entry.target.classList.contains('process-timeline')) {
+                    observer.unobserve(entry.target);
+                }
             }
         });
     }, {
-        threshold: 0.15,
-        rootMargin: '0px 0px -5% 0px'
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
     });
 
-    document.querySelectorAll('.animate-on-scroll').forEach(el => {
+    document.querySelectorAll('.animate-on-scroll, .process-timeline').forEach(el => {
         observer.observe(el);
     });
 
@@ -59,6 +62,22 @@ document.addEventListener('DOMContentLoaded', () => {
         document.addEventListener('click', (e) => {
             if (!hamburger.contains(e.target) && !mobileNav.contains(e.target)) {
                 mobileNav.classList.remove('active');
+            }
+        });
+    }
+
+    // ── Floating CTA Popup Toggle ──────────────────────────
+    const floatingCtaBtn = document.getElementById('floatingCtaBtn');
+    const floatingCtaPopup = document.getElementById('floatingCtaPopup');
+    if (floatingCtaBtn && floatingCtaPopup) {
+        floatingCtaBtn.addEventListener('click', (e) => {
+            e.stopPropagation(); // Prevents document click trigger
+            floatingCtaPopup.classList.toggle('active');
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!floatingCtaBtn.contains(e.target) && !floatingCtaPopup.contains(e.target)) {
+                floatingCtaPopup.classList.remove('active');
             }
         });
     }

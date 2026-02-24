@@ -1,0 +1,13 @@
+User-agent: *
+Allow: /
+Allow: /assets/
+Disallow: /admin/
+Disallow: /api/
+Disallow: /config.php
+Disallow: /core/
+Disallow: /cron/
+Disallow: /includes/
+Disallow: /views/admin/
+Disallow: /views/partials/
+
+Sitemap: https://micosage.com/sitemap.xml

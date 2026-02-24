@@ -314,22 +314,26 @@ function adminSettings(): void {
                ->execute([$toggle, $val]);
         }
 
-        // Handle File Upload for site_logo
-        if (!empty($_FILES['site_logo']['name'])) {
-            $uploadDir = __DIR__ . '/../assets/uploads/';
-            if (!is_dir($uploadDir)) mkdir($uploadDir, 0777, true);
-            
-            $fileInfo = pathinfo($_FILES['site_logo']['name']);
-            $ext = strtolower($fileInfo['extension'] ?? '');
-            if (in_array($ext, ['jpg', 'jpeg', 'png', 'svg', 'webp', 'gif'])) {
-                $filename = 'logo_' . time() . '.' . $ext;
-                $targetFile = $uploadDir . $filename;
+        // Handle File Uploads (Logo, Favicon, OG Image)
+        $uploadFields = ['site_logo', 'seo_favicon', 'seo_og_image'];
+        $uploadDir = __DIR__ . '/../assets/uploads/';
+        
+        foreach ($uploadFields as $field) {
+            if (!empty($_FILES[$field]['name'])) {
+                if (!is_dir($uploadDir)) mkdir($uploadDir, 0777, true);
                 
-                if (move_uploaded_file($_FILES['site_logo']['tmp_name'], $targetFile)) {
-                    $logoUrl = 'assets/uploads/' . $filename;
-                    $db->prepare('INSERT INTO site_settings (setting_key, setting_value) VALUES (?, ?)
-                        ON DUPLICATE KEY UPDATE setting_value = VALUES(setting_value)')
-                       ->execute(['site_logo', $logoUrl]);
+                $fileInfo = pathinfo($_FILES[$field]['name']);
+                $ext = strtolower($fileInfo['extension'] ?? '');
+                if (in_array($ext, ['jpg', 'jpeg', 'png', 'svg', 'webp', 'gif', 'ico'])) {
+                    $filename = $field . '_' . time() . '.' . $ext;
+                    $targetFile = $uploadDir . $filename;
+                    
+                    if (move_uploaded_file($_FILES[$field]['tmp_name'], $targetFile)) {
+                        $fileUrl = 'assets/uploads/' . $filename;
+                        $db->prepare('INSERT INTO site_settings (setting_key, setting_value) VALUES (?, ?)
+                            ON DUPLICATE KEY UPDATE setting_value = VALUES(setting_value)')
+                           ->execute([$field, $fileUrl]);
+                    }
                 }
             }
         }
