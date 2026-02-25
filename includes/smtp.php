@@ -58,9 +58,11 @@ class MicoSMTP {
                 $hostname = isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : 'micosage.com';
             }
 
+            $boundary = "----=_NextPart_" . md5(uniqid(time()));
+
             $headers = [
                 "MIME-Version: 1.0",
-                "Content-type: text/html; charset=UTF-8",
+                "Content-type: multipart/alternative; boundary=\"$boundary\"",
                 "To: <$to>",
                 "From: $fromName <$from>",
                 "Reply-To: <$from>",
@@ -68,13 +70,39 @@ class MicoSMTP {
                 "Subject: $subject",
                 "Date: " . date('r'),
                 "Message-ID: <" . time() . "." . uniqid() . "@" . $hostname . ">",
-                "X-Mailer: MicoSage-SMTP"
+                "X-Mailer: MicoSage-SMTP",
+                "Precedence: bulk",
+                "Auto-Submitted: auto-generated"
             ];
 
-            // SMTP Dot-stuffing: any line starting with a dot gets an extra dot
-            $fullBody = preg_replace('/^\./m', '..', $fullBody);
+            // Generate Plain Text fallback from HTML
+            $plainBody = strip_tags(str_replace(['<br>', '<br/>', '</p>', '</h1>', '</h2>', '</h3>'], "\r\n", $fullBody));
+            $plainBody = html_entity_decode($plainBody, ENT_QUOTES, 'UTF-8');
+            $plainBody = trim(preg_replace('/[\r\n]+/', "\r\n", $plainBody));
 
-            $message = implode("\r\n", $headers) . "\r\n\r\n" . $fullBody . "\r\n.";
+            // SMTP Dot-stuffing for both structures
+            $plainBody = preg_replace('/^\./m', '..', $plainBody);
+            $fullHtmlBody = preg_replace('/^\./m', '..', $fullBody);
+
+            $messageParts = [];
+            $messageParts[] = implode("\r\n", $headers);
+            $messageParts[] = "";
+            $messageParts[] = "This is a multi-part message in MIME format.";
+            $messageParts[] = "--$boundary";
+            $messageParts[] = "Content-Type: text/plain; charset=\"utf-8\"";
+            $messageParts[] = "Content-Transfer-Encoding: 8bit";
+            $messageParts[] = "";
+            $messageParts[] = $plainBody;
+            $messageParts[] = "--$boundary";
+            $messageParts[] = "Content-Type: text/html; charset=\"utf-8\"";
+            $messageParts[] = "Content-Transfer-Encoding: 8bit";
+            $messageParts[] = "";
+            $messageParts[] = $fullHtmlBody;
+            $messageParts[] = "--$boundary--";
+            $messageParts[] = ".";
+
+            $message = implode("\r\n", $messageParts);
+
             $this->sendCommand($message, 250);
             $this->sendCommand("QUIT", 221);
             
