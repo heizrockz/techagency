@@ -138,6 +138,11 @@ switch ($path) {
         adminUpdateBookingStatus();
         break;
 
+    case '/blogs':
+        require __DIR__ . '/controllers/BlogController.php';
+        showAll();
+        break;
+
     case '/admin/services':
         requireAdmin();
         require __DIR__ . '/controllers/AdminController.php';

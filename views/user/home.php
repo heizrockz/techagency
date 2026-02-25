@@ -453,7 +453,10 @@ $blogs = getBlogs();
         </div>
 
         <div class="blog-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; margin-top: 60px;">
-            <?php foreach ($blogs as $i => $blog): ?>
+            <?php 
+            $latestBlogs = array_slice($blogs, 0, 3);
+            foreach ($latestBlogs as $i => $blog): 
+            ?>
             <div class="blog-card animate-on-scroll" style="animation-delay: <?= $i * 0.1 ?>s; background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255,255,255,0.08); border-radius: 20px; overflow: hidden; backdrop-filter: blur(12px); transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);">
                 
                 <div class="blog-media" style="position: relative; height: 200px; overflow: hidden; border-bottom: 1px solid rgba(255,255,255,0.05);">
@@ -488,6 +491,15 @@ $blogs = getBlogs();
             </div>
             <?php endforeach; ?>
         </div>
+
+        <?php if (count($blogs) > 3): ?>
+        <div style="text-align: center; margin-top: 50px;">
+            <a href="<?= baseUrl('blogs') ?>" class="btn-ghost" style="border: 1px solid rgba(var(--neon-cyan-rgb), 0.3); padding: 12px 30px; border-radius: 30px; color: var(--neon-cyan); text-decoration: none; font-weight: 600; transition: all 0.3s ease;">
+                SEE MORE PROJECTS
+                <svg style="margin-left: 8px; vertical-align: middle;" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </a>
+        </div>
+        <?php endif; ?>
     </div>
     
     <style>
