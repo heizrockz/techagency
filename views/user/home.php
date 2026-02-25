@@ -133,6 +133,18 @@ $blogs = getBlogs();
                     <h3><?= e(getContent('process_step1_title')) ?></h3>
                     <p><?= e(getContent('process_step1_desc')) ?></p>
                 </div>
+                <div class="process-visual">
+                    <div class="pv-bubbles">
+                        <span class="bubble b1" style="color:var(--neon-emerald);">💡</span>
+                        <span class="bubble b2" style="color:var(--neon-cyan);">✨</span>
+                        <span class="bubble b3" style="color:var(--theme-gold);">🎯</span>
+                        <span class="bubble b4" style="color:var(--neon-pink);">💭</span>
+                        <span class="bubble b5" style="color:var(--neon-violet);">🧠</span>
+                        <span class="bubble b6" style="color:var(--neon-emerald);">⚡</span>
+                        <span class="bubble b7" style="color:var(--theme-primary);">💡</span>
+                        <span class="bubble b8" style="color:var(--neon-cyan);">🔮</span>
+                    </div>
+                </div>
             </div>
 
             <div class="process-step" data-step="2">
@@ -140,6 +152,21 @@ $blogs = getBlogs();
                 <div class="step-content">
                     <h3><?= e(getContent('process_step2_title')) ?></h3>
                     <p><?= e(getContent('process_step2_desc')) ?></p>
+                </div>
+                <div class="process-visual">
+                    <div class="pv-design">
+                        <svg class="design-grid" viewBox="0 0 120 120" fill="none">
+                            <rect class="dg-r dg1" x="5" y="5" width="50" height="50" rx="8"/>
+                            <rect class="dg-r dg2" x="65" y="5" width="50" height="22" rx="6"/>
+                            <rect class="dg-r dg3" x="65" y="35" width="50" height="20" rx="6"/>
+                            <rect class="dg-r dg4" x="5" y="65" width="110" height="50" rx="8"/>
+                            <circle class="dg-dot dd1" cx="30" cy="30" r="8"/>
+                            <circle class="dg-dot dd2" cx="90" cy="90" r="5"/>
+                        </svg>
+                        <div class="design-cursor">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="var(--neon-cyan)"><path d="M3 3l7.07 16.97 2.51-7.39 7.39-2.51L3 3z"/></svg>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -149,6 +176,21 @@ $blogs = getBlogs();
                     <h3><?= e(getContent('process_step3_title')) ?></h3>
                     <p><?= e(getContent('process_step3_desc')) ?></p>
                 </div>
+                <div class="process-visual">
+                    <div class="pv-code">
+                        <div class="code-window">
+                            <div class="code-dots"><span></span><span></span><span></span></div>
+                            <div class="code-lines">
+                                <div class="cl cl1"><span class="ck">const</span> <span class="cv">app</span> = <span class="cf">create</span>();</div>
+                                <div class="cl cl2"><span class="ck">app</span>.<span class="cf">build</span>({</div>
+                                <div class="cl cl3">  <span class="cs">quality</span>: <span class="cn">'premium'</span>,</div>
+                                <div class="cl cl4">  <span class="cs">speed</span>: <span class="cn">'blazing'</span></div>
+                                <div class="cl cl5">});</div>
+                                <div class="cl cl6"><span class="ck">await</span> <span class="cv">app</span>.<span class="cf">deploy</span>();</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <div class="process-step" data-step="4">
@@ -156,6 +198,23 @@ $blogs = getBlogs();
                 <div class="step-content">
                     <h3><?= e(getContent('process_step4_title')) ?></h3>
                     <p><?= e(getContent('process_step4_desc')) ?></p>
+                </div>
+                <div class="process-visual">
+                    <div class="pv-launch">
+                        <div class="rocket">🚀</div>
+                        <div class="launch-trail">
+                            <span class="trail t1"></span>
+                            <span class="trail t2"></span>
+                            <span class="trail t3"></span>
+                        </div>
+                        <div class="launch-stars">
+                            <span class="star s1">✦</span>
+                            <span class="star s2">✦</span>
+                            <span class="star s3">✦</span>
+                            <span class="star s4">✦</span>
+                            <span class="star s5">✦</span>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

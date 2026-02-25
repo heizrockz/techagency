@@ -27,7 +27,7 @@ $action = $action ?? 'list';
                 <?php if ($action === 'list'): ?>
                     <a href="<?= baseUrl('admin/contacts?action=new') ?>" class="btn-primary" style="padding: 8px 16px; font-size: 0.9rem;">+ New Contact</a>
                 <?php else: ?>
-                    <a href="<?= baseUrl('admin/contacts') ?>" class="admin-btn">← Back to List</a>
+                    <a href="<?= baseUrl('admin/contacts') ?>" class="btn-ghost">← Back to List</a>
                 <?php endif; ?>
             </div>
         </div>

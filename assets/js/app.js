@@ -20,7 +20,7 @@ document.addEventListener('DOMContentLoaded', () => {
         rootMargin: '0px 0px -50px 0px'
     });
 
-    document.querySelectorAll('.animate-on-scroll, .process-timeline').forEach(el => {
+    document.querySelectorAll('.animate-on-scroll, .process-timeline, .process-step').forEach(el => {
         observer.observe(el);
     });
 

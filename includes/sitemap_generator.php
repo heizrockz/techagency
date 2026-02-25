@@ -44,9 +44,20 @@ function generateDynamicSitemap(): string {
         }
     } catch (Exception $e) {}
 
-    // 3. Dynamic Portfolio Projects (Optional detail based on user snippet)
-    // The user snippet focused on home, portfolio landing, and blog details.
-    // I will include portfolio items at 0.70 to keep hierarchy clear.
+    // 3. Dynamic Services
+    try {
+        $services = $db->query("SELECT id, updated_at FROM services WHERE is_active = 1")->fetchAll();
+        foreach ($services as $service) {
+            // Service link is dynamic by ID in this app: e.g. /#service-ID
+            $xml .= '<url>' . PHP_EOL;
+            $xml .= '<loc>' . $baseUrl . '#service-' . $service['id'] . '</loc>' . PHP_EOL;
+            $xml .= '<lastmod>' . $formatDate($service['updated_at'] ?? null) . '</lastmod>' . PHP_EOL;
+            $xml .= '<priority>0.70</priority>' . PHP_EOL;
+            $xml .= '</url>' . PHP_EOL;
+        }
+    } catch (Exception $e) {}
+
+    // 4. Dynamic Portfolio Projects
     try {
         $projects = $db->query("SELECT slug, created_at FROM portfolio_projects WHERE is_active = 1")->fetchAll();
         foreach ($projects as $proj) {

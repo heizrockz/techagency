@@ -31,7 +31,7 @@
                 <form method="POST" action="<?= baseUrl('admin/team') ?>">
                     <input type="hidden" name="id" value="<?= $editMember['id'] ?? 0 ?>">
 
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+                    <div class="admin-grid-2" style="margin-bottom: 20px;">
                         <div class="admin-form-group">
                             <label>Photo / Avatar URL</label>
                             <input type="text" name="image_url" class="form-input" placeholder="https://..." value="<?= e($editMember['image_url'] ?? '') ?>">
@@ -78,7 +78,8 @@
             </div>
         <?php else: ?>
             <div class="admin-card">
-                <table class="admin-table">
+                <div style="overflow-x: auto;">
+                    <table class="admin-table">
                     <thead>
                         <tr>
                             <th>Photo</th>
@@ -123,6 +124,7 @@
                         <?php endforeach; ?>
                     </tbody>
                 </table>
+                </div>
             </div>
         <?php endif; ?>
     </div>

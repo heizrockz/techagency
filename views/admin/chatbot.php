@@ -14,9 +14,9 @@
     .fb-wrap { display:flex; height:calc(100vh - 58px); overflow:hidden; background:#0a0c10; }
 
     /* ═══ Canvas ═══ */
-    .fb-canvas-area { flex:1; position:relative; overflow:hidden; cursor:grab; }
+    .fb-canvas-area { flex:1; position:relative; overflow:auto; cursor:grab; background-image: radial-gradient(rgba(255,255,255,0.05) 1px, transparent 1px); background-size: 20px 20px; }
     .fb-canvas-area.grabbing { cursor:grabbing; }
-    .fb-canvas { position:absolute; top:0; left:0; width:10000px; height:10000px; transform-origin:0 0; }
+    .fb-canvas { position:absolute; top:0; left:0; width:5000px; height:5000px; transform-origin:0 0; }
     .fb-svg { position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:1; }
     .fb-svg path { fill:none; stroke:rgba(16,185,129,0.35); stroke-width:2.5; transition: stroke 0.15s; }
     .fb-svg path.hl { stroke:var(--neon-cyan); stroke-width:3; }
@@ -36,8 +36,9 @@
     .fb-badge-input { background:rgba(251,191,36,0.12); color:#fbbf24; }
 
     .fb-n-body { padding:8px 12px; font-size:0.72rem; color:#64748b; line-height:1.5; max-height:50px; overflow:hidden; }
-    .fb-n-foot { padding:6px 10px; display:flex; flex-wrap:wrap; gap:3px; border-top:1px solid rgba(255,255,255,0.03); }
-    .fb-pill { font-size:0.65rem; padding:2px 8px; border-radius:50px; background:rgba(255,255,255,0.04); color:#94a3b8; border:1px solid rgba(255,255,255,0.06); }
+    .fb-pill { position:relative; font-size:0.65rem; padding:2px 22px 2px 8px; border-radius:50px; background:rgba(255,255,255,0.04); color:#94a3b8; border:1px solid rgba(255,255,255,0.06); margin-bottom: 2px; }
+    .fb-pill .fb-port-out { right: 6px; left: auto; top: 50%; bottom: auto; transform: translateY(-50%); width: 10px; height: 10px; border-width: 1.5px; }
+    .fb-pill .fb-port-out:hover { transform: translateY(-50%) scale(1.3); }
 
     /* ═══ Ports ═══ */
     .fb-port { position:absolute; width:16px; height:16px; border-radius:50%; border:2.5px solid #10b981; background:#0a0c10; cursor:crosshair; z-index:20; transition:all 0.15s; }
@@ -98,10 +99,12 @@
     .fb-hint.show { display:block; }
 
     @media (max-width: 768px) {
-        .fb-editor.open { width: 100%; position: absolute; right: 0; bottom: 0; height: 100%; z-index: 1000; }
+        .fb-wrap { height: auto; min-height: 500px; flex-direction: column; }
+        .fb-canvas-area { height: 400px; }
+        .fb-editor.open { width: 100%; position: relative; border-left: none; border-top: 1px solid rgba(255,255,255,0.06); height: auto; max-height: 500px; overflow-y: auto; }
         .fb-ed { width: 100%; }
         .fb-fg label { font-size: 0.8rem; }
-        .fb-fg input, .fb-fg textarea, .fb-fg select { font-size: 1rem; } /* Better for mobile zoom */
+        .fb-fg input, .fb-fg textarea, .fb-fg select { font-size: 1rem; }
     }
     </style>
 </head>
@@ -115,6 +118,7 @@
         <div style="padding:12px 20px; background:#0f1117; border-bottom:1px solid rgba(255,255,255,0.06); display:flex; align-items:center; justify-content:space-between; flex-shrink:0; flex-wrap: wrap; gap: 10px;">
             <h1 style="color:var(--neon-cyan); margin:0; font-size:1.1rem; font-weight:700;">🤖 Flow Builder</h1>
             <div style="display:flex; gap:8px;">
+                <button onclick="FB.centerView()" class="btn-secondary" style="padding:7px 16px; font-size:0.82rem;">Center View</button>
                 <button onclick="FB.addNode()" class="btn-primary" style="padding:7px 16px; font-size:0.82rem;">+ Node</button>
             </div>
         </div>
@@ -148,6 +152,29 @@ const FB = {
     pan: null,
     offset: {x:0,y:0},
     zoom: 1,
+
+    centerView() {
+        const area = document.getElementById('canvasArea');
+        const canvas = document.getElementById('fbCanvas');
+        if (!area || !canvas) return;
+        
+        // Find center of current nodes or default to 0,0
+        if (this.nodes.length > 0) {
+            let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+            this.nodes.forEach(n => {
+                minX = Math.min(minX, n.pos_x); minY = Math.min(minY, n.pos_y);
+                maxX = Math.max(maxX, n.pos_x + 240); maxY = Math.max(maxY, n.pos_y + 150);
+            });
+            const midX = (minX + maxX) / 2;
+            const midY = (minY + maxY) / 2;
+            this.offset.x = (area.offsetWidth / 2) - (midX * this.zoom);
+            this.offset.y = (area.offsetHeight / 2) - (midY * this.zoom);
+        } else {
+            this.offset = {x: 50, y: 50};
+        }
+        this.applyTransform();
+        this.saveCanvasState();
+    },
     // Linking state
     linking: false,
     linkFrom: null, // { nodeId, optionId }
@@ -209,7 +236,10 @@ const FB = {
             const rootB = n.is_root==1 ? '<span class="fb-badge fb-badge-root">Start</span>' : '';
             const msg = (n.translations?.en||'').substring(0,70);
             const pills = (n.options||[]).map(o=>
-                `<span class="fb-pill">${this.esc(o.translations?.en||'?')}</span>`
+                `<span class="fb-pill" data-option="${o.id}">
+                    ${this.esc(o.translations?.en||'?')}
+                    <div class="fb-port fb-port-out" data-port="out" data-node="${n.id}" data-option="${o.id}"></div>
+                </span>`
             ).join('');
 
             el.innerHTML = `
@@ -220,7 +250,6 @@ const FB = {
                 </div>
                 <div class="fb-n-body">${this.esc(msg)}</div>
                 ${pills?`<div class="fb-n-foot">${pills}</div>`:''}
-                <div class="fb-port fb-port-out" data-port="out" data-node="${n.id}"></div>
             `;
 
             // Node drag
@@ -255,13 +284,24 @@ const FB = {
         this.nodes.forEach(n => {
             (n.options||[]).forEach(o => {
                 if (o.action_type==='goto_node' && o.next_node_id) {
-                    const from = document.querySelector(`.fb-node[data-id="${n.id}"]`);
-                    const to = document.querySelector(`.fb-node[data-id="${o.next_node_id}"]`);
-                    if (from && to) {
-                        const x1 = parseInt(from.style.left)+from.offsetWidth/2;
-                        const y1 = parseInt(from.style.top)+from.offsetHeight;
-                        const x2 = parseInt(to.style.left)+to.offsetWidth/2;
-                        const y2 = parseInt(to.style.top);
+                    const fromNode = document.querySelector(`.fb-node[data-id="${n.id}"]`);
+                    const fromPill = fromNode?.querySelector(`.fb-pill[data-option="${o.id}"]`);
+                    const toNode = document.querySelector(`.fb-node[data-id="${o.next_node_id}"]`);
+                    
+                    if (fromNode && toNode) {
+                        let x1, y1;
+                        if (fromPill) {
+                            const rect = fromPill.getBoundingClientRect();
+                            const cRect = document.getElementById('fbCanvas').getBoundingClientRect();
+                            x1 = (rect.right - cRect.left) / this.zoom;
+                            y1 = (rect.top + rect.height/2 - cRect.top) / this.zoom;
+                        } else {
+                            x1 = parseInt(fromNode.style.left) + fromNode.offsetWidth/2;
+                            y1 = parseInt(fromNode.style.top) + fromNode.offsetHeight;
+                        }
+
+                        const x2 = parseInt(toNode.style.left) + toNode.offsetWidth/2;
+                        const y2 = parseInt(toNode.style.top);
                         const dy = Math.abs(y2-y1);
                         const cp = Math.max(50, dy*0.5);
                         const p = document.createElementNS('http://www.w3.org/2000/svg','path');
@@ -286,13 +326,19 @@ const FB = {
             if (port) {
                 e.stopPropagation();
                 this.linking = true;
-                this.linkFrom = { nodeId: parseInt(port.dataset.node) };
+                this.linkFrom = { 
+                    nodeId: parseInt(port.dataset.node),
+                    optionId: parseInt(port.dataset.option)
+                };
                 hint.classList.add('show');
 
                 // Create temp SVG line
-                const nodeEl = document.querySelector(`.fb-node[data-id="${this.linkFrom.nodeId}"]`);
-                const x1 = parseInt(nodeEl.style.left) + nodeEl.offsetWidth/2;
-                const y1 = parseInt(nodeEl.style.top) + nodeEl.offsetHeight;
+                const pillEl = e.target.closest('.fb-pill');
+                const portRect = port.getBoundingClientRect();
+                const cRect = canvas.getBoundingClientRect();
+                const x1 = (portRect.left + portRect.width/2 - cRect.left) / this.zoom;
+                const y1 = (portRect.top + portRect.height/2 - cRect.top) / this.zoom;
+
                 this.tempLine = document.createElementNS('http://www.w3.org/2000/svg','path');
                 this.tempLine.classList.add('temp');
                 this.tempLine.setAttribute('d',`M${x1},${y1} L${x1},${y1}`);
@@ -316,9 +362,22 @@ const FB = {
 
             // Linking: update temp line
             if (this.linking && this.tempLine && this.linkFrom) {
+                let x1, y1;
                 const nodeEl = document.querySelector(`.fb-node[data-id="${this.linkFrom.nodeId}"]`);
-                const x1 = parseInt(nodeEl.style.left) + nodeEl.offsetWidth/2;
-                const y1 = parseInt(nodeEl.style.top) + nodeEl.offsetHeight;
+                const portEl = this.linkFrom.optionId 
+                    ? nodeEl?.querySelector(`.fb-pill[data-option="${this.linkFrom.optionId}"] .fb-port-out`)
+                    : nodeEl?.querySelector('.fb-port-out');
+                
+                if (portEl) {
+                    const portRect = portEl.getBoundingClientRect();
+                    const cRect = canvas.getBoundingClientRect();
+                    x1 = (portRect.left + portRect.width/2 - cRect.left) / this.zoom;
+                    y1 = (portRect.top + portRect.height/2 - cRect.top) / this.zoom;
+                } else {
+                    x1 = parseInt(nodeEl.style.left) + nodeEl.offsetWidth/2;
+                    y1 = parseInt(nodeEl.style.top) + nodeEl.offsetHeight;
+                }
+
                 const mx = (e.clientX - areaRect.left - this.offset.x) / this.zoom;
                 const my = (e.clientY - areaRect.top - this.offset.y) / this.zoom;
                 const dy = Math.abs(my-y1);
@@ -363,7 +422,7 @@ const FB = {
                 if (inPort && this.linkFrom) {
                     const targetNodeId = parseInt(inPort.dataset.node);
                     if (targetNodeId !== this.linkFrom.nodeId) {
-                        this.createConnection(this.linkFrom.nodeId, targetNodeId);
+                        this.createConnection(this.linkFrom.nodeId, targetNodeId, this.linkFrom.optionId);
                     }
                 }
                 this.linking = false;
@@ -397,33 +456,45 @@ const FB = {
         }, {passive:false});
     },
 
-    async createConnection(fromNodeId, toNodeId) {
-        // Find or create an option on fromNode that goes to toNodeId
+    async createConnection(fromNodeId, toNodeId, optionId = null) {
         const node = this.nodes.find(n=>n.id==fromNodeId);
         if (!node) return;
 
-        // Check if there's already an unlinked option we can assign
-        const unlinked = (node.options||[]).find(o=>o.action_type==='goto_node' && !o.next_node_id);
-        if (unlinked) {
-            // Update existing option's target
-            await this.api('save_option', {
-                option_id: unlinked.id,
-                node_id: fromNodeId,
-                action_type: 'goto_node',
-                next_node_id: toNodeId,
-                action_value: '',
-                sort_order: unlinked.sort_order||0,
-                ...this.optionLabelPayload(unlinked)
-            });
+        if (optionId) {
+            const opt = (node.options||[]).find(o=>o.id==optionId);
+            if (opt) {
+                await this.api('save_option', {
+                    option_id: opt.id,
+                    node_id: fromNodeId,
+                    action_type: 'goto_node',
+                    next_node_id: toNodeId,
+                    action_value: opt.action_value||'',
+                    sort_order: opt.sort_order||0,
+                    ...this.optionLabelPayload(opt)
+                });
+            }
         } else {
-            // Create a new option
-            const data = {
-                option_id: 0, node_id: fromNodeId,
-                action_type: 'goto_node', next_node_id: toNodeId,
-                action_value: '', sort_order: (node.options||[]).length
-            };
-            LOC.forEach(l => data['label_'+l] = 'Go');
-            await this.api('save_option', data);
+            // Fallback: Find or create an option on fromNode that goes to toNodeId
+            const unlinked = (node.options||[]).find(o=>o.action_type==='goto_node' && !o.next_node_id);
+            if (unlinked) {
+                await this.api('save_option', {
+                    option_id: unlinked.id,
+                    node_id: fromNodeId,
+                    action_type: 'goto_node',
+                    next_node_id: toNodeId,
+                    action_value: '',
+                    sort_order: unlinked.sort_order||0,
+                    ...this.optionLabelPayload(unlinked)
+                });
+            } else {
+                const data = {
+                    option_id: 0, node_id: fromNodeId,
+                    action_type: 'goto_node', next_node_id: toNodeId,
+                    action_value: '', sort_order: (node.options||[]).length
+                };
+                LOC.forEach(l => data['label_'+l] = 'Go');
+                await this.api('save_option', data);
+            }
         }
         await this.loadAll();
         if (this.selId) this.openEditor(this.selId);
@@ -574,12 +645,21 @@ const FB = {
 
     async delNode(id) {
         if (!confirm('Delete this node and all its options?')) return;
-        await this.api('delete_node', {node_id:id});
-        this.closeEditor();
-        await this.loadAll();
+        const el = document.querySelector(`.fb-node[data-id="${id}"]`);
+        if (el) el.style.opacity = '0.5';
+        const r = await this.api('delete_node', {node_id:id});
+        if (r.success) {
+            this.closeEditor();
+            await this.loadAll();
+        }
     },
 
     async saveOpt(oid, nid) {
+        const btn = event.target;
+        const oldText = btn.textContent;
+        btn.textContent = 'Saving...';
+        btn.disabled = true;
+        
         const d = {
             option_id:oid, node_id:nid,
             action_type: document.getElementById(`eo_${oid}_act`).value,
@@ -593,6 +673,9 @@ const FB = {
     },
 
     async addOpt(nid) {
+        const btn = event.target;
+        btn.textContent = 'Adding...';
+        btn.disabled = true;
         const d = {option_id:0, node_id:nid, action_type:'goto_node', next_node_id:'', action_value:'', sort_order:0};
         LOC.forEach(l=> d['label_'+l] = 'New Option');
         const r = await this.api('save_option', d);
@@ -601,8 +684,13 @@ const FB = {
 
     async delOpt(oid) {
         if (!confirm('Delete this option?')) return;
-        await this.api('delete_option', {option_id:oid});
-        if (this.selId) { await this.loadAll(); this.openEditor(this.selId); }
+        const btn = event.target;
+        btn.style.opacity = '0.3';
+        const r = await this.api('delete_option', {option_id:oid});
+        if (r.success && this.selId) { 
+            await this.loadAll(); 
+            this.openEditor(this.selId); 
+        }
     },
     
     async breakLink(oid, nid) {

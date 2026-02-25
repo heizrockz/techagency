@@ -35,11 +35,11 @@ $currencies = ['AED' => 'AED (د.إ)', 'USD' => 'USD ($)', 'EUR' => 'EUR (€)',
                 <h1 style="color: var(--theme-gold); margin:0;">🧾 <?= e($title) ?></h1>
                 <p style="color: var(--text-muted); font-size: 0.9rem;">Fill in the details below to generate.</p>
             </div>
-            <div>
+            <div class="admin-header-actions">
                 <?php if (!$isNew): ?>
-                    <a href="<?= baseUrl('admin/invoices?action=print&id=' . $invoice['id']) ?>" target="_blank" class="admin-btn" style="border-color: var(--theme-gold); color: var(--theme-gold);">🖨️ Print / PDF</a>
+                    <a href="<?= baseUrl('admin/invoices?action=print&id=' . $invoice['id']) ?>" target="_blank" class="btn-secondary">🖨️ Print / PDF</a>
                 <?php endif; ?>
-                <a href="<?= baseUrl('admin/invoices') ?>" class="admin-btn">← Back to List</a>
+                <a href="<?= baseUrl('admin/invoices') ?>" class="btn-ghost">← Back to List</a>
             </div>
         </div>
 
@@ -52,12 +52,12 @@ $currencies = ['AED' => 'AED (د.إ)', 'USD' => 'USD ($)', 'EUR' => 'EUR (€)',
         <form method="POST" action="<?= baseUrl('admin/invoices') ?>" class="admin-card invoice-form">
             <input type="hidden" name="id" value="<?= $invoice['id'] ?? 0 ?>">
             
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 30px;">
+            <div class="admin-grid-2" style="margin-bottom: 30px; align-items: start;">
                 <!-- Document Info -->
-                <div>
+                <div class="admin-card" style="padding: 20px; background: rgba(0,0,0,0.15);">
                     <h3 style="color: var(--neon-cyan); margin-bottom: 15px; border-bottom: 1px solid var(--glass-border); padding-bottom: 10px;">Document Details</h3>
                     
-                    <div class="form-group" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                    <div class="admin-grid-2" style="gap: 15px;">
                         <div>
                             <label>Document Type</label>
                             <select name="type" class="form-input">
@@ -75,7 +75,7 @@ $currencies = ['AED' => 'AED (د.إ)', 'USD' => 'USD ($)', 'EUR' => 'EUR (€)',
                         </div>
                     </div>
 
-                    <div class="form-group" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                    <div class="admin-grid-2" style="gap: 15px;">
                         <div>
                             <label>Invoice/Quote Number *</label>
                             <input type="text" name="invoice_number" value="<?= e($invNum) ?>" class="form-input" required>
@@ -94,7 +94,7 @@ $currencies = ['AED' => 'AED (د.إ)', 'USD' => 'USD ($)', 'EUR' => 'EUR (€)',
                 </div>
 
                 <!-- Client Info -->
-                <div>
+                <div class="admin-card" style="padding: 20px; background: rgba(0,0,0,0.15);">
                     <h3 style="color: var(--neon-emerald); margin-bottom: 15px; border-bottom: 1px solid var(--glass-border); padding-bottom: 10px;">Client Details</h3>
                     
                     <div class="form-group">
@@ -120,7 +120,7 @@ $currencies = ['AED' => 'AED (د.إ)', 'USD' => 'USD ($)', 'EUR' => 'EUR (€)',
                         <input type="text" name="client_name" id="client-name" value="<?= e($invoice['client_name'] ?? '') ?>" class="form-input" required>
                     </div>
 
-                    <div class="form-group" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                    <div class="admin-grid-2" style="gap: 15px;">
                         <div>
                             <label>Email Address</label>
                             <input type="email" name="client_email" id="client-email" value="<?= e($invoice['client_email'] ?? '') ?>" class="form-input">
@@ -187,7 +187,7 @@ $currencies = ['AED' => 'AED (د.إ)', 'USD' => 'USD ($)', 'EUR' => 'EUR (€)',
 
             <!-- Totals -->
             <div style="display: flex; justify-content: flex-end; margin-bottom: 30px;">
-                <div style="width: 300px; background: rgba(0,0,0,0.2); padding: 20px; border-radius: 8px; border: 1px solid var(--glass-border);">
+                <div style="width: 100%; max-width: 350px; background: rgba(0,0,0,0.2); padding: 20px; border-radius: 8px; border: 1px solid var(--glass-border);">
                     <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
                         <span style="color: var(--text-secondary);">Subtotal:</span>
                         <strong id="calc-subtotal">0.00</strong>
@@ -208,7 +208,7 @@ $currencies = ['AED' => 'AED (د.إ)', 'USD' => 'USD ($)', 'EUR' => 'EUR (€)',
             </div>
 
             <!-- Notes, Terms & Payment Terms -->
-            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; margin-bottom: 30px;">
+            <div class="admin-grid-3" style="gap: 20px; margin-bottom: 30px;">
                 <div class="form-group">
                     <label>Client Notes (Printed on invoice)</label>
                     <textarea name="notes" class="form-input" style="min-height: 100px;"><?= e($invoice['notes'] ?? '') ?></textarea>

@@ -974,6 +974,7 @@ function adminChatbot(): void {
             } elseif ($apiAction === 'delete_option') {
                 $optId = intval($_POST['option_id'] ?? 0);
                 if ($optId > 0) {
+                    $db->prepare('DELETE FROM chatbot_option_translations WHERE option_id = ?')->execute([$optId]);
                     $db->prepare('DELETE FROM chatbot_options WHERE id = ?')->execute([$optId]);
                 }
                 echo json_encode(['success' => true]);

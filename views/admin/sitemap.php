@@ -29,7 +29,7 @@ $currentPage = 'sitemap';
             <div class="header-actions">
                 <form method="POST" style="display:inline;">
                     <input type="hidden" name="action" value="regenerate">
-                    <button type="submit" class="btn btn-secondary" style="background:rgba(255,255,255,0.05); border:1px solid var(--glass-border); padding:8px 15px; border-radius:8px; color:white; cursor:pointer;" onclick="return confirm('This will reload the sitemap from the current database records. Any manual changes will be lost. Proceed?')">
+                    <button type="submit" class="btn-secondary" onclick="return confirm('This will reload the sitemap from the current database records. Any manual changes will be lost. Proceed?')">
                         🔄 Regenerate Now
                     </button>
                 </form>
@@ -55,8 +55,8 @@ $currentPage = 'sitemap';
                     </div>
                     
                     <div class="form-actions" style="margin-top: 20px; display:flex; gap:15px;">
-                        <button type="submit" class="btn btn-primary" style="background:var(--theme-primary); border:none; padding:10px 20px; border-radius:8px; color:white; font-weight:600; cursor:pointer;">Save Manual Changes</button>
-                        <a href="<?= baseUrl('sitemap.xml') ?>" target="_blank" class="btn btn-secondary" style="background:rgba(255,255,255,0.05); border:1px solid var(--glass-border); padding:10px 20px; border-radius:8px; color:white; text-decoration:none; display:inline-block;">View Live XML</a>
+                        <button type="submit" class="btn-primary">Save Manual Changes</button>
+                        <a href="<?= baseUrl('sitemap.xml') ?>" target="_blank" class="btn-secondary">View Live XML</a>
                     </div>
                 </form>
             </div>

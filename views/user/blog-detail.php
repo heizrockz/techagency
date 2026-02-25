@@ -43,13 +43,70 @@
             
             <!-- Blog Featured Media -->
             <div class="blog-featured-media animate-on-scroll" style="border-radius:24px; overflow:hidden; border:1px solid rgba(255,255,255,0.1); background:rgba(255,255,255,0.03); box-shadow:0 30px 60px -12px rgba(0,0,0,0.5);">
-                <?php if (!empty($blog['video_url'])): ?>
-                    <div class="video-container" style="position:relative; padding-bottom:56.25%; height:0; overflow:hidden;">
-                        <iframe style="position:absolute; top:0; left:0; width:100%; height:100%;" src="<?= e($blog['video_url']) ?>" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-                    </div>
-                <?php elseif (!empty($blog['image_url'])): ?>
-                    <img src="<?= e($blog['image_url']) ?>" alt="<?= e($blog['title']) ?>" style="width:100%; height:auto; display:block;">
+                <?php
+                    $mediaType = $blog['media_type'] ?? 'image';
+                    $mediaUrl  = $blog['media_url'] ?? '';
+
+                    // Helper: extract YouTube video ID from various URL formats
+                    function extractYouTubeId($url) {
+                        $patterns = [
+                            '/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/|youtube\.com\/shorts\/)([a-zA-Z0-9_-]{11})/',
+                        ];
+                        foreach ($patterns as $p) {
+                            if (preg_match($p, $url, $m)) return $m[1];
+                        }
+                        return null;
+                    }
+
+                    // Helper: extract Vimeo video ID
+                    function extractVimeoId($url) {
+                        if (preg_match('/vimeo\.com\/(\d+)/', $url, $m)) return $m[1];
+                        return null;
+                    }
+                ?>
+
+                <?php if ($mediaType === 'video' && !empty($mediaUrl)): ?>
+                    <!-- Uploaded video file — native HTML5 player -->
+                    <video controls playsinline style="width:100%; display:block; background:#000;">
+                        <source src="<?= baseUrl($mediaUrl) ?>" type="video/<?= pathinfo($mediaUrl, PATHINFO_EXTENSION) ?>">
+                        Your browser does not support the video tag.
+                    </video>
+
+                <?php elseif ($mediaType === 'video_link' && !empty($mediaUrl)): ?>
+                    <?php $ytId = extractYouTubeId($mediaUrl); $vmId = extractVimeoId($mediaUrl); ?>
+
+                    <?php if ($ytId): ?>
+                        <!-- YouTube embed -->
+                        <div style="position:relative; padding-bottom:56.25%; height:0; overflow:hidden;">
+                            <iframe style="position:absolute; top:0; left:0; width:100%; height:100%; border:0;"
+                                    src="https://www.youtube.com/embed/<?= e($ytId) ?>?rel=0"
+                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                    allowfullscreen></iframe>
+                        </div>
+                    <?php elseif ($vmId): ?>
+                        <!-- Vimeo embed -->
+                        <div style="position:relative; padding-bottom:56.25%; height:0; overflow:hidden;">
+                            <iframe style="position:absolute; top:0; left:0; width:100%; height:100%; border:0;"
+                                    src="https://player.vimeo.com/video/<?= e($vmId) ?>"
+                                    allow="autoplay; fullscreen; picture-in-picture"
+                                    allowfullscreen></iframe>
+                        </div>
+                    <?php else: ?>
+                        <!-- Fallback: generic external video link -->
+                        <div style="position:relative; padding-bottom:56.25%; height:0; overflow:hidden;">
+                            <iframe style="position:absolute; top:0; left:0; width:100%; height:100%; border:0;"
+                                    src="<?= e($mediaUrl) ?>"
+                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                    allowfullscreen></iframe>
+                        </div>
+                    <?php endif; ?>
+
+                <?php elseif (!empty($mediaUrl)): ?>
+                    <!-- Image -->
+                    <img src="<?= baseUrl($mediaUrl) ?>" alt="<?= e($blog['title']) ?>" style="width:100%; height:auto; display:block;">
+
                 <?php else: ?>
+                    <!-- No media placeholder -->
                     <div style="width:100%; aspect-ratio:16/9; background:linear-gradient(45deg, #1e1e1e, #2a2a2a); display:flex; align-items:center; justify-content:center; color:rgba(255,255,255,0.1);">
                         <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
                     </div>

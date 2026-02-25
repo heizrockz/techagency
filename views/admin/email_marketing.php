@@ -93,7 +93,7 @@ $currentPage = 'marketing';
                     </div>
 
                     <div style="margin-top: 20px;">
-                        <button type="submit" class="btn btn-primary" style="background:var(--theme-primary); border:none; padding:10px 20px; border-radius:8px; color:white; font-weight:600; cursor:pointer;">Save & Verify Configuration</button>
+                        <button type="submit" class="btn-primary">Save & Verify Configuration</button>
                     </div>
                 </form>
             </div>
@@ -189,7 +189,7 @@ $currentPage = 'marketing';
                 <!-- Log area -->
                 <div id="progressLog" style="max-height:300px; overflow-y:auto; padding:0 24px 16px; font-family:'Inter',monospace; font-size:0.78rem; line-height:1.8;"></div>
                 <div id="progressFooter" style="display:none; padding:16px 24px; border-top:1px solid rgba(255,255,255,0.06); text-align:center;">
-                    <button onclick="closeProgress()" class="btn btn-primary" style="padding:10px 30px; background:var(--neon-emerald); border:none; border-radius:8px; color:#000; font-weight:600; cursor:pointer;">✓ Done — Close</button>
+                    <button onclick="closeProgress()" class="btn-primary">✓ Done — Close</button>
                 </div>
             </div>
         </div>

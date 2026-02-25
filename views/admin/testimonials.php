@@ -31,7 +31,7 @@
                 <form method="POST" action="<?= baseUrl('admin/testimonials') ?>">
                     <input type="hidden" name="id" value="<?= $editTestimonial['id'] ?? 0 ?>">
 
-                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; margin-bottom: 24px;">
+                    <div class="admin-grid-3" style="margin-bottom: 24px;">
                         <div class="admin-form-group">
                             <label>Client Photo URL (optional)</label>
                             <input type="text" name="client_image_url" class="form-input" placeholder="https://..."
@@ -90,7 +90,8 @@
             </div>
         <?php else: ?>
             <div class="admin-card">
-                <table class="admin-table">
+                <div style="overflow-x: auto;">
+                    <table class="admin-table">
                     <thead>
                         <tr>
                             <th>Client</th>
@@ -138,6 +139,7 @@
                         <?php endforeach; ?>
                     </tbody>
                 </table>
+                </div>
             </div>
         <?php endif; ?>
     </div>

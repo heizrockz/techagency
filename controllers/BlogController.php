@@ -21,7 +21,7 @@ function showBlogDetail(string $slug): void {
         'title' => $blog['title'] . ' | ' . APP_NAME,
         'description' => $blog['description'] ?? '',
         'keywords' => $blog['keywords'] ?? '',
-        'og_image' => $blog['image_url'] ?? '',
+        'og_image' => (!empty($blog['media_url']) && ($blog['media_type'] ?? '') === 'image') ? baseUrl($blog['media_url']) : '',
         'canonical_link' => baseUrl('blog/' . $blog['slug'])
     ];
 

@@ -24,7 +24,7 @@
             <div class="admin-card" style="margin-bottom: 30px;">
                 <form method="POST" action="<?= baseUrl('admin/booking-fields') ?>">
                     <input type="hidden" name="id" value="<?= $editField['id'] ?? 0 ?>">
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div class="admin-grid-2">
                         <div class="form-group">
                             <label>Field Name (code handle) *</label>
                             <input type="text" name="field_name" class="form-input" value="<?= e($editField['field_name'] ?? '') ?>" required <?= isset($editField) && in_array($editField['field_name'], ['name','email','phone','service','date','message']) ? 'readonly' : '' ?>>
@@ -83,7 +83,8 @@
             </div>
         <?php else: ?>
             <div class="admin-card">
-                <table class="admin-table">
+                <div style="overflow-x: auto;">
+                    <table class="admin-table">
                     <thead>
                         <tr>
                             <th>Field Handle</th>
@@ -114,6 +115,7 @@
                         <?php endforeach; ?>
                     </tbody>
                 </table>
+                </div>
             </div>
         <?php endif; ?>
     </div>
