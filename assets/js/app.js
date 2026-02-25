@@ -3,7 +3,22 @@
  * Alpine.js components + scroll animations + interactivity
  */
 
+// ── Apply saved theme BEFORE DOM renders to prevent flash ──
+(function () {
+    const saved = localStorage.getItem('mico_theme');
+    if (saved === 'light') document.documentElement.classList.add('light-theme');
+})();
+
 document.addEventListener('DOMContentLoaded', () => {
+    // ── Theme Toggle ─────────────────────────────────────────
+    const themeBtn = document.getElementById('themeToggle');
+    if (themeBtn) {
+        themeBtn.addEventListener('click', () => {
+            document.documentElement.classList.toggle('light-theme');
+            const isLight = document.documentElement.classList.contains('light-theme');
+            localStorage.setItem('mico_theme', isLight ? 'light' : 'dark');
+        });
+    }
     // ── Scroll-triggered animations ────────────────────────
     const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
@@ -42,10 +57,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const navbar = document.querySelector('.navbar-island');
     if (navbar) {
         window.addEventListener('scroll', () => {
+            const isLight = document.documentElement.classList.contains('light-theme');
             if (window.scrollY > 100) {
-                navbar.style.background = 'rgba(10, 10, 30, 0.85)';
+                navbar.style.background = isLight ? 'rgba(255,255,255,0.9)' : 'rgba(10, 10, 30, 0.85)';
             } else {
-                navbar.style.background = 'rgba(10, 10, 30, 0.65)';
+                navbar.style.background = isLight ? 'rgba(255,255,255,0.75)' : 'rgba(10, 10, 30, 0.65)';
             }
         });
     }
@@ -177,6 +193,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const chatData = window.chatbotData;
         let chatTranscript = [];
         let currentInputHandler = null;
+        let chatSessionId = localStorage.getItem('mico_chat_session') || null;
 
         // Toggle Chat
         chatToggle.addEventListener('click', () => {
@@ -247,6 +264,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 chatEnded = false;
                 if (chatEndBtn) chatEndBtn.disabled = false;
                 localStorage.removeItem('mico_chat_transcript');
+                // Generate a fresh session ID for the new chat
+                chatSessionId = crypto.randomUUID ? crypto.randomUUID() : (Date.now().toString(36) + Math.random().toString(36).slice(2));
+                localStorage.setItem('mico_chat_session', chatSessionId);
                 if (currentInputHandler && chatSendBtn) {
                     chatSendBtn.removeEventListener('click', currentInputHandler);
                     currentInputHandler = null;
@@ -297,10 +317,15 @@ document.addEventListener('DOMContentLoaded', () => {
             // Save to localStorage
             localStorage.setItem('mico_chat_transcript', JSON.stringify(chatTranscript));
 
+            // Generate session ID if not available yet
+            if (!chatSessionId) {
+                chatSessionId = crypto.randomUUID ? crypto.randomUUID() : (Date.now().toString(36) + Math.random().toString(36).slice(2));
+                localStorage.setItem('mico_chat_session', chatSessionId);
+            }
             fetch(document.body.getAttribute('data-baseurl') + 'api/chatbot_save.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ transcript: chatTranscript })
+                body: JSON.stringify({ transcript: chatTranscript, session_id: chatSessionId })
             }).catch(err => console.error('Chat save error:', err));
         }
 

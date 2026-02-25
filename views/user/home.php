@@ -68,17 +68,23 @@ $blogs = getBlogs();
     <div class="section-container">
         <div class="tagline-grid">
             <div class="tagline-card animate-on-scroll" style="animation-delay: 0s;">
-                <div class="tagline-icon"><?= e(getContent('tagline1_icon')) ?></div>
+                <div class="tagline-icon">
+                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--theme-primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+                </div>
                 <h3><?= e(getContent('tagline1_title')) ?></h3>
                 <p><?= e(getContent('tagline1_desc')) ?></p>
             </div>
             <div class="tagline-card animate-on-scroll" style="animation-delay: 0.15s;">
-                <div class="tagline-icon"><?= e(getContent('tagline2_icon')) ?></div>
+                <div class="tagline-icon">
+                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--neon-cyan)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+                </div>
                 <h3><?= e(getContent('tagline2_title')) ?></h3>
                 <p><?= e(getContent('tagline2_desc')) ?></p>
             </div>
             <div class="tagline-card animate-on-scroll" style="animation-delay: 0.3s;">
-                <div class="tagline-icon"><?= e(getContent('tagline3_icon')) ?></div>
+                <div class="tagline-icon">
+                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--theme-gold)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 3 21 3 21 9"></polyline><polyline points="9 21 3 21 3 15"></polyline><line x1="21" y1="3" x2="14" y2="10"></line><line x1="3" y1="21" x2="10" y2="14"></line></svg>
+                </div>
                 <h3><?= e(getContent('tagline3_title')) ?></h3>
                 <p><?= e(getContent('tagline3_desc')) ?></p>
             </div>

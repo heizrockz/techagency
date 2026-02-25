@@ -22,6 +22,7 @@ if (!isset($data['transcript']) || !is_array($data['transcript']) || empty($data
 }
 
 $transcript = $data['transcript'];
+$clientSessionId = $data['session_id'] ?? null;
 $db = getDB();
 
 try {
@@ -50,11 +51,21 @@ try {
         }
     }
 
-    // Try to find an existing active session for this IP (within the last 2 hours) to append to
-    // Use a simpler time check to be more robust across different DB timezone settings
-    $stmt = $db->prepare("SELECT id FROM chatbot_sessions WHERE user_ip = ? AND status = 'Open' AND updated_at > (NOW() - INTERVAL 4 HOUR) ORDER BY updated_at DESC LIMIT 1");
-    $stmt->execute([$ip]);
-    $existingSession = $stmt->fetch();
+    $existingSession = null;
+
+    // If frontend provided a session_id, find by that first
+    if (!empty($clientSessionId)) {
+        $stmt = $db->prepare("SELECT id FROM chatbot_sessions WHERE session_uuid = ? LIMIT 1");
+        $stmt->execute([$clientSessionId]);
+        $existingSession = $stmt->fetch();
+    }
+
+    // Fallback: look by IP within 4 hours (for older clients without session_id)
+    if (!$existingSession && empty($clientSessionId)) {
+        $stmt = $db->prepare("SELECT id FROM chatbot_sessions WHERE user_ip = ? AND status = 'Open' AND updated_at > (NOW() - INTERVAL 4 HOUR) ORDER BY updated_at DESC LIMIT 1");
+        $stmt->execute([$ip]);
+        $existingSession = $stmt->fetch();
+    }
 
     if ($existingSession) {
         $sessionId = $existingSession['id'];
@@ -79,8 +90,8 @@ try {
         }
         
     } else {
-        // Create a new session
-        $uuid = bin2hex(random_bytes(8)); // Simple 16-char random ID
+        // Create a new session with the client-provided session_id or generate one
+        $uuid = $clientSessionId ?: bin2hex(random_bytes(8));
         $stmt = $db->prepare('INSERT INTO chatbot_sessions (user_email, user_phone, session_uuid, user_ip, user_agent, status, is_read) VALUES (?, ?, ?, ?, ?, ?, 0)');
         $stmt->execute([$userEmail, $userPhone, $uuid, $ip, $userAgent, 'Open']);
         $sessionId = $db->lastInsertId();

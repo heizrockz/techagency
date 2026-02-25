@@ -36,7 +36,8 @@
     .fb-badge-input { background:rgba(251,191,36,0.12); color:#fbbf24; }
 
     .fb-n-body { padding:8px 12px; font-size:0.72rem; color:#64748b; line-height:1.5; max-height:50px; overflow:hidden; }
-    .fb-pill { position:relative; font-size:0.65rem; padding:2px 22px 2px 8px; border-radius:50px; background:rgba(255,255,255,0.04); color:#94a3b8; border:1px solid rgba(255,255,255,0.06); margin-bottom: 2px; }
+    .fb-n-foot { display:flex; flex-wrap:wrap; gap:6px; padding:8px 12px; border-top:1px solid rgba(255,255,255,0.04); }
+    .fb-pill { position:relative; display:inline-flex; align-items:center; font-size:0.65rem; padding:2px 22px 2px 8px; border-radius:50px; background:rgba(255,255,255,0.04); color:#94a3b8; border:1px solid rgba(255,255,255,0.06); }
     .fb-pill .fb-port-out { right: 6px; left: auto; top: 50%; bottom: auto; transform: translateY(-50%); width: 10px; height: 10px; border-width: 1.5px; }
     .fb-pill .fb-port-out:hover { transform: translateY(-50%) scale(1.3); }
 
