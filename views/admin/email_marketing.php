@@ -276,10 +276,8 @@ async function launchCampaign() {
         // Step 1: Create campaign
         const fd = new FormData();
         fd.append('action', 'create_campaign');
-        fd.append('subject', document.getElementById('campSubject').value);
-        fd.append('body', document.getElementById('campBody').value);
-        
-        const sendType = document.querySelector('input[name="send_type"]:checked').value;
+        fd.append('subject', subject);
+        fd.append('body', body);
         fd.append('send_type', sendType);
         
         if (sendType === 'single') {
@@ -293,10 +291,10 @@ async function launchCampaign() {
         const createData = await createRes.json();
 
         if (createData.error) {
-            alert('Error: ' + createData.error);
+            showCampError(createData.error);
             btn.disabled = false;
             btn.innerHTML = '<span style="font-size:1.2rem;">🚀</span> Launch Campaign Now';
-            return false;
+            return;
         }
 
         const { campaign_id, emails, total } = createData;
@@ -345,12 +343,18 @@ async function launchCampaign() {
         document.getElementById('progressFooter').style.display = 'block';
 
     } catch (err) {
-        alert('Unexpected error: ' + err.message);
+        showCampError('Unexpected error: ' + err.message);
     }
 
     btn.disabled = false;
     btn.innerHTML = '<span style="font-size:1.2rem;">🚀</span> Launch Campaign Now';
-    return false;
+}
+
+function showCampError(msg) {
+    const el = document.getElementById('campError');
+    el.textContent = msg;
+    el.style.display = 'block';
+    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
 
 function showProgress(total) {
