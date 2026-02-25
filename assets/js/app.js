@@ -184,7 +184,7 @@ document.addEventListener('DOMContentLoaded', () => {
             chatToggle.style.transform = 'scale(0)';
             if (!chatInitialized) {
                 chatInitialized = true;
-                loadNode(chatData.start_node_id);
+                initChat();
             }
         });
 
@@ -192,6 +192,50 @@ document.addEventListener('DOMContentLoaded', () => {
             chatPanel.classList.remove('active');
             chatToggle.style.transform = 'scale(1)';
         });
+
+        function initChat() {
+            // Try to load from localStorage
+            const saved = localStorage.getItem('mico_chat_transcript');
+            if (saved) {
+                try {
+                    const data = JSON.parse(saved);
+                    if (Array.isArray(data) && data.length > 0) {
+                        chatTranscript = data;
+                        renderTranscript();
+                        return;
+                    }
+                } catch (e) {
+                    console.warn('Failed to parse saved chat:', e);
+                }
+            }
+
+            // Start fresh if no saved transcript
+            loadNode(chatData.start_node_id);
+        }
+
+        function renderTranscript() {
+            chatMessages.innerHTML = '';
+            chatTranscript.forEach(item => {
+                const msgDiv = document.createElement('div');
+                msgDiv.className = 'chat-msg ' + item.sender;
+                msgDiv.innerHTML = item.message.replace(/\n/g, '<br>');
+                chatMessages.appendChild(msgDiv);
+            });
+            scrollToBottom();
+
+            // If the last message was a bot message, we might need to show options or input
+            const lastMsg = chatTranscript[chatTranscript.length - 1];
+            if (lastMsg && lastMsg.sender === 'bot') {
+                // Determine which node this was (best effort)
+                // For simplicity, if it ended with a bot message, we'll re-load the node if we can find it
+                // Or just show a "New Chat" button
+                const btn = document.createElement('button');
+                btn.className = 'chat-opt-btn';
+                btn.textContent = 'Continue or Start New?';
+                btn.style.opacity = '0.7';
+                chatOptions.appendChild(btn);
+            }
+        }
 
         // ── New Chat ──
         if (chatNewBtn) {
@@ -202,6 +246,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 chatTranscript = [];
                 chatEnded = false;
                 if (chatEndBtn) chatEndBtn.disabled = false;
+                localStorage.removeItem('mico_chat_transcript');
                 if (currentInputHandler && chatSendBtn) {
                     chatSendBtn.removeEventListener('click', currentInputHandler);
                     currentInputHandler = null;
@@ -229,6 +274,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 chatTranscript.push({ sender: 'bot', message: 'Chat ended.' });
                 scrollToBottom();
                 saveTranscript();
+                localStorage.removeItem('mico_chat_transcript');
             });
         }
 
@@ -248,6 +294,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
         function saveTranscript() {
             if (chatTranscript.length === 0) return;
+            // Save to localStorage
+            localStorage.setItem('mico_chat_transcript', JSON.stringify(chatTranscript));
+
             fetch(document.body.getAttribute('data-baseurl') + 'api/chatbot_save.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
