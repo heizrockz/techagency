@@ -22,6 +22,20 @@ class MicoSMTP {
         $this->encryption = strtolower($encryption);
     }
 
+    public function testConnection() {
+        $this->debug = [];
+        try {
+            $this->connect();
+            $this->auth();
+            $this->sendCommand("QUIT");
+            fclose($this->socket);
+            return true;
+        } catch (Exception $e) {
+            $this->debug[] = "Connection Test Failed: " . $e->getMessage();
+            return $e->getMessage();
+        }
+    }
+
     public function send($to, $from, $fromName, $subject, $body, $signature = '') {
         $this->debug = [];
         try {

@@ -1282,47 +1282,72 @@ function adminEmailMarketing(): void {
         $action = $_POST['action'] ?? '';
 
         if ($action === 'save_settings') {
-            $db->prepare('UPDATE email_settings SET 
-                smtp_host=?, smtp_port=?, smtp_user=?, smtp_pass=?, smtp_encryption=?, 
-                from_email=?, from_name=?, imap_host=?, imap_port=?, signature_html=? WHERE id=1')
-               ->execute([
-                   $_POST['smtp_host'] ?? '',
-                   intval($_POST['smtp_port'] ?? 587),
-                   $_POST['smtp_user'] ?? '',
-                   $_POST['smtp_pass'] ?? '',
-                   $_POST['smtp_encryption'] ?? 'tls',
-                   $_POST['from_email'] ?? '',
-                   $_POST['from_name'] ?? '',
-                   $_POST['imap_host'] ?? '',
-                   intval($_POST['imap_port'] ?? 993),
-                   $_POST['signature_html'] ?? ''
-               ]);
-            $saved = true;
-            // Re-fetch
-            $settings = $db->query('SELECT * FROM email_settings LIMIT 1')->fetch();
+            $smtpHost = $_POST['smtp_host'] ?? '';
+            $smtpPort = intval($_POST['smtp_port'] ?? 587);
+            $smtpUser = $_POST['smtp_user'] ?? '';
+            $smtpPass = $_POST['smtp_pass'] ?? '';
+            $smtpEnc = $_POST['smtp_encryption'] ?? 'tls';
+
+            // Test Connection
+            $tester = new MicoSMTP($smtpHost, $smtpPort, $smtpUser, $smtpPass, $smtpEnc);
+            $testRes = $tester->testConnection();
+
+            if ($testRes === true) {
+                $db->prepare('UPDATE email_settings SET 
+                    smtp_host=?, smtp_port=?, smtp_user=?, smtp_pass=?, smtp_encryption=?, 
+                    from_email=?, from_name=?, imap_host=?, imap_port=?, signature_html=? WHERE id=1')
+                   ->execute([
+                       $smtpHost,
+                       $smtpPort,
+                       $smtpUser,
+                       $smtpPass,
+                       $smtpEnc,
+                       $_POST['from_email'] ?? '',
+                       $_POST['from_name'] ?? '',
+                       $_POST['imap_host'] ?? '',
+                       intval($_POST['imap_port'] ?? 993),
+                       $_POST['signature_html'] ?? ''
+                   ]);
+                $saved = true;
+                // Re-fetch
+                $settings = $db->query('SELECT * FROM email_settings LIMIT 1')->fetch();
+            } else {
+                $error = "SMTP Verification Failed: " . $testRes;
+            }
         }
 
         if ($action === 'send_campaign') {
             $subject = trim($_POST['subject'] ?? '');
             $body = trim($_POST['body'] ?? '');
+            $type = $_POST['send_type'] ?? 'bulk';
             
-            // Handle CSV Upload
             $emails = [];
-            if (!empty($_FILES['email_list']['tmp_name'])) {
-                if (($handle = fopen($_FILES['email_list']['tmp_name'], "r")) !== FALSE) {
-                    while (($data = fgetcsv($handle, 1000, ",")) !== FALSE) {
-                        // Assume email is in first column
-                        if (filter_var($data[0], FILTER_VALIDATE_EMAIL)) {
-                            $emails[] = $data[0];
-                        }
+            if ($type === 'single') {
+                $rawEmails = $_POST['single_recipients'] ?? '';
+                $parts = explode(',', $rawEmails);
+                foreach ($parts as $p) {
+                    $email = trim($p);
+                    if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                        $emails[] = $email;
                     }
-                    fclose($handle);
                 }
+                if (empty($emails)) $error = "No valid recipient emails provided.";
+            } else {
+                // Bulk / CSV Upload
+                if (!empty($_FILES['email_list']['tmp_name'])) {
+                    if (($handle = fopen($_FILES['email_list']['tmp_name'], "r")) !== FALSE) {
+                        while (($data = fgetcsv($handle, 1000, ",")) !== FALSE) {
+                            if (filter_var($data[0], FILTER_VALIDATE_EMAIL)) {
+                                $emails[] = $data[0];
+                            }
+                        }
+                        fclose($handle);
+                    }
+                }
+                if (empty($emails)) $error = "No valid emails found in the uploaded CSV.";
             }
 
-            if (empty($emails)) {
-                $error = "No valid emails found in the uploaded file.";
-            } else {
+            if (empty($error) && !empty($emails)) {
                 // Register campaign in DB
                 $db->prepare('INSERT INTO marketing_campaigns (subject, body, total_emails, status) VALUES (?, ?, ?, ?)')
                    ->execute([$subject, $body, count($emails), 'sending']);
