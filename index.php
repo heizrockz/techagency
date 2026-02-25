@@ -8,6 +8,11 @@ require_once __DIR__ . '/config.php';
 require_once __DIR__ . '/includes/helpers.php';
 require_once __DIR__ . '/includes/auth.php';
 
+// ── Language Handling ─────────────────────────────────────
+if (isset($_GET['lang'])) {
+    appSetLocale($_GET['lang']);
+}
+
 // Parse request URI
 $requestUri = $_SERVER['REQUEST_URI'];
 $basePath   = BASE_URL;
@@ -28,15 +33,12 @@ if (empty($path) || $path[0] !== '/') {
 // Routing
 if ($path === '/' || $path === '/index.php' || $path === '') {
     require_once __DIR__ . '/controllers/HomeController.php';
-    homeIndex();
 } elseif ($path === '/blogs') {
     require_once __DIR__ . '/controllers/BlogController.php';
-    $blogController = new BlogController();
-    $blogController->showAll();
+    showAll();
 } elseif (preg_match('#^/blog/([^/]+)$#', $path, $matches)) {
     require_once __DIR__ . '/controllers/BlogController.php';
-    $blogController = new BlogController();
-    $blogController->showDetail($matches[1]);
+    showBlogDetail($matches[1]);
 } elseif ($path === '/admin/login') {
     require_once __DIR__ . '/controllers/AdminController.php';
     adminLogin();
