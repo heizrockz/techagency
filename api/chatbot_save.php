@@ -80,8 +80,9 @@ try {
         
     } else {
         // Create a new session
-        $stmt = $db->prepare('INSERT INTO chatbot_sessions (user_email, user_phone, user_ip, user_agent, status) VALUES (?, ?, ?, ?, ?)');
-        $stmt->execute([$userEmail, $userPhone, $ip, $userAgent, 'Open']);
+        $uuid = bin2hex(random_bytes(8)); // Simple 16-char random ID
+        $stmt = $db->prepare('INSERT INTO chatbot_sessions (user_email, user_phone, session_uuid, user_ip, user_agent, status) VALUES (?, ?, ?, ?, ?, ?)');
+        $stmt->execute([$userEmail, $userPhone, $uuid, $ip, $userAgent, 'Open']);
         $sessionId = $db->lastInsertId();
     }
 
