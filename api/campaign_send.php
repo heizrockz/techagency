@@ -5,10 +5,10 @@
  */
 require_once __DIR__ . '/../includes/db.php';
 require_once __DIR__ . '/../includes/helpers.php';
+require_once __DIR__ . '/../includes/auth.php';
 require_once __DIR__ . '/../includes/smtp.php';
 
 // Only admin
-session_start();
 if (!isAdminLoggedIn()) {
     http_response_code(403);
     echo json_encode(['error' => 'Unauthorized']);
