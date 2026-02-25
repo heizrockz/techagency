@@ -49,7 +49,7 @@ if ($path === '/' || $path === '/index.php' || $path === '') {
 
     require_once __DIR__ . '/controllers/AdminController.php';
 
-    if ($path === '/admin/dashboard') {
+    if ($path === '/admin/dashboard' || $path === '/admin') {
         adminDashboard();
     } elseif ($path === '/admin/inbox') {
         adminInbox();
@@ -79,6 +79,10 @@ if ($path === '/' || $path === '/index.php' || $path === '') {
         adminTranslations();
     } elseif ($path === '/admin/settings') {
         adminSettings();
+    } elseif ($path === '/admin/invoices') {
+        adminInvoices();
+    } elseif ($path === '/admin/contacts') {
+        adminContacts();
     } elseif ($path === '/admin/profile') {
         adminProfile();
     } elseif ($path === '/admin/logout') {
