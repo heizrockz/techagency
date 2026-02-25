@@ -266,9 +266,30 @@ async function launchCampaign() {
     if (!subject) { showCampError('Please enter a campaign subject.'); return; }
     if (!body) { showCampError('Please enter the email body.'); return; }
 
-    if (!confirm('Launch campaign to all recipients?')) return;
-
     const btn = document.getElementById('launchBtn');
+
+    // Inline confirm to avoid browser popup blockers
+    if (btn.dataset.confirmed !== 'true') {
+        btn.innerHTML = '<span style="font-size:1.2rem;">⚠️</span> Click again to confirm launch';
+        btn.dataset.confirmed = 'true';
+        btn.style.background = '#f59e0b'; // warning color
+        btn.style.color = '#000';
+        
+        // Reset after 4 seconds
+        setTimeout(() => {
+            if (!btn.disabled) {
+                btn.dataset.confirmed = 'false';
+                btn.innerHTML = '<span style="font-size:1.2rem;">🚀</span> Launch Campaign Now';
+                btn.style.background = '';
+                btn.style.color = '';
+            }
+        }, 4000);
+        return;
+    }
+
+    btn.dataset.confirmed = 'false';
+    btn.style.background = '';
+    btn.style.color = '';
     btn.disabled = true;
     btn.innerHTML = '⏳ Preparing...';
 
