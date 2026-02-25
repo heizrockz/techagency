@@ -10,13 +10,13 @@ class MicoSMTP {
     private $user;
     private $pass;
     private $encryption;
-    private $timeout = 10;
+    private $timeout = 15;
     private $socket;
     private $debug = [];
 
     public function __construct($host, $port, $user, $pass, $encryption = 'tls') {
         $this->host = $host;
-        $this->port = $port;
+        $this->port = intval($port);
         $this->user = $user;
         $this->pass = $pass;
         $this->encryption = strtolower($encryption);
@@ -27,11 +27,13 @@ class MicoSMTP {
         try {
             $this->connect();
             $this->auth();
-            $this->sendCommand("QUIT");
+            $this->sendCommand("QUIT", 221);
             fclose($this->socket);
+            $this->socket = null;
             return true;
         } catch (Exception $e) {
             $this->debug[] = "Connection Test Failed: " . $e->getMessage();
+            if ($this->socket) { @fclose($this->socket); $this->socket = null; }
             return $e->getMessage();
         }
     }
@@ -47,9 +49,9 @@ class MicoSMTP {
                 $fullBody .= "<br><br>--<br>" . $signature;
             }
 
-            $this->sendCommand("MAIL FROM: <$from>");
-            $this->sendCommand("RCPT TO: <$to>");
-            $this->sendCommand("DATA");
+            $this->sendCommand("MAIL FROM: <$from>", 250);
+            $this->sendCommand("RCPT TO: <$to>", 250);
+            $this->sendCommand("DATA", 354);
 
             $headers = [
                 "MIME-Version: 1.0",
@@ -58,63 +60,115 @@ class MicoSMTP {
                 "From: $fromName <$from>",
                 "Subject: $subject",
                 "Date: " . date('r'),
-                "Message-ID: <" . time() . "." . uniqid() . "@" . $this->host . ">"
+                "Message-ID: <" . time() . "." . uniqid() . "@" . gethostname() . ">"
             ];
 
             $message = implode("\r\n", $headers) . "\r\n\r\n" . $fullBody . "\r\n.";
-            $this->sendCommand($message);
-            $this->sendCommand("QUIT");
+            $this->sendCommand($message, 250);
+            $this->sendCommand("QUIT", 221);
             
             fclose($this->socket);
+            $this->socket = null;
             return true;
         } catch (Exception $e) {
             $this->debug[] = "Error: " . $e->getMessage();
+            if ($this->socket) { @fclose($this->socket); $this->socket = null; }
             return false;
         }
     }
 
     private function connect() {
-        $remote = $this->host . ":" . $this->port;
+        $context = stream_context_create([
+            'ssl' => [
+                'verify_peer' => false,
+                'verify_peer_name' => false,
+                'allow_self_signed' => true,
+            ]
+        ]);
+
         if ($this->encryption === 'ssl') {
-            $remote = "ssl://" . $remote;
+            // SSL: connect directly over SSL on port 465
+            $remote = "ssl://" . $this->host;
+            $this->socket = @stream_socket_client(
+                "$remote:{$this->port}",
+                $errno, $errstr, $this->timeout,
+                STREAM_CLIENT_CONNECT, $context
+            );
+        } else {
+            // TLS or None: connect plaintext first
+            $this->socket = @stream_socket_client(
+                "tcp://{$this->host}:{$this->port}",
+                $errno, $errstr, $this->timeout,
+                STREAM_CLIENT_CONNECT, $context
+            );
         }
 
-        $this->socket = fsockopen($remote, $this->port, $errno, $errstr, $this->timeout);
         if (!$this->socket) {
-            throw new Exception("Could not connect to $remote: $errstr ($errno)");
+            throw new Exception("Could not connect to {$this->host}:{$this->port} — $errstr ($errno)");
         }
 
-        $this->getResponse();
+        stream_set_timeout($this->socket, $this->timeout);
 
+        // Read server greeting
+        $this->getResponse(220);
+
+        // Send EHLO
+        $this->sendCommand("EHLO " . gethostname(), 250);
+
+        // Upgrade to TLS if requested
         if ($this->encryption === 'tls') {
-            $this->sendCommand("EHLO " . $this->host);
-            $this->sendCommand("STARTTLS");
-            if (!stream_socket_enable_crypto($this->socket, true, STREAM_CRYPTO_METHOD_TLS_CLIENT)) {
-                throw new Exception("Failed to start TLS encryption");
+            $this->sendCommand("STARTTLS", 220);
+            $crypto = STREAM_CRYPTO_METHOD_TLSv1_2_CLIENT;
+            if (defined('STREAM_CRYPTO_METHOD_TLSv1_3_CLIENT')) {
+                $crypto |= STREAM_CRYPTO_METHOD_TLSv1_3_CLIENT;
             }
+            $result = stream_socket_enable_crypto($this->socket, true, $crypto);
+            if (!$result) {
+                throw new Exception("Failed to start TLS encryption with {$this->host}");
+            }
+            // Re-send EHLO after TLS upgrade
+            $this->sendCommand("EHLO " . gethostname(), 250);
         }
-
-        $this->sendCommand("EHLO " . $this->host);
     }
 
     private function auth() {
-        $this->sendCommand("AUTH LOGIN");
-        $this->sendCommand(base64_encode($this->user));
-        $this->sendCommand(base64_encode($this->pass));
+        $this->sendCommand("AUTH LOGIN", 334);
+        $this->sendCommand(base64_encode($this->user), 334);
+        $this->sendCommand(base64_encode($this->pass), 235);
     }
 
-    private function sendCommand($cmd) {
+    private function sendCommand($cmd, $expectedCode = null) {
         fwrite($this->socket, $cmd . "\r\n");
-        return $this->getResponse();
+        return $this->getResponse($expectedCode);
     }
 
-    private function getResponse() {
+    private function getResponse($expectedCode = null) {
         $response = "";
-        while ($line = fgets($this->socket, 515)) {
+        $startTime = time();
+        while (true) {
+            $line = @fgets($this->socket, 515);
+            if ($line === false) {
+                $info = stream_get_meta_data($this->socket);
+                if (!empty($info['timed_out'])) {
+                    throw new Exception("Connection timed out waiting for server response");
+                }
+                break;
+            }
             $response .= $line;
-            if (substr($line, 3, 1) === " ") break;
+            // SMTP multi-line: lines with format "123-..." continue, "123 ..." is last
+            if (strlen($line) >= 4 && substr($line, 3, 1) === " ") break;
+            if ((time() - $startTime) > $this->timeout) break;
         }
-        $this->debug[] = "S: " . $response;
+        
+        $this->debug[] = "S: " . trim($response);
+        
+        if ($expectedCode !== null && !empty($response)) {
+            $code = intval(substr($response, 0, 3));
+            if ($code !== $expectedCode) {
+                throw new Exception("Expected $expectedCode but got $code: " . trim($response));
+            }
+        }
+        
         return $response;
     }
 
