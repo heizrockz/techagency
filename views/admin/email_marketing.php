@@ -106,18 +106,16 @@ $currentPage = 'marketing';
                     <h3 class="card-title" style="font-size:1.1rem; font-weight:600;">🚀 Launch New Campaign</h3>
                 </div>
                 <div class="card-body">
-                    <form method="POST" enctype="multipart/form-data">
-                        <input type="hidden" name="action" value="send_campaign">
-                        
+                    <form id="campaignForm" enctype="multipart/form-data" onsubmit="return launchCampaign(event)">
                         <div class="form-row" style="display:grid; grid-template-columns:1fr 1fr; gap:30px;">
                             <div class="col-left">
                                 <div class="form-group" style="margin-bottom:15px;">
                                     <label style="display:block; font-size:0.8rem; color:var(--text-muted); margin-bottom:5px;">Campaign Subject</label>
-                                    <input type="text" name="subject" class="form-control" required placeholder="Our Latest AI Insights" style="width:100%; padding:10px; background:rgba(255,255,255,0.05); border:1px solid var(--glass-border); border-radius:8px; color:white;">
+                                    <input type="text" name="subject" id="campSubject" class="form-control" required placeholder="Our Latest AI Insights" style="width:100%; padding:10px; background:rgba(255,255,255,0.05); border:1px solid var(--glass-border); border-radius:8px; color:white;">
                                 </div>
                                 <div class="form-group" style="margin-bottom:15px;">
                                     <label style="display:block; font-size:0.8rem; color:var(--text-muted); margin-bottom:5px;">Email Body (HTML)</label>
-                                    <textarea name="body" class="form-control" rows="12" required placeholder="Hello, we are excited to share..." style="width:100%; padding:10px; background:rgba(255,255,255,0.05); border:1px solid var(--glass-border); border-radius:8px; color:white; font-family:inherit;"></textarea>
+                                    <textarea name="body" id="campBody" class="form-control" rows="12" required placeholder="Hello, we are excited to share..." style="width:100%; padding:10px; background:rgba(255,255,255,0.05); border:1px solid var(--glass-border); border-radius:8px; color:white; font-family:inherit;"></textarea>
                                 </div>
 
                                 <!-- Signature Preview -->
@@ -147,24 +145,50 @@ $currentPage = 'marketing';
 
                                 <div id="recipient-single" class="form-group" style="margin-bottom:20px;">
                                     <label style="display:block; font-size:0.8rem; color:var(--text-muted); margin-bottom:5px;">Recipient Emails</label>
-                                    <textarea name="single_recipients" class="form-control" rows="4" placeholder="email1@example.com, email2@example.com" style="width:100%; padding:10px; background:rgba(255,255,255,0.05); border:1px solid var(--glass-border); border-radius:8px; color:white;"></textarea>
+                                    <textarea name="single_recipients" id="campRecipients" class="form-control" rows="4" placeholder="email1@example.com, email2@example.com" style="width:100%; padding:10px; background:rgba(255,255,255,0.05); border:1px solid var(--glass-border); border-radius:8px; color:white;"></textarea>
                                     <small style="color:var(--text-muted); font-size:0.7rem;">Enter one or more emails separated by commas.</small>
                                 </div>
 
                                 <div id="recipient-bulk" class="form-group" style="margin-bottom:20px; display:none;">
                                     <label style="display:block; font-size:0.8rem; color:var(--text-muted); margin-bottom:5px;">Recipient List (CSV)</label>
-                                    <input type="file" name="email_list" class="form-control" accept=".csv" style="width:100%; padding:8px; background:rgba(255,255,255,0.05); border:1px solid var(--glass-border); border-radius:8px; color:white;">
+                                    <input type="file" name="email_list" id="campCSV" class="form-control" accept=".csv" style="width:100%; padding:8px; background:rgba(255,255,255,0.05); border:1px solid var(--glass-border); border-radius:8px; color:white;">
                                     <small style="color:var(--text-muted); font-size:0.7rem;">Upload a CSV file. The first column must contain the email addresses.</small>
                                 </div>
 
                                 <div style="margin-top: 40px; text-align:center;">
-                                    <button type="submit" class="btn btn-neon" style="width:100%; padding:15px;" onclick="return confirm('Launch campaign to all recipients?')">
+                                    <button type="submit" id="launchBtn" class="btn btn-neon" style="width:100%; padding:15px;">
                                         <span style="font-size:1.2rem;">🚀</span> Launch Campaign Now
                                     </button>
                                 </div>
                             </div>
                         </div>
                     </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Progress Modal -->
+        <div id="progressModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:9999; backdrop-filter:blur(6px);">
+            <div style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:600px; max-height:80vh; background:#0f1117; border:1px solid rgba(255,255,255,0.1); border-radius:16px; overflow:hidden; box-shadow:0 20px 60px rgba(0,0,0,0.5);">
+                <div style="padding:20px 24px; border-bottom:1px solid rgba(255,255,255,0.06); display:flex; align-items:center; justify-content:space-between;">
+                    <h3 style="margin:0; color:white; font-size:1.1rem;">📧 Sending Campaign</h3>
+                    <span id="progressCounter" style="color:var(--neon-cyan); font-size:0.9rem; font-weight:600;">0 / 0</span>
+                </div>
+                <div style="padding:16px 24px;">
+                    <!-- Progress Bar -->
+                    <div style="background:rgba(255,255,255,0.06); border-radius:10px; height:8px; overflow:hidden; margin-bottom:16px;">
+                        <div id="progressBar" style="width:0%; height:100%; background:linear-gradient(90deg, var(--neon-emerald), var(--neon-cyan)); border-radius:10px; transition:width 0.3s ease;"></div>
+                    </div>
+                    <div style="display:flex; gap:16px; margin-bottom:16px;">
+                        <span style="font-size:0.8rem; color:var(--text-muted);">✅ Sent: <strong id="sentCount" style="color:var(--neon-emerald);">0</strong></span>
+                        <span style="font-size:0.8rem; color:var(--text-muted);">❌ Failed: <strong id="failCount" style="color:var(--neon-pink);">0</strong></span>
+                        <span style="font-size:0.8rem; color:var(--text-muted);">⏳ Pending: <strong id="pendingCount" style="color:var(--neon-cyan);">0</strong></span>
+                    </div>
+                </div>
+                <!-- Log area -->
+                <div id="progressLog" style="max-height:300px; overflow-y:auto; padding:0 24px 16px; font-family:'Inter',monospace; font-size:0.78rem; line-height:1.8;"></div>
+                <div id="progressFooter" style="display:none; padding:16px 24px; border-top:1px solid rgba(255,255,255,0.06); text-align:center;">
+                    <button onclick="closeProgress()" class="btn btn-primary" style="padding:10px 30px; background:var(--neon-emerald); border:none; border-radius:8px; color:#000; font-weight:600; cursor:pointer;">✓ Done — Close</button>
                 </div>
             </div>
         </div>
@@ -210,6 +234,8 @@ $currentPage = 'marketing';
 </div>
 
 <script>
+const API_URL = '<?= baseUrl("api/campaign_send.php") ?>';
+
 function toggleConfig() {
     const content = document.getElementById('config-content');
     const icon = document.getElementById('config-toggle-icon');
@@ -223,15 +249,145 @@ function toggleConfig() {
 }
 
 function toggleRecipientType(type) {
-    const single = document.getElementById('recipient-single');
-    const bulk = document.getElementById('recipient-bulk');
-    if (type === 'single') {
-        single.style.display = 'block';
-        bulk.style.display = 'none';
-    } else {
-        single.style.display = 'none';
-        bulk.style.display = 'block';
+    document.getElementById('recipient-single').style.display = type === 'single' ? 'block' : 'none';
+    document.getElementById('recipient-bulk').style.display = type === 'bulk' ? 'block' : 'none';
+}
+
+async function launchCampaign(e) {
+    e.preventDefault();
+    if (!confirm('Launch campaign to all recipients?')) return false;
+
+    const btn = document.getElementById('launchBtn');
+    btn.disabled = true;
+    btn.innerHTML = '⏳ Preparing...';
+
+    try {
+        // Step 1: Create campaign
+        const fd = new FormData();
+        fd.append('action', 'create_campaign');
+        fd.append('subject', document.getElementById('campSubject').value);
+        fd.append('body', document.getElementById('campBody').value);
+        
+        const sendType = document.querySelector('input[name="send_type"]:checked').value;
+        fd.append('send_type', sendType);
+        
+        if (sendType === 'single') {
+            fd.append('recipients', document.getElementById('campRecipients').value);
+        } else {
+            const csvFile = document.getElementById('campCSV').files[0];
+            if (csvFile) fd.append('email_list', csvFile);
+        }
+
+        const createRes = await fetch(API_URL, { method: 'POST', body: fd });
+        const createData = await createRes.json();
+
+        if (createData.error) {
+            alert('Error: ' + createData.error);
+            btn.disabled = false;
+            btn.innerHTML = '<span style="font-size:1.2rem;">🚀</span> Launch Campaign Now';
+            return false;
+        }
+
+        const { campaign_id, emails, total } = createData;
+
+        // Show progress modal
+        showProgress(total);
+
+        // Step 2: Send emails one by one
+        let sent = 0, failed = 0;
+        for (let i = 0; i < emails.length; i++) {
+            const email = emails[i];
+            updatePending(total - i - 1);
+            addLog(`Sending to ${email}...`, 'pending');
+
+            try {
+                const sendFd = new FormData();
+                sendFd.append('action', 'send_one');
+                sendFd.append('campaign_id', campaign_id);
+                sendFd.append('email', email);
+
+                const sendRes = await fetch(API_URL, { method: 'POST', body: sendFd });
+                const sendData = await sendRes.json();
+
+                if (sendData.status === 'sent') {
+                    sent++;
+                    updateLastLog(`✅ ${email} — Sent`, 'success');
+                } else {
+                    failed++;
+                    updateLastLog(`❌ ${email} — Failed`, 'error');
+                }
+            } catch (err) {
+                failed++;
+                updateLastLog(`❌ ${email} — Network Error`, 'error');
+            }
+
+            updateProgress(i + 1, total, sent, failed);
+        }
+
+        // Step 3: Finalize
+        const finFd = new FormData();
+        finFd.append('action', 'finalize');
+        finFd.append('campaign_id', campaign_id);
+        await fetch(API_URL, { method: 'POST', body: finFd });
+
+        addLog(`\n✓ Campaign complete: ${sent} sent, ${failed} failed.`, 'done');
+        document.getElementById('progressFooter').style.display = 'block';
+
+    } catch (err) {
+        alert('Unexpected error: ' + err.message);
     }
+
+    btn.disabled = false;
+    btn.innerHTML = '<span style="font-size:1.2rem;">🚀</span> Launch Campaign Now';
+    return false;
+}
+
+function showProgress(total) {
+    document.getElementById('progressModal').style.display = 'block';
+    document.getElementById('progressCounter').textContent = `0 / ${total}`;
+    document.getElementById('progressBar').style.width = '0%';
+    document.getElementById('sentCount').textContent = '0';
+    document.getElementById('failCount').textContent = '0';
+    document.getElementById('pendingCount').textContent = total;
+    document.getElementById('progressLog').innerHTML = '';
+    document.getElementById('progressFooter').style.display = 'none';
+}
+
+function updateProgress(current, total, sent, failed) {
+    document.getElementById('progressCounter').textContent = `${current} / ${total}`;
+    document.getElementById('progressBar').style.width = `${(current / total * 100)}%`;
+    document.getElementById('sentCount').textContent = sent;
+    document.getElementById('failCount').textContent = failed;
+}
+
+function updatePending(n) {
+    document.getElementById('pendingCount').textContent = n;
+}
+
+function addLog(msg, type) {
+    const log = document.getElementById('progressLog');
+    const div = document.createElement('div');
+    div.className = 'log-' + type;
+    const colors = { pending: '#64748b', success: '#10b981', error: '#f43f5e', done: '#22d3ee' };
+    div.style.color = colors[type] || '#94a3b8';
+    div.textContent = msg;
+    log.appendChild(div);
+    log.scrollTop = log.scrollHeight;
+}
+
+function updateLastLog(msg, type) {
+    const log = document.getElementById('progressLog');
+    const last = log.lastElementChild;
+    if (last) {
+        const colors = { success: '#10b981', error: '#f43f5e' };
+        last.style.color = colors[type] || '#94a3b8';
+        last.textContent = msg;
+    }
+}
+
+function closeProgress() {
+    document.getElementById('progressModal').style.display = 'none';
+    window.location.reload();
 }
 </script>
 
@@ -255,6 +411,11 @@ function toggleRecipientType(type) {
     transform: translateY(-2px);
     box-shadow: 0 5px 20px rgba(var(--neon-cyan-rgb), 0.4);
 }
+.btn-neon:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
 .admin-card {
     background: rgba(255, 255, 255, 0.03);
     border: 1px solid var(--glass-border);
@@ -264,6 +425,9 @@ function toggleRecipientType(type) {
 .collapsible-card:hover {
     background: rgba(255, 255, 255, 0.04);
 }
+#progressLog::-webkit-scrollbar { width: 4px; }
+#progressLog::-webkit-scrollbar-track { background: transparent; }
+#progressLog::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
 </style>
 
 </body>
