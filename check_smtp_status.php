@@ -16,19 +16,13 @@ $smtp = new MicoSMTP(
     $settings['smtp_encryption']
 );
 
-echo "Testing SMTP send...\n";
-$res = $smtp->send(
-    'test@micosage.com', // To
-    $settings['from_email'], // From
-    $settings['from_name'], // From Name
-    'Test Email',
-    '<h1>Hello!</h1><p>Testing email delivery.</p>'
-);
+echo "Testing SMTP Connection method...\n";
+$res = $smtp->testConnection();
 
-if ($res) {
-    echo "Sent successfully!\n";
+if ($res === true) {
+    echo "Connection TEST: SUCCESS!\n";
 } else {
-    echo "Failed to send.\n";
+    echo "Connection TEST: FAILED - " . $res . "\n";
 }
 
 echo "Debug Log:\n";

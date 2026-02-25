@@ -53,6 +53,11 @@ class MicoSMTP {
             $this->sendCommand("RCPT TO: <$to>", 250);
             $this->sendCommand("DATA", 354);
 
+            $hostname = parse_url(BASE_URL, PHP_URL_HOST);
+            if (empty($hostname)) {
+                $hostname = isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : 'micosage.com';
+            }
+
             $headers = [
                 "MIME-Version: 1.0",
                 "Content-type: text/html; charset=UTF-8",
@@ -62,7 +67,7 @@ class MicoSMTP {
                 "Return-Path: <$from>",
                 "Subject: $subject",
                 "Date: " . date('r'),
-                "Message-ID: <" . time() . "." . uniqid() . "@" . parse_url(BASE_URL, PHP_URL_HOST) . ">",
+                "Message-ID: <" . time() . "." . uniqid() . "@" . $hostname . ">",
                 "X-Mailer: MicoSage-SMTP"
             ];
 
@@ -95,14 +100,14 @@ class MicoSMTP {
         if ($this->encryption === 'ssl') {
             // SSL: connect directly over SSL on port 465
             $remote = "ssl://" . $this->host;
-            $this->socket = @stream_socket_client(
+            $this->socket = stream_socket_client(
                 "$remote:{$this->port}",
                 $errno, $errstr, $this->timeout,
                 STREAM_CLIENT_CONNECT, $context
             );
         } else {
             // TLS or None: connect plaintext first
-            $this->socket = @stream_socket_client(
+            $this->socket = stream_socket_client(
                 "tcp://{$this->host}:{$this->port}",
                 $errno, $errstr, $this->timeout,
                 STREAM_CLIENT_CONNECT, $context
@@ -154,7 +159,7 @@ class MicoSMTP {
         $response = "";
         $startTime = time();
         while (true) {
-            $line = @fgets($this->socket, 515);
+            $line = fgets($this->socket, 515);
             if ($line === false) {
                 $info = stream_get_meta_data($this->socket);
                 if (!empty($info['timed_out'])) {
