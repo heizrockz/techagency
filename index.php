@@ -52,23 +52,57 @@ if ($path === '/' || $path === '/index.php' || $path === '') {
         exit;
     }
 
+    require_once __DIR__ . '/controllers/AdminController.php';
+
     if ($path === '/admin/dashboard') {
-        require_once __DIR__ . '/controllers/AdminController.php';
         adminDashboard();
+    } elseif ($path === '/admin/inbox') {
+        adminInbox();
     } elseif ($path === '/admin/marketing') {
-        require_once __DIR__ . '/controllers/AdminController.php';
         adminEmailMarketing();
     } elseif ($path === '/admin/sitemap') {
-        require_once __DIR__ . '/controllers/AdminController.php';
         adminSitemap();
+    } elseif ($path === '/admin/bookings') {
+        adminBookings();
+    } elseif ($path === '/admin/services') {
+        adminServices();
+    } elseif ($path === '/admin/clients') {
+        adminClients();
+    } elseif ($path === '/admin/products') {
+        adminProducts();
+    } elseif ($path === '/admin/portfolio') {
+        adminPortfolio();
+    } elseif ($path === '/admin/blogs') {
+        adminBlogs();
+    } elseif ($path === '/admin/team') {
+        adminTeam();
+    } elseif ($path === '/admin/testimonials') {
+        adminTestimonials();
+    } elseif ($path === '/admin/chatbot') {
+        adminChatbot();
+    } elseif ($path === '/admin/translations') {
+        adminTranslations();
+    } elseif ($path === '/admin/settings') {
+        adminSettings();
+    } elseif ($path === '/admin/profile') {
+        adminProfile();
     } elseif ($path === '/admin/logout') {
-        require_once __DIR__ . '/controllers/AdminController.php';
         adminLogout();
     } else {
         // Handle other admin routes or 404
-        require_once __DIR__ . '/views/errors/404.php';
+        if (file_exists(__DIR__ . '/views/errors/404.php')) {
+            require_once __DIR__ . '/views/errors/404.php';
+        } else {
+            http_response_code(404);
+            echo "404 Not Found";
+        }
     }
 } else {
     // 404
-    require_once __DIR__ . '/views/errors/404.php';
+    if (file_exists(__DIR__ . '/views/errors/404.php')) {
+        require_once __DIR__ . '/views/errors/404.php';
+    } else {
+        http_response_code(404);
+        echo "404 Not Found";
+    }
 }
