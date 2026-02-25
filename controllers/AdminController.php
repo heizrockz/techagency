@@ -5,6 +5,7 @@
 require_once __DIR__ . '/../includes/db.php';
 require_once __DIR__ . '/../includes/helpers.php';
 require_once __DIR__ . '/../includes/sitemap_generator.php';
+require_once __DIR__ . '/../includes/smtp.php';
 
 /* ═══ Login ═══ */
 function adminLogin(): void {
@@ -1239,4 +1240,104 @@ function adminSitemap(): void {
 
     $currentContent = file_exists($sitemapPath) ? file_get_contents($sitemapPath) : '';
     require __DIR__ . '/../views/admin/sitemap.php';
+}
+
+/* ═══ Email Marketing ═══ */
+function adminEmailMarketing(): void {
+    $db = getDB();
+    $saved = false;
+    $sent = false;
+    $error = '';
+
+    // Fetch settings
+    $settings = $db->query('SELECT * FROM email_settings LIMIT 1')->fetch();
+    if (!$settings) {
+        $db->exec('INSERT INTO email_settings (id) VALUES (1)');
+        $settings = $db->query('SELECT * FROM email_settings LIMIT 1')->fetch();
+    }
+
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        $action = $_POST['action'] ?? '';
+
+        if ($action === 'save_settings') {
+            $db->prepare('UPDATE email_settings SET 
+                smtp_host=?, smtp_port=?, smtp_user=?, smtp_pass=?, smtp_encryption=?, 
+                from_email=?, from_name=?, imap_host=?, imap_port=?, signature_html=? WHERE id=1')
+               ->execute([
+                   $_POST['smtp_host'] ?? '',
+                   intval($_POST['smtp_port'] ?? 587),
+                   $_POST['smtp_user'] ?? '',
+                   $_POST['smtp_pass'] ?? '',
+                   $_POST['smtp_encryption'] ?? 'tls',
+                   $_POST['from_email'] ?? '',
+                   $_POST['from_name'] ?? '',
+                   $_POST['imap_host'] ?? '',
+                   intval($_POST['imap_port'] ?? 993),
+                   $_POST['signature_html'] ?? ''
+               ]);
+            $saved = true;
+            // Re-fetch
+            $settings = $db->query('SELECT * FROM email_settings LIMIT 1')->fetch();
+        }
+
+        if ($action === 'send_campaign') {
+            $subject = trim($_POST['subject'] ?? '');
+            $body = trim($_POST['body'] ?? '');
+            
+            // Handle CSV Upload
+            $emails = [];
+            if (!empty($_FILES['email_list']['tmp_name'])) {
+                if (($handle = fopen($_FILES['email_list']['tmp_name'], "r")) !== FALSE) {
+                    while (($data = fgetcsv($handle, 1000, ",")) !== FALSE) {
+                        // Assume email is in first column
+                        if (filter_var($data[0], FILTER_VALIDATE_EMAIL)) {
+                            $emails[] = $data[0];
+                        }
+                    }
+                    fclose($handle);
+                }
+            }
+
+            if (empty($emails)) {
+                $error = "No valid emails found in the uploaded file.";
+            } else {
+                // Register campaign in DB
+                $db->prepare('INSERT INTO marketing_campaigns (subject, body, total_emails, status) VALUES (?, ?, ?, ?)')
+                   ->execute([$subject, $body, count($emails), 'sending']);
+                $campaignId = $db->lastInsertId();
+
+                // Initialize SMTP
+                $mailer = new MicoSMTP(
+                    $settings['smtp_host'],
+                    $settings['smtp_port'],
+                    $settings['smtp_user'],
+                    $settings['smtp_pass'],
+                    $settings['smtp_encryption']
+                );
+
+                $successCount = 0;
+                $failCount = 0;
+
+                foreach ($emails as $email) {
+                    $res = $mailer->send($email, $settings['from_email'], $settings['from_name'], $subject, $body, $settings['signature_html']);
+                    
+                    $status = $res ? 'sent' : 'failed';
+                    if ($res) $successCount++; else $failCount++;
+
+                    $db->prepare('INSERT INTO marketing_recipients (campaign_id, email, status, sent_at) VALUES (?, ?, ?, NOW())')
+                       ->execute([$campaignId, $email, $status]);
+                }
+
+                $db->prepare('UPDATE marketing_campaigns SET sent_count=?, failed_count=?, status=? WHERE id=?')
+                   ->execute([$successCount, $failCount, 'completed', $campaignId]);
+                
+                $sent = true;
+            }
+        }
+    }
+
+    // Fetch campaigns
+    $campaigns = $db->query('SELECT * FROM marketing_campaigns ORDER BY created_at DESC LIMIT 20')->fetchAll();
+
+    require __DIR__ . '/../views/admin/email_marketing.php';
 }

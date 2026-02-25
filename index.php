@@ -110,6 +110,12 @@ switch ($path) {
         adminInbox();
         break;
 
+    case '/admin/marketing':
+        requireAdmin();
+        require __DIR__ . '/controllers/AdminController.php';
+        adminEmailMarketing();
+        break;
+
     case '/admin/contacts':
         requireAdmin();
         require __DIR__ . '/controllers/AdminController.php';

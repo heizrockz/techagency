@@ -12,7 +12,7 @@
         <a href="<?= baseUrl('admin/bookings') ?>" class="<?= $currentPage === 'bookings' ? 'active' : '' ?>">📋 <?= t('admin_bookings') ?></a>
 
         <!-- CRM Group -->
-        <?php $crmActive = in_array($currentPage, ['contacts', 'invoices']); ?>
+        <?php $crmActive = in_array($currentPage, ['contacts', 'marketing', 'invoices']); ?>
         <div class="sidebar-group <?= $crmActive ? 'open' : '' ?>">
             <div class="sidebar-group-toggle" onclick="this.parentElement.classList.toggle('open')">
                 <span>💼 CRM</span>
@@ -20,6 +20,7 @@
             </div>
             <div class="sidebar-group-items">
                 <a href="<?= baseUrl('admin/contacts') ?>" class="<?= $currentPage === 'contacts' ? 'active' : '' ?>">📇 Contacts</a>
+                <a href="<?= baseUrl('admin/marketing') ?>" class="<?= $currentPage === 'marketing' ? 'active' : '' ?>">✉️ Email Marketing</a>
                 <a href="<?= baseUrl('admin/invoices') ?>" class="<?= $currentPage === 'invoices' ? 'active' : '' ?>">🧾 Invoices / Quotes</a>
             </div>
         </div>
