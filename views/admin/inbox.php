@@ -57,11 +57,16 @@ $currentPage = 'inbox';
                                     ?>
                                 </div>
                                 <div class="session-info">
-                                    <div class="session-name"><?= e($snippet) ?></div>
+                                    <div class="session-name">
+                                        <?= e($snippet) ?>
+                                        <?php if(($s['is_read'] ?? 1) == 0): ?>
+                                            <span class="badge" style="background:var(--neon-emerald); color:white; font-size:0.6rem; padding:2px 6px; margin-left:6px; border:none; vertical-align:middle;">NEW</span>
+                                        <?php endif; ?>
+                                    </div>
                                     <div class="session-snippet"><?= $s['msg_count'] ?> messages • <?= date('H:i', strtotime($s['updated_at'])) ?></div>
                                 </div>
                                 <?php if($s['status'] === 'Open'): ?>
-                                    <span style="width:8px; height:8px; background:var(--theme-primary); border-radius:50%; margin-top:5px;"></span>
+                                    <span title="Status: Open" style="width:8px; height:8px; background:var(--theme-primary); border-radius:50%; margin-top:5px; flex-shrink:0;"></span>
                                 <?php endif; ?>
                             </a>
                         <?php endforeach; ?>

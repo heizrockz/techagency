@@ -73,15 +73,15 @@ try {
         
         if (!empty($updateSql)) {
             $updateParams[] = $sessionId;
-            $db->prepare("UPDATE chatbot_sessions SET updated_at = CURRENT_TIMESTAMP, " . implode(', ', $updateSql) . " WHERE id = ?")->execute($updateParams);
+            $db->prepare("UPDATE chatbot_sessions SET is_read = 0, updated_at = CURRENT_TIMESTAMP, " . implode(', ', $updateSql) . " WHERE id = ?")->execute($updateParams);
         } else {
-            $db->prepare("UPDATE chatbot_sessions SET updated_at = CURRENT_TIMESTAMP WHERE id = ?")->execute([$sessionId]);
+            $db->prepare("UPDATE chatbot_sessions SET is_read = 0, updated_at = CURRENT_TIMESTAMP WHERE id = ?")->execute([$sessionId]);
         }
         
     } else {
         // Create a new session
         $uuid = bin2hex(random_bytes(8)); // Simple 16-char random ID
-        $stmt = $db->prepare('INSERT INTO chatbot_sessions (user_email, user_phone, session_uuid, user_ip, user_agent, status) VALUES (?, ?, ?, ?, ?, ?)');
+        $stmt = $db->prepare('INSERT INTO chatbot_sessions (user_email, user_phone, session_uuid, user_ip, user_agent, status, is_read) VALUES (?, ?, ?, ?, ?, ?, 0)');
         $stmt->execute([$userEmail, $userPhone, $uuid, $ip, $userAgent, 'Open']);
         $sessionId = $db->lastInsertId();
     }
