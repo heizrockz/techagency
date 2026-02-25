@@ -1321,7 +1321,15 @@ function adminEmailMarketing(): void {
             $smtpPort = intval($_POST['smtp_port'] ?? 587);
             $smtpUser = $_POST['smtp_user'] ?? '';
             $smtpPass = $_POST['smtp_pass'] ?? '';
-            $smtpEnc = $_POST['smtp_encryption'] ?? 'tls';
+            
+            // Auto-detect encryption based on standard ports
+            if ($smtpPort === 465) {
+                $smtpEnc = 'ssl';
+            } elseif ($smtpPort === 587) {
+                $smtpEnc = 'tls';
+            } else {
+                $smtpEnc = 'none';
+            }
 
             // Test Connection
             $tester = new MicoSMTP($smtpHost, $smtpPort, $smtpUser, $smtpPass, $smtpEnc);
