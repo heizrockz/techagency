@@ -59,6 +59,8 @@ if ($path === '/' || $path === '/index.php' || $path === '') {
         adminSitemap();
     } elseif ($path === '/admin/bookings') {
         adminBookings();
+    } elseif ($path === '/admin/booking-fields') {
+        adminBookingFields();
     } elseif ($path === '/admin/services') {
         adminServices();
     } elseif ($path === '/admin/clients') {
@@ -79,6 +81,10 @@ if ($path === '/' || $path === '/index.php' || $path === '') {
         adminTranslations();
     } elseif ($path === '/admin/settings') {
         adminSettings();
+    } elseif ($path === '/admin/content') {
+        adminContent();
+    } elseif ($path === '/admin/seo') {
+        adminSeo();
     } elseif ($path === '/admin/invoices') {
         adminInvoices();
     } elseif ($path === '/admin/contacts') {
