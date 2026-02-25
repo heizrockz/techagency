@@ -1258,8 +1258,14 @@ function adminEmailMarketing(): void {
         // Tables missing - try to apply schema
         $schemaFile = __DIR__ . '/../migrations/email_schema.sql';
         if (file_exists($schemaFile)) {
-            $schema = file_get_contents($schemaFile);
-            $db->exec($schema);
+            $sql = file_get_contents($schemaFile);
+            // Split by semicolon and filter empty statements
+            $statements = array_filter(array_map('trim', explode(';', $sql)));
+            foreach ($statements as $stmt) {
+                if (!empty($stmt)) {
+                    $db->exec($stmt);
+                }
+            }
         } else {
             die("Marketing tables missing and schema file not found.");
         }
