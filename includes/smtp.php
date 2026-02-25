@@ -58,10 +58,16 @@ class MicoSMTP {
                 "Content-type: text/html; charset=UTF-8",
                 "To: <$to>",
                 "From: $fromName <$from>",
+                "Reply-To: <$from>",
+                "Return-Path: <$from>",
                 "Subject: $subject",
                 "Date: " . date('r'),
-                "Message-ID: <" . time() . "." . uniqid() . "@" . gethostname() . ">"
+                "Message-ID: <" . time() . "." . uniqid() . "@" . parse_url(BASE_URL, PHP_URL_HOST) . ">",
+                "X-Mailer: MicoSage-SMTP"
             ];
+
+            // SMTP Dot-stuffing: any line starting with a dot gets an extra dot
+            $fullBody = preg_replace('/^\./m', '..', $fullBody);
 
             $message = implode("\r\n", $headers) . "\r\n\r\n" . $fullBody . "\r\n.";
             $this->sendCommand($message, 250);
@@ -138,6 +144,8 @@ class MicoSMTP {
     }
 
     private function sendCommand($cmd, $expectedCode = null) {
+        $logCmd = (strpos($cmd, 'AUTH ') === 0 || preg_match('/^[A-Za-z0-9+\/]+={0,2}$/', $cmd)) && $expectedCode === 235 ? 'AUTH ***' : $cmd;
+        $this->debug[] = "C: " . $logCmd;
         fwrite($this->socket, $cmd . "\r\n");
         return $this->getResponse($expectedCode);
     }
@@ -162,7 +170,10 @@ class MicoSMTP {
         
         $this->debug[] = "S: " . trim($response);
         
-        if ($expectedCode !== null && !empty($response)) {
+        if ($expectedCode !== null) {
+            if (empty($response)) {
+                throw new Exception("Expected $expectedCode but got empty response (Connection dropped or timed out)");
+            }
             $code = intval(substr($response, 0, 3));
             if ($code !== $expectedCode) {
                 throw new Exception("Expected $expectedCode but got $code: " . trim($response));
