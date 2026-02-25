@@ -29,7 +29,7 @@ $currentPage = 'inbox';
         </div>
 
         <!-- Dashboard Layout -->
-        <div class="inbox-dashboard">
+        <div class="inbox-dashboard <?= $sessionData ? 'session-selected' : '' ?>">
             
             <!-- Left Sidebar: Sessions -->
             <div class="inbox-sidebar">
@@ -83,6 +83,7 @@ $currentPage = 'inbox';
                     </div>
                 <?php else: ?>
                     <div class="chat-header">
+                        <a href="<?= baseUrl('admin/inbox') ?>" class="inbox-back-btn">← Back</a>
                         <div>
                             <div style="font-weight:600; font-size:1rem; color:white;"><?= e($sessionData['user_email'] ?: 'Anonymous Visitor') ?></div>
                             <div style="font-size:0.75rem; color:var(--text-muted);">

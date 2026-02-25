@@ -24,7 +24,7 @@
             <div class="admin-card" style="margin-bottom: 30px;">
                 <form method="POST" action="<?= baseUrl('admin/products') ?>">
                     <input type="hidden" name="id" value="<?= $editProduct['id'] ?? 0 ?>">
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div class="admin-grid-2">
                         <div class="form-group">
                             <label>Category</label>
                             <select name="category" class="form-input">
@@ -76,7 +76,8 @@
             </div>
         <?php else: ?>
             <div class="admin-card">
-                <table class="admin-table">
+                <div style="overflow-x: auto;">
+                    <table class="admin-table">
                     <thead>
                         <tr>
                             <th>Category</th>
@@ -100,7 +101,8 @@
                         </tr>
                         <?php endforeach; ?>
                     </tbody>
-                </table>
+                    </table>
+                </div>
             </div>
         <?php endif; ?>
     </div>

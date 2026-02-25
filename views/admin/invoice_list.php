@@ -33,7 +33,8 @@ $currentPage = 'invoices';
                 <div style="display: flex; justify-content: flex-end; margin-bottom: 15px;">
                     <input type="text" id="invoiceSearch" class="form-input" placeholder="Search invoices..." style="max-width: 300px;">
                 </div>
-                <table class="admin-table" id="invoicesTable">
+                <div style="overflow-x: auto;">
+                    <table class="admin-table" id="invoicesTable">
                     <thead>
                         <tr>
                             <th>Number</th>
@@ -80,6 +81,7 @@ $currentPage = 'invoices';
                         <?php endforeach; ?>
                     </tbody>
                 </table>
+                </div>
                 
                 <script>
                 document.getElementById('invoiceSearch').addEventListener('input', function() {

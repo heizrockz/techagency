@@ -1,4 +1,9 @@
-<div class="admin-sidebar">
+<!-- Mobile Toggle Button -->
+<button class="admin-mobile-toggle" id="adminMobileToggle" aria-label="Toggle Menu">
+    <span class="toggle-icon">☰</span>
+</button>
+
+<div class="admin-sidebar" id="adminSidebar">
     <div class="admin-brand" style="display:flex; align-items:center;">
         <?php $logo = getSetting('site_logo'); if(!empty($logo)): ?>
             <img src="<?= baseUrl($logo) ?>" alt="<?= APP_NAME ?>" style="max-height: 40px;">
@@ -104,3 +109,35 @@
         </style>
     </nav>
 </div>
+
+<!-- Mobile Overlay -->
+<div class="admin-mobile-overlay" id="adminOverlay"></div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const toggle = document.getElementById('adminMobileToggle');
+    const sidebar = document.getElementById('adminSidebar');
+    const overlay = document.getElementById('adminOverlay');
+    
+    if (toggle && sidebar && overlay) {
+        const toggleMenu = () => {
+            sidebar.classList.toggle('active');
+            overlay.classList.toggle('active');
+            document.body.style.overflow = sidebar.classList.contains('active') ? 'hidden' : '';
+        };
+
+        toggle.addEventListener('click', toggleMenu);
+        overlay.addEventListener('click', toggleMenu);
+
+        // Close sidebar when clicking nav links on mobile
+        const navLinks = sidebar.querySelectorAll('nav a');
+        navLinks.forEach(link => {
+            link.addEventListener('click', () => {
+                if (window.innerWidth <= 768) {
+                    toggleMenu();
+                }
+            });
+        });
+    }
+});
+</script>

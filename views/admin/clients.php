@@ -24,7 +24,7 @@
             <div class="admin-card" style="margin-bottom: 30px;">
                 <form method="POST" action="<?= baseUrl('admin/clients') ?>">
                     <input type="hidden" name="id" value="<?= $editClient['id'] ?? 0 ?>">
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div class="admin-grid-2">
                         <div class="form-group">
                             <label>Client Name</label>
                             <input type="text" name="name" class="form-input" value="<?= e($editClient['name'] ?? '') ?>" required>
@@ -57,7 +57,8 @@
             </div>
         <?php else: ?>
             <div class="admin-card">
-                <table class="admin-table">
+                <div style="overflow-x: auto;">
+                    <table class="admin-table">
                     <thead>
                         <tr>
                             <th>Name</th>
@@ -87,7 +88,8 @@
                         </tr>
                         <?php endforeach; ?>
                     </tbody>
-                </table>
+                    </table>
+                </div>
             </div>
         <?php endif; ?>
     </div>

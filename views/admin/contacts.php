@@ -42,7 +42,7 @@ $action = $action ?? 'list';
             <form method="POST" action="<?= baseUrl('admin/contacts') ?>" class="admin-card">
                 <input type="hidden" name="id" value="<?= $contact['id'] ?? 0 ?>">
                 
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 25px;">
+                <div class="admin-grid-2" style="margin-bottom: 25px;">
                     <div class="form-group">
                         <label>Contact Name *</label>
                         <input type="text" name="name" value="<?= e($contact['name'] ?? '') ?>" class="form-input" required placeholder="Company or Individual Name">
@@ -56,7 +56,7 @@ $action = $action ?? 'list';
                     </div>
                 </div>
 
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 25px;">
+                <div class="admin-grid-2" style="margin-bottom: 25px;">
                     <div class="form-group">
                         <label>Phone Number</label>
                         <input type="text" name="phone" value="<?= e($contact['phone'] ?? '') ?>" class="form-input" placeholder="+971 50 123 4567">
@@ -67,7 +67,7 @@ $action = $action ?? 'list';
                     </div>
                 </div>
 
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 25px;">
+                <div class="admin-grid-2" style="margin-bottom: 25px;">
                     <div class="form-group">
                         <label>TRN / VAT Number</label>
                         <input type="text" name="vat_number" value="<?= e($contact['vat_number'] ?? '') ?>" class="form-input" placeholder="Tax Registration Number">
@@ -78,7 +78,7 @@ $action = $action ?? 'list';
                     </div>
                 </div>
 
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 25px;">
+                <div class="admin-grid-2" style="margin-bottom: 25px;">
                     <div class="form-group">
                         <label>Location / Address</label>
                         <input type="text" name="location" value="<?= e($contact['location'] ?? '') ?>" class="form-input" placeholder="City, Street">

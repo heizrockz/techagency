@@ -35,14 +35,14 @@ $emojiList = ['👤','😎','🧑‍💻','👩‍💼','🦁','🐺','🦅','�
             <div class="admin-card" style="margin-bottom: 25px;">
                 <h3 style="color: var(--neon-cyan); margin-bottom: 20px;">Personal Information</h3>
                 
-                <div style="display: grid; grid-template-columns: auto 1fr; gap: 25px; align-items: start;">
+                <div class="profile-main-grid">
                     <!-- Avatar Picker -->
                     <div style="text-align: center;">
                         <div style="width: 80px; height: 80px; border-radius: 50%; background: linear-gradient(135deg, var(--neon-cyan), var(--neon-violet)); display: flex; align-items: center; justify-content: center; font-size: 2.5rem; margin-bottom: 10px;">
                             <?= $admin['avatar_emoji'] ?? '👤' ?>
                         </div>
                         <label style="font-size: 0.8rem; color: var(--text-muted);">Choose Avatar</label>
-                        <div style="display: flex; flex-wrap: wrap; gap: 5px; max-width: 200px; margin-top: 8px;">
+                        <div class="admin-grid-2" style="max-width: 200px; margin-top: 8px;">
                             <?php foreach ($emojiList as $em): ?>
                                 <label style="cursor: pointer;">
                                     <input type="radio" name="avatar_emoji" value="<?= $em ?>" style="display:none;" <?= ($admin['avatar_emoji'] ?? '👤') === $em ? 'checked' : '' ?>>
@@ -54,7 +54,7 @@ $emojiList = ['👤','😎','🧑‍💻','👩‍💼','🦁','🐺','🦅','�
 
                     <!-- Info Fields -->
                     <div>
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                        <div class="admin-grid-2">
                             <div class="form-group">
                                 <label>Full Name</label>
                                 <input type="text" name="full_name" value="<?= e($admin['full_name'] ?? '') ?>" class="form-input" placeholder="Your full name">
@@ -66,7 +66,7 @@ $emojiList = ['👤','😎','🧑‍💻','👩‍💼','🦁','🐺','🦅','�
                             </div>
                         </div>
 
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 15px;">
+                        <div class="admin-grid-2" style="margin-top: 15px;">
                             <div class="form-group">
                                 <label>Recovery Email</label>
                                 <input type="email" name="recovery_email" value="<?= e($admin['recovery_email'] ?? '') ?>" class="form-input" placeholder="backup@email.com">
@@ -83,7 +83,7 @@ $emojiList = ['👤','😎','🧑‍💻','👩‍💼','🦁','🐺','🦅','�
             <div class="admin-card" style="margin-bottom: 25px;">
                 <h3 style="color: var(--theme-gold); margin-bottom: 20px;">🔐 Change Password</h3>
                 <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 15px;">Leave blank to keep your current password.</p>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <div class="admin-grid-2">
                     <div class="form-group">
                         <label>New Password</label>
                         <input type="password" name="new_password" class="form-input" placeholder="••••••••" autocomplete="new-password">

@@ -23,7 +23,7 @@
             <div class="admin-card" style="margin-bottom: 20px;">
                 <h3>Section Toggles</h3>
                 <p style="color:var(--text-muted); font-size:0.85rem; margin-bottom:15px;">Show or hide entire sections on the user-facing home page.</p>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                <div class="admin-grid-2">
                     <label style="cursor: pointer; display: flex; align-items: center; gap: 10px;">
                         <input type="checkbox" name="settings[show_clients_section]" <?= ($settings['show_clients_section']['setting_value'] ?? '1') === '1' ? 'checked' : '' ?>> Show "Our Clients" Section
                     </label>
@@ -56,7 +56,7 @@
 
             <div class="admin-card" style="margin-bottom: 20px;">
                 <h3>Branding</h3>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 15px;">
+                <div class="admin-grid-2" style="margin-top: 15px;">
                     <div class="form-group" style="grid-column: 1 / -1;">
                         <label>Site Name</label>
                         <input type="text" name="settings[site_name]" class="form-input" value="<?= e($settings['site_name']['setting_value'] ?? 'Mico Sage') ?>">
@@ -78,7 +78,7 @@
 
             <div class="admin-card" style="margin-bottom: 20px;">
                 <h3>Company Stats</h3>
-                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; margin-top: 15px;">
+                <div class="admin-grid-3" style="margin-top: 15px;">
                     <div class="form-group">
                         <label>Projects Number</label>
                         <input type="text" name="settings[stat_projects_num]" class="form-input" value="<?= e($settings['stat_projects_num']['setting_value'] ?? '150+') ?>">
@@ -104,7 +104,7 @@
         <div class="admin-card" style="margin-bottom: 20px;">
             <h3 style="color: var(--neon-cyan);">📞 Contact Information</h3>
             <p style="color:var(--text-muted); font-size:0.85rem; margin-bottom:15px;">Used for the floating call button and contact page.</p>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+            <div class="admin-grid-2">
                 <div class="form-group">
                     <label>Contact Phone (for Call Button)</label>
                     <input type="text" name="settings[contact_phone]" class="form-input" value="<?= e($settings['contact_phone']['setting_value'] ?? '') ?>" placeholder="+1 234 567 8900" dir="ltr">
@@ -128,7 +128,7 @@
             <div class="admin-card" style="margin-bottom: 20px;">
                 <h3 style="color: var(--neon-cyan);">🌐 Social Media Links</h3>
                 <p style="color:var(--text-muted); font-size:0.85rem; margin-bottom:15px;">Displayed in the website footer.</p>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <div class="admin-grid-2">
                     <div class="form-group">
                         <label>Facebook URL</label>
                         <input type="url" name="settings[social_facebook]" class="form-input" value="<?= e($settings['social_facebook']['setting_value'] ?? '') ?>" placeholder="https://facebook.com/..." dir="ltr">

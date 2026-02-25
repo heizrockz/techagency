@@ -24,7 +24,7 @@
             <div class="admin-card" style="margin-bottom: 30px;">
                 <form method="POST" action="<?= baseUrl('admin/portfolio') ?>">
                     <input type="hidden" name="id" value="<?= $editProject['id'] ?? 0 ?>">
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div class="admin-grid-2">
                         <div class="form-group">
                             <label>Slug (URL-friendly name)</label>
                             <input type="text" name="slug" class="form-input" value="<?= e($editProject['slug'] ?? '') ?>" placeholder="e.g. my-project" required>
@@ -70,7 +70,7 @@
                     <?php foreach (SUPPORTED_LOCALES as $loc): ?>
                         <div style="margin-top: 20px; padding: 15px; background: rgba(255,255,255,0.02); border-radius: 8px;">
                             <h4 style="margin-bottom: 10px;"><?= strtoupper($loc) ?> Translation</h4>
-                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                            <div class="admin-grid-2">
                                 <div class="form-group">
                                     <label>Title</label>
                                     <input type="text" name="title_<?= $loc ?>" class="form-input" value="<?= e($editProject['translations'][$loc]['title'] ?? '') ?>" dir="<?= $loc === 'ar' ? 'rtl' : 'ltr' ?>" required>
@@ -99,7 +99,8 @@
             </div>
         <?php else: ?>
             <div class="admin-card">
-                <table class="admin-table">
+                <div style="overflow-x: auto;">
+                    <table class="admin-table">
                     <thead>
                         <tr>
                             <th>Category</th>
@@ -125,7 +126,8 @@
                         </tr>
                         <?php endforeach; ?>
                     </tbody>
-                </table>
+                    </table>
+                </div>
             </div>
         <?php endif; ?>
     </div>

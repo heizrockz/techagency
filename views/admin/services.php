@@ -24,7 +24,7 @@
             <div class="admin-card" style="margin-bottom: 30px;">
                 <form method="POST" action="<?= baseUrl('admin/services') ?>">
                     <input type="hidden" name="id" value="<?= $editService['id'] ?? 0 ?>">
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div class="admin-grid-2">
                         <div class="form-group">
                             <label>Icon (code, monitor, chart, globe, etc)</label>
                             <input type="text" name="icon" class="form-input" value="<?= e($editService['icon'] ?? 'code') ?>">
@@ -67,7 +67,8 @@
             </div>
         <?php else: ?>
             <div class="admin-card">
-                <table class="admin-table">
+                <div style="overflow-x: auto;">
+                    <table class="admin-table">
                     <thead>
                         <tr>
                             <th>Icon / Color</th>
@@ -91,7 +92,8 @@
                         </tr>
                         <?php endforeach; ?>
                     </tbody>
-                </table>
+                    </table>
+                </div>
             </div>
         <?php endif; ?>
     </div>

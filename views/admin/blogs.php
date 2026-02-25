@@ -24,7 +24,7 @@
             <div class="admin-card" style="margin-bottom: 30px;">
                 <form method="POST" action="<?= baseUrl('admin/blogs') ?>" enctype="multipart/form-data">
                     <input type="hidden" name="id" value="<?= $editBlog['id'] ?? 0 ?>">
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div class="admin-grid-2">
                         <div class="form-group">
                             <label>Slug (URL-friendly name, auto-generated if empty)</label>
                             <input type="text" name="slug" class="form-input" value="<?= e($editBlog['slug'] ?? '') ?>" placeholder="e.g. my-first-blog">
@@ -83,7 +83,8 @@
             </div>
         <?php else: ?>
             <div class="admin-card">
-                <table class="admin-table">
+                <div style="overflow-x: auto;">
+                    <table class="admin-table">
                     <thead>
                         <tr>
                             <th>Slug</th>
@@ -114,7 +115,8 @@
                         </tr>
                         <?php endif; ?>
                     </tbody>
-                </table>
+                    </table>
+                </div>
             </div>
         <?php endif; ?>
     </div>

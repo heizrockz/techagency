@@ -24,7 +24,7 @@
             <h3>Add New Translation Key</h3>
             <form method="POST" action="<?= baseUrl('admin/translations') ?>" style="margin-top: 15px;">
                 <input type="hidden" name="action" value="save">
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <div class="admin-grid-2">
                     <div class="form-group">
                         <label>Translation Key (e.g., hero_cta)</label>
                         <input type="text" name="new_key" class="form-input" placeholder="hero_cta">
@@ -34,7 +34,7 @@
                         <input type="text" name="new_group" class="form-input" value="general">
                     </div>
                 </div>
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 15px;">
+                <div class="admin-grid-2" style="margin-top: 15px;">
                     <div class="form-group">
                         <label>English Value</label>
                         <input type="text" name="new_value_en" class="form-input" placeholder="English text">
@@ -64,7 +64,7 @@
                                 <input type="hidden" id="del_<?= e($key) ?>">
                             </div>
                         </div>
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                        <div class="admin-grid-2">
                             <?php foreach (SUPPORTED_LOCALES as $loc): ?>
                                 <div class="form-group" style="margin: 0;">
                                     <label style="font-size: 0.75rem; opacity: 0.7;"><?= strtoupper($loc) ?></label>

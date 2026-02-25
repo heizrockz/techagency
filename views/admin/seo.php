@@ -29,7 +29,7 @@
                 <h3>🌍 Global SEO Settings</h3>
                 <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 20px;">Settings that apply site-wide, such as the browser tab icon and link sharing images.</p>
                 
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <div class="admin-grid-2">
                     <div class="admin-form-group" style="display: flex; align-items: center; gap: 20px;">
                         <div style="flex:1;">
                             <label>Favicon (Browser Tab Icon)</label>

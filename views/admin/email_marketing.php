@@ -45,7 +45,7 @@ $currentPage = 'marketing';
             <div id="config-content" style="display:none; padding-top:20px; border-top:1px solid rgba(255,255,255,0.05); margin-top:15px;">
                 <form method="POST">
                     <input type="hidden" name="action" value="save_settings">
-                    <div class="form-row" style="display:grid; grid-template-columns:1fr 1fr; gap:15px; margin-bottom:15px;">
+                    <div class="admin-grid-2" style="margin-bottom:15px; gap:15px;">
                         <div class="form-group">
                             <label style="display:block; font-size:0.8rem; color:var(--text-muted); margin-bottom:5px;">SMTP Host</label>
                             <input type="text" name="smtp_host" value="<?= e($settings['smtp_host']) ?>" class="form-control" placeholder="smtp.example.com" style="width:100%; padding:10px; background:rgba(255,255,255,0.05); border:1px solid var(--glass-border); border-radius:8px; color:white;">
@@ -55,7 +55,7 @@ $currentPage = 'marketing';
                             <input type="number" name="smtp_port" value="<?= e($settings['smtp_port']) ?>" class="form-control" placeholder="587" style="width:100%; padding:10px; background:rgba(255,255,255,0.05); border:1px solid var(--glass-border); border-radius:8px; color:white;">
                         </div>
                     </div>
-                    <div class="form-row" style="display:grid; grid-template-columns:1fr 1fr; gap:15px; margin-bottom:15px;">
+                    <div class="admin-grid-2" style="margin-bottom:15px; gap:15px;">
                         <div class="form-group">
                             <label style="display:block; font-size:0.8rem; color:var(--text-muted); margin-bottom:5px;">SMTP User</label>
                             <input type="text" name="smtp_user" value="<?= e($settings['smtp_user']) ?>" class="form-control" placeholder="user@example.com" style="width:100%; padding:10px; background:rgba(255,255,255,0.05); border:1px solid var(--glass-border); border-radius:8px; color:white;">
@@ -108,7 +108,7 @@ $currentPage = 'marketing';
                 <div class="card-body">
                     <form id="campaignForm" enctype="multipart/form-data">
                         <div id="campError" style="display:none; background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.2); color:#f43f5e; padding:12px 16px; border-radius:8px; margin-bottom:15px; font-size:0.85rem;"></div>
-                        <div class="form-row" style="display:grid; grid-template-columns:1fr 1fr; gap:30px;">
+                        <div class="admin-grid-2" style="gap:30px;">
                             <div class="col-left">
                                 <div class="form-group" style="margin-bottom:15px;">
                                     <label style="display:block; font-size:0.8rem; color:var(--text-muted); margin-bottom:5px;">Campaign Subject</label>
@@ -200,7 +200,8 @@ $currentPage = 'marketing';
                 <h3 class="card-title" style="font-size:1.1rem; font-weight:600;">📜 Campaign History</h3>
             </div>
             <div class="card-body">
-                <table class="admin-table">
+                <div style="overflow-x: auto;">
+                    <table class="admin-table">
                     <thead>
                         <tr>
                             <th>ID</th>
@@ -228,7 +229,8 @@ $currentPage = 'marketing';
                         <tr><td colspan="5" style="text-align:center; padding:30px; color:var(--text-muted);">No campaigns launched yet.</td></tr>
                         <?php endif; ?>
                     </tbody>
-                </table>
+                    </table>
+                </div>
             </div>
         </div>
     </div>

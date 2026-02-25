@@ -96,6 +96,13 @@
     /* ═══ Connection drawing hint ═══ */
     .fb-hint { position:absolute; bottom:14px; left:14px; background:rgba(251,191,36,0.1); color:#fbbf24; padding:6px 14px; border-radius:6px; font-size:0.75rem; z-index:50; border:1px solid rgba(251,191,36,0.2); font-family:Inter,sans-serif; display:none; }
     .fb-hint.show { display:block; }
+
+    @media (max-width: 768px) {
+        .fb-editor.open { width: 100%; position: absolute; right: 0; bottom: 0; height: 100%; z-index: 1000; }
+        .fb-ed { width: 100%; }
+        .fb-fg label { font-size: 0.8rem; }
+        .fb-fg input, .fb-fg textarea, .fb-fg select { font-size: 1rem; } /* Better for mobile zoom */
+    }
     </style>
 </head>
 <body dir="<?= isRTL() ? 'rtl' : 'ltr' ?>">
@@ -105,10 +112,10 @@
 
     <div class="admin-main" style="padding:0; overflow:hidden;">
         <!-- Top bar -->
-        <div style="padding:12px 20px; background:#0f1117; border-bottom:1px solid rgba(255,255,255,0.06); display:flex; align-items:center; justify-content:space-between; flex-shrink:0;">
-            <h1 style="color:var(--neon-cyan); margin:0; font-size:1.1rem; font-weight:700;">🤖 Chatbot Flow Builder</h1>
+        <div style="padding:12px 20px; background:#0f1117; border-bottom:1px solid rgba(255,255,255,0.06); display:flex; align-items:center; justify-content:space-between; flex-shrink:0; flex-wrap: wrap; gap: 10px;">
+            <h1 style="color:var(--neon-cyan); margin:0; font-size:1.1rem; font-weight:700;">🤖 Flow Builder</h1>
             <div style="display:flex; gap:8px;">
-                <button onclick="FB.addNode()" class="btn-primary" style="padding:7px 16px; font-size:0.82rem;">+ Add Node</button>
+                <button onclick="FB.addNode()" class="btn-primary" style="padding:7px 16px; font-size:0.82rem;">+ Node</button>
             </div>
         </div>
 
