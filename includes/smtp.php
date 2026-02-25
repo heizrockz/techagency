@@ -72,7 +72,8 @@ class MicoSMTP {
                 "Message-ID: <" . time() . "." . uniqid() . "@" . $hostname . ">",
                 "X-Mailer: MicoSage-SMTP",
                 "Precedence: bulk",
-                "Auto-Submitted: auto-generated"
+                "Auto-Submitted: auto-generated",
+                "List-Unsubscribe: <mailto:unsubscribe@" . $hostname . "?subject=unsubscribe>"
             ];
 
             // Generate Plain Text fallback from HTML
