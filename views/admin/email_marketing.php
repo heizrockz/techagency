@@ -106,16 +106,17 @@ $currentPage = 'marketing';
                     <h3 class="card-title" style="font-size:1.1rem; font-weight:600;">🚀 Launch New Campaign</h3>
                 </div>
                 <div class="card-body">
-                    <form id="campaignForm" enctype="multipart/form-data" onsubmit="return launchCampaign(event)">
+                    <form id="campaignForm" enctype="multipart/form-data">
+                        <div id="campError" style="display:none; background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.2); color:#f43f5e; padding:12px 16px; border-radius:8px; margin-bottom:15px; font-size:0.85rem;"></div>
                         <div class="form-row" style="display:grid; grid-template-columns:1fr 1fr; gap:30px;">
                             <div class="col-left">
                                 <div class="form-group" style="margin-bottom:15px;">
                                     <label style="display:block; font-size:0.8rem; color:var(--text-muted); margin-bottom:5px;">Campaign Subject</label>
-                                    <input type="text" name="subject" id="campSubject" class="form-control" required placeholder="Our Latest AI Insights" style="width:100%; padding:10px; background:rgba(255,255,255,0.05); border:1px solid var(--glass-border); border-radius:8px; color:white;">
+                                    <input type="text" name="subject" id="campSubject" class="form-control" placeholder="Our Latest AI Insights" style="width:100%; padding:10px; background:rgba(255,255,255,0.05); border:1px solid var(--glass-border); border-radius:8px; color:white;">
                                 </div>
                                 <div class="form-group" style="margin-bottom:15px;">
                                     <label style="display:block; font-size:0.8rem; color:var(--text-muted); margin-bottom:5px;">Email Body (HTML)</label>
-                                    <textarea name="body" id="campBody" class="form-control" rows="12" required placeholder="Hello, we are excited to share..." style="width:100%; padding:10px; background:rgba(255,255,255,0.05); border:1px solid var(--glass-border); border-radius:8px; color:white; font-family:inherit;"></textarea>
+                                    <textarea name="body" id="campBody" class="form-control" rows="12" placeholder="Hello, we are excited to share..." style="width:100%; padding:10px; background:rgba(255,255,255,0.05); border:1px solid var(--glass-border); border-radius:8px; color:white; font-family:inherit;"></textarea>
                                 </div>
 
                                 <!-- Signature Preview -->
@@ -156,7 +157,7 @@ $currentPage = 'marketing';
                                 </div>
 
                                 <div style="margin-top: 40px; text-align:center;">
-                                    <button type="submit" id="launchBtn" class="btn btn-neon" style="width:100%; padding:15px;">
+                                    <button type="button" id="launchBtn" class="btn btn-neon" style="width:100%; padding:15px;" onclick="launchCampaign()">
                                         <span style="font-size:1.2rem;">🚀</span> Launch Campaign Now
                                     </button>
                                 </div>
