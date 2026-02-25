@@ -937,9 +937,38 @@ function adminChatbot(): void {
             } elseif ($apiAction === 'delete_node') {
                 $nodeId = intval($_POST['node_id'] ?? 0);
                 if ($nodeId > 0) {
-                    $db->prepare('DELETE FROM chatbot_nodes WHERE id = ?')->execute([$nodeId]);
+                    $db->beginTransaction();
+                    try {
+                        // Delete node translations
+                        $db->prepare('DELETE FROM chatbot_node_translations WHERE node_id = ?')->execute([$nodeId]);
+                        
+                        // Find all options of this node and delete their translations
+                        $opts = $db->prepare('SELECT id FROM chatbot_options WHERE node_id = ?');
+                        $opts->execute([$nodeId]);
+                        $optIds = $opts->fetchAll(PDO::FETCH_COLUMN);
+                        if (!empty($optIds)) {
+                            $placeholders = implode(',', array_fill(0, count($optIds), '?'));
+                            $db->prepare("DELETE FROM chatbot_option_translations WHERE option_id IN ($placeholders)")->execute($optIds);
+                        }
+                        
+                        // Delete the options
+                        $db->prepare('DELETE FROM chatbot_options WHERE node_id = ?')->execute([$nodeId]);
+                        
+                        // Break incoming connections from other nodes
+                        $db->prepare('UPDATE chatbot_options SET next_node_id = NULL WHERE next_node_id = ?')->execute([$nodeId]);
+                        
+                        // Finally delete the node
+                        $db->prepare('DELETE FROM chatbot_nodes WHERE id = ?')->execute([$nodeId]);
+                        
+                        $db->commit();
+                        echo json_encode(['success' => true]);
+                    } catch (Exception $e) {
+                        $db->rollBack();
+                        throw $e;
+                    }
+                } else {
+                    echo json_encode(['success' => true]);
                 }
-                echo json_encode(['success' => true]);
                 exit;
 
             } elseif ($apiAction === 'delete_option') {
@@ -995,6 +1024,12 @@ function adminInbox(): void {
         $sessionData = $session->fetch();
 
         if ($sessionData) {
+            // Mark session as read
+            if ($sessionData['is_read'] == 0) {
+                $db->prepare('UPDATE chatbot_sessions SET is_read = 1 WHERE id = ?')->execute([$selectedId]);
+                $sessionData['is_read'] = 1;
+            }
+
             $messagesStmt = $db->prepare('SELECT * FROM chatbot_messages WHERE session_id = ? ORDER BY created_at ASC');
             $messagesStmt->execute([$selectedId]);
             $messages = $messagesStmt->fetchAll();
