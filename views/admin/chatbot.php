@@ -488,7 +488,10 @@ const FB = {
                     <label>URL / Phone</label>
                     <input id="eo_${o.id}_val" value="${this.esc(o.action_value||'')}">
                 </div>
-                <button class="fb-opt-save" onclick="FB.saveOpt(${o.id},${n.id})">Save Option</button>
+                <div style="display:flex; gap:6px;">
+                    <button class="fb-opt-save" style="flex:1;" onclick="FB.saveOpt(${o.id},${n.id})">Save Option</button>
+                    ${o.next_node_id ? `<button class="fb-opt-save" style="flex:1; background:rgba(244,63,94,0.1); border-color:rgba(244,63,94,0.2); color:#f43f5e;" onclick="FB.breakLink(${o.id},${n.id})">Break Link</button>`:''}
+                </div>
             </div>`;
         }).join('');
 
@@ -593,6 +596,22 @@ const FB = {
         if (!confirm('Delete this option?')) return;
         await this.api('delete_option', {option_id:oid});
         if (this.selId) { await this.loadAll(); this.openEditor(this.selId); }
+    },
+    
+    async breakLink(oid, nid) {
+        const d = {
+            option_id:oid, node_id:nid,
+            action_type: 'goto_node',
+            next_node_id: '',
+            action_value: '',
+            sort_order: 0
+        };
+        // Preserve labels
+        const opt = this.nodes.find(n=>n.id==nid).options.find(o=>o.id==oid);
+        LOC.forEach(l=> d['label_'+l] = opt.translations?.[l]||'');
+        
+        const r = await this.api('save_option', d);
+        if (r.success) { await this.loadAll(); this.openEditor(nid); }
     },
 
     esc(s) { const d=document.createElement('div'); d.textContent=s||''; return d.innerHTML; }
