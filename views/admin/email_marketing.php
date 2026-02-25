@@ -254,9 +254,19 @@ function toggleRecipientType(type) {
     document.getElementById('recipient-bulk').style.display = type === 'bulk' ? 'block' : 'none';
 }
 
-async function launchCampaign(e) {
-    e.preventDefault();
-    if (!confirm('Launch campaign to all recipients?')) return false;
+async function launchCampaign() {
+    const errEl = document.getElementById('campError');
+    errEl.style.display = 'none';
+
+    const subject = document.getElementById('campSubject').value.trim();
+    const body = document.getElementById('campBody').value.trim();
+    const sendType = document.querySelector('input[name="send_type"]:checked').value;
+
+    // Visible validation
+    if (!subject) { showCampError('Please enter a campaign subject.'); return; }
+    if (!body) { showCampError('Please enter the email body.'); return; }
+
+    if (!confirm('Launch campaign to all recipients?')) return;
 
     const btn = document.getElementById('launchBtn');
     btn.disabled = true;
