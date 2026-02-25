@@ -1249,10 +1249,26 @@ function adminEmailMarketing(): void {
     $sent = false;
     $error = '';
 
+    // Ensure tables exist
+    try {
+        $db->query("SELECT 1 FROM email_settings LIMIT 1");
+        $db->query("SELECT 1 FROM marketing_campaigns LIMIT 1");
+        $db->query("SELECT 1 FROM marketing_recipients LIMIT 1");
+    } catch (Exception $e) {
+        // Tables missing - try to apply schema
+        $schemaFile = __DIR__ . '/../migrations/email_schema.sql';
+        if (file_exists($schemaFile)) {
+            $schema = file_get_contents($schemaFile);
+            $db->exec($schema);
+        } else {
+            die("Marketing tables missing and schema file not found.");
+        }
+    }
+
     // Fetch settings
     $settings = $db->query('SELECT * FROM email_settings LIMIT 1')->fetch();
     if (!$settings) {
-        $db->exec('INSERT INTO email_settings (id) VALUES (1)');
+        $db->exec('INSERT INTO email_settings (id, from_name) VALUES (1, "Mico Sage Team")');
         $settings = $db->query('SELECT * FROM email_settings LIMIT 1')->fetch();
     }
 
