@@ -147,6 +147,8 @@
                 padding: 12px 0; 
                 border-bottom: 1px solid rgba(255,255,255,0.05);
                 font-size: 0.9rem;
+                overflow-wrap: anywhere;
+                word-break: break-word;
             }
             .admin-table td:last-child { border-bottom: none; padding-top: 15px; }
             .admin-table td::before { 
@@ -157,14 +159,17 @@
                 color: var(--neon-cyan);
                 letter-spacing: 1px;
                 text-align: left;
+                min-width: 100px;
+                flex-shrink: 0;
+            }
+            .admin-table td .badge {
+                margin: 0;
             }
             .admin-table td[data-label="Translations"] {
                 flex-direction: column;
                 align-items: flex-start;
                 text-align: left;
-            }
-            .admin-table td[data-label="Translations"]::before {
-                margin-bottom: 8px;
+                gap: 5px;
             }
         }
     </style>

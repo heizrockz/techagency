@@ -310,6 +310,25 @@ html.light-theme {
     --text-muted: #64748b;
 }
 
+html.light-theme .mobile-nav {
+    background: rgba(255, 255, 255, 0.98) !important;
+    border-color: rgba(0, 0, 0, 0.08) !important;
+    box-shadow: 0 15px 50px rgba(0, 0, 0, 0.1) !important;
+}
+
+html.light-theme .mobile-nav a {
+    color: #475569 !important;
+}
+
+html.light-theme .mobile-nav a:hover {
+    background: rgba(0, 0, 0, 0.04) !important;
+    color: #0f172a !important;
+}
+
+html.light-theme .nav-hamburger span {
+    background: #0f172a !important;
+}
+
 html.light-theme body {
     background: #f1f5f9;
     color: var(--text-primary);

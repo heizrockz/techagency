@@ -12,7 +12,7 @@ $title = $seo['title'] ?? 'Our Projects | Mico Sage';
     
     <div class="section-container" style="position: relative; z-index: 1;">
         <div class="section-heading animate-on-scroll">
-            <h1 class="gradient-text" style="font-size: 3rem; margin-bottom: 20px;"><?= e(getContent('blog_title')) ?></h1>
+            <h1 class="gradient-text hero-title" style="margin-bottom: 20px;"><?= e(getContent('blog_title')) ?></h1>
             <p style="color: var(--text-secondary); font-size: 1.1rem; max-width: 600px; margin: 0 auto;"><?= e(getContent('blog_subtitle')) ?></p>
             <div class="heading-line" style="margin: 30px auto; width: 80px; height: 4px; background: linear-gradient(90deg, var(--neon-cyan), var(--neon-violet)); border-radius: 2px;"></div>
         </div>
@@ -26,7 +26,7 @@ $title = $seo['title'] ?? 'Our Projects | Mico Sage';
                 <h3 style="color: var(--text-muted);">No blog posts found yet.</h3>
             </div>
         <?php else: ?>
-            <div id="blog-grid-main" class="blog-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 40px;">
+            <div id="blog-grid-main" class="blog-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 40px;">
                 <?php foreach ($blogs as $i => $blog): 
                     $isHidden = $i >= 10 ? 'style="display:none;" class="blog-card-item-main hidden-blog-main"' : 'class="blog-card-item-main"';
                 ?>
@@ -185,4 +185,19 @@ $title = $seo['title'] ?? 'Our Projects | Mico Sage';
     .blog-card:hover { transform: translateY(-15px); background: var(--glass-hover); border-color: var(--theme-primary); box-shadow: 0 30px 60px -15px rgba(0,0,0,0.3); }
     .blog-card:hover img, .blog-card:hover video { transform: scale(1.1); }
     .blog-nav-link:hover { color: var(--theme-gold); gap: 12px; }
+
+    .hero-title { font-size: 3.5rem; }
+
+    @media (max-width: 768px) {
+        .hero-title { font-size: 2.5rem !important; }
+        .blog-grid { grid-template-columns: 1fr !important; gap: 30px !important; }
+        .blog-card { border-radius: 20px !important; }
+        .blog-media { height: 200px !important; }
+        .blog-content { padding: 25px !important; }
+    }
+    @media (max-width: 480px) {
+        .hero-title { font-size: 2rem !important; }
+        .blog-grid { gap: 20px !important; }
+        .blog-content { padding: 20px !important; }
+    }
 </style>
