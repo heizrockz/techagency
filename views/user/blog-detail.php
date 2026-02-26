@@ -14,7 +14,7 @@
 
     <div class="section-container" style="position: relative; z-index: 1;">
         <!-- Back Link -->
-        <a href="<?= baseUrl('/') ?>#blogs" class="back-link animate-on-scroll" style="display:inline-flex; align-items:center; gap:8px; color:rgba(255,255,255,0.6); text-decoration:none; margin-bottom:32px; font-weight:500; transition:all 0.3s ease;">
+        <a href="<?= baseUrl('/') ?>#blogs" class="back-link animate-on-scroll" style="display:inline-flex; align-items:center; gap:8px; color:var(--text-secondary); text-decoration:none; margin-bottom:32px; font-weight:500; transition:all 0.3s ease;">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
             <?= getCurrentLocale() === 'en' ? 'Back to Insights' : 'العودة للمقالات' ?>
         </a>
@@ -26,14 +26,14 @@
                     <?= date('M d, Y', strtotime($blog['created_at'])) ?>
                 </span>
                 <div style="width:4px; height:4px; border-radius:50%; background:rgba(255,255,255,0.2);"></div>
-                <span class="blog-category" style="font-size:0.9rem; color:rgba(255,255,255,0.5);">
+                <span class="blog-category" style="font-size:0.9rem; color:var(--text-muted);">
                     <?= e($blog['category'] ?? (getCurrentLocale()==='en'?'Technology':'تكنولوجيا')) ?>
                 </span>
             </div>
             <h1 class="gradient-text" style="font-size: clamp(2.5rem, 5vw, 4rem); line-height: 1.1; margin-bottom: 24px;">
                 <?= e($blog['title']) ?>
             </h1>
-            <p class="blog-lead" style="font-size: 1.25rem; color: rgba(255,255,255,0.7); max-width: 800px; line-height: 1.6;">
+            <p class="blog-lead" style="font-size: 1.25rem; color: var(--text-secondary); max-width: 800px; line-height: 1.6; font-weight: 400;">
                 <?= e($blog['description']) ?>
             </p>
         </header>
@@ -42,7 +42,7 @@
         <div class="blog-content-wrapper" style="display: grid; grid-template-columns: 1fr; gap: 48px;">
             
             <!-- Blog Featured Media -->
-            <div class="blog-featured-media animate-on-scroll" style="border-radius:24px; overflow:hidden; border:1px solid rgba(255,255,255,0.1); background:rgba(255,255,255,0.03); box-shadow:0 30px 60px -12px rgba(0,0,0,0.5);">
+            <div class="blog-featured-media animate-on-scroll" style="border-radius:24px; overflow:hidden; border:1px solid var(--glass-border); background:var(--glass-bg); backdrop-filter: blur(10px); box-shadow:0 30px 60px -12px rgba(0,0,0,0.25);">
                 <?php
                     $mediaType = $blog['media_type'] ?? 'image';
                     $mediaUrl  = $blog['media_url'] ?? '';
@@ -50,17 +50,22 @@
                     // Helper: extract YouTube video ID from various URL formats
                     function extractYouTubeId($url) {
                         $patterns = [
-                            '/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/|youtube\.com\/shorts\/)([a-zA-Z0-9_-]{11})/',
+                            '/youtube\.com\/watch\?.*v=([a-zA-Z0-9_-]{11})/',
+                            '/youtu\.be\/([a-zA-Z0-9_-]{11})/',
+                            '/youtube\.com\/embed\/([a-zA-Z0-9_-]{11})/',
+                            '/youtube\.com\/shorts\/([a-zA-Z0-9_-]{11})/',
+                            '/v=([a-zA-Z0-9_-]{11})/',
+                            '/^([a-zA-Z0-9_-]{11})$/'
                         ];
                         foreach ($patterns as $p) {
                             if (preg_match($p, $url, $m)) return $m[1];
                         }
                         return null;
                     }
-
+                    
                     // Helper: extract Vimeo video ID
                     function extractVimeoId($url) {
-                        if (preg_match('/vimeo\.com\/(\d+)/', $url, $m)) return $m[1];
+                        if (preg_match('/vimeo\.com\/(?:video\/)?(\d+)/', $url, $m)) return $m[1];
                         return null;
                     }
                 ?>
@@ -107,26 +112,26 @@
 
                 <?php else: ?>
                     <!-- No media placeholder -->
-                    <div style="width:100%; aspect-ratio:16/9; background:linear-gradient(45deg, #1e1e1e, #2a2a2a); display:flex; align-items:center; justify-content:center; color:rgba(255,255,255,0.1);">
+                    <div style="width:100%; aspect-ratio:16/9; background:var(--bg-secondary); display:flex; align-items:center; justify-content:center; color:var(--text-muted);">
                         <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
                     </div>
                 <?php endif; ?>
             </div>
 
             <!-- Blog Rich Text Content -->
-            <div class="blog-rich-content animate-on-scroll" style="font-size:1.15rem; line-height:1.8; color:rgba(255,255,255,0.85); max-width:850px; margin:0 auto;">
+            <div class="blog-rich-content animate-on-scroll" style="font-size:1.15rem; line-height:1.9; color:var(--text-primary); max-width:850px; margin:0 auto; font-weight: 400;">
                 <?= ($blog['content']) ?> <!-- Already sanitized or assuming HTML from admin -->
             </div>
 
         </div>
 
         <!-- Share Section -->
-        <div class="blog-footer animate-on-scroll" style="margin-top:80px; padding-top:40px; border-top:1px solid rgba(255,255,255,0.1); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:24px;">
-            <div class="share-title" style="font-weight:600; color:#fff;"><?= getCurrentLocale() === 'en' ? 'Share this Insight' : 'شارك هذا المقال' ?></div>
+        <div class="blog-footer animate-on-scroll" style="margin-top:80px; padding-top:40px; border-top:1px solid var(--glass-border); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:24px;">
+            <div class="share-title" style="font-weight:600; color:var(--text-primary);"><?= getCurrentLocale() === 'en' ? 'Share this Insight' : 'شارك هذا المقال' ?></div>
             <div class="social-share-links" style="display:flex; gap:16px;">
-                <a href="#" class="share-btn" style="width:40px; height:40px; border-radius:50%; background:rgba(255,255,255,0.05); display:flex; align-items:center; justify-content:center; color:#fff; transition:0.3s;"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path></svg></a>
-                <a href="#" class="share-btn" style="width:40px; height:40px; border-radius:50%; background:rgba(255,255,255,0.05); display:flex; align-items:center; justify-content:center; color:#fff; transition:0.3s;"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"></path></svg></a>
-                <a href="#" class="share-btn" style="width:40px; height:40px; border-radius:50%; background:rgba(255,255,255,0.05); display:flex; align-items:center; justify-content:center; color:#fff; transition:0.3s;"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect x="2" y="9" width="4" height="12"></rect><circle cx="4" cy="4" r="2"></circle></svg></a>
+                <a href="#" class="share-btn" style="width:40px; height:40px; border-radius:50%; background:var(--glass-bg); border:1px solid var(--glass-border); display:flex; align-items:center; justify-content:center; color:var(--text-primary); transition:0.3s;"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path></svg></a>
+                <a href="#" class="share-btn" style="width:40px; height:40px; border-radius:50%; background:var(--glass-bg); border:1px solid var(--glass-border); display:flex; align-items:center; justify-content:center; color:var(--text-primary); transition:0.3s;"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"></path></svg></a>
+                <a href="#" class="share-btn" style="width:40px; height:40px; border-radius:50%; background:var(--glass-bg); border:1px solid var(--glass-border); display:flex; align-items:center; justify-content:center; color:var(--text-primary); transition:0.3s;"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect x="2" y="9" width="4" height="12"></rect><circle cx="4" cy="4" r="2"></circle></svg></a>
             </div>
         </div>
     </div>
@@ -134,10 +139,10 @@
 
 <style>
     .back-link:hover { color: var(--neon-emerald) !important; transform: translateX(-5px); }
-    .blog-rich-content h2, .blog-rich-content h3 { color: #fff; margin-top: 2rem; margin-bottom: 1rem; }
+    .blog-rich-content h2, .blog-rich-content h3 { color: var(--text-primary); margin-top: 2.5rem; margin-bottom: 1.25rem; font-weight: 700; }
     .blog-rich-content p { margin-bottom: 1.5rem; }
-    .blog-rich-content strong { color: var(--neon-emerald); }
+    .blog-rich-content strong { color: var(--neon-emerald); font-weight: 600; }
     .blog-rich-content ul { padding-left: 1.5rem; margin-bottom: 1.5rem; }
-    .blog-rich-content li { margin-bottom: 0.5rem; list-style-type: square; color: rgba(255,255,255,0.7); }
-    .share-btn:hover { background: var(--neon-emerald) !important; transform: translateY(-3px); box-shadow:0 10px 20px -5px rgba(16,185,129,0.3); }
+    .blog-rich-content li { margin-bottom: 0.75rem; list-style-type: square; color: var(--text-secondary); }
+    .share-btn:hover { background: var(--neon-emerald) !important; color: #fff !important; transform: translateY(-3px); box-shadow:0 10px 20px -5px rgba(16,185,129,0.3); border-color: var(--neon-emerald) !important; }
 </style>

@@ -529,12 +529,41 @@ $blogs = getBlogs();
                         <video autoplay loop muted playsinline style="width: 100%; height: 100%; object-fit: cover; opacity: 0.8; transition: transform 0.8s ease;">
                             <source src="<?= baseUrl($blog['media_url']) ?>" type="video/<?= pathinfo($blog['media_url'], PATHINFO_EXTENSION) ?>">
                         </video>
-                    <?php elseif ($blog['media_type'] === 'video_link' && !empty($blog['media_url'])): ?>
-                        <div style="width: 100%; height: 100%; background: #0a0f18; display:flex; align-items:center; justify-content:center;">
-                            <a href="<?= e($blog['media_url']) ?>" target="_blank" style="color:var(--neon-pink); opacity:0.8; transition:transform 0.3s ease;" onmouseover="this.style.transform='scale(1.2)'" onmouseout="this.style.transform='scale(1)'">
-                                <svg width="50" height="50" viewBox="0 0 24 24" fill="currentColor"><path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"/></svg>
-                            </a>
-                        </div>
+                    <?php elseif ($blog['media_type'] === 'video_link' && !empty($blog['media_url'])): 
+                            $isYoutube = false;
+                            $ytId = null;
+                            $patterns = [
+                                '/youtube\.com\/watch\?.*v=([a-zA-Z0-9_-]{11})/',
+                                '/youtu\.be\/([a-zA-Z0-9_-]{11})/',
+                                '/youtube\.com\/embed\/([a-zA-Z0-9_-]{11})/',
+                                '/youtube\.com\/shorts\/([a-zA-Z0-9_-]{11})/',
+                                '/v=([a-zA-Z0-9_-]{11})/',
+                                '/^([a-zA-Z0-9_-]{11})$/'
+                            ];
+                            foreach ($patterns as $p) {
+                                if (preg_match($p, $blog['media_url'], $m)) {
+                                    $isYoutube = true;
+                                    $ytId = $m[1];
+                                    break;
+                                }
+                            }
+                        ?>
+                        <?php if ($isYoutube && $ytId): ?>
+                            <div style="width: 100%; height: 100%; position: relative;">
+                                <img src="https://img.youtube.com/vi/<?= $ytId ?>/maxresdefault.jpg" alt="<?= e($blog['title'] ?? '') ?>" style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.8s ease; opacity: 0.9;" onerror="this.src='https://img.youtube.com/vi/<?= $ytId ?>/hqdefault.jpg'">
+                                <div style="position: absolute; inset: 0; display:flex; align-items:center; justify-content:center; background: rgba(0,0,0,0.3);">
+                                    <a href="<?= e($blog['media_url']) ?>" target="_blank" style="color:var(--neon-pink); opacity:0.9; transition:transform 0.3s ease; filter: drop-shadow(0 0 10px rgba(0,0,0,0.5));" onmouseover="this.style.transform='scale(1.2)'" onmouseout="this.style.transform='scale(1)'">
+                                        <svg width="60" height="60" viewBox="0 0 24 24" fill="currentColor"><path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"/></svg>
+                                    </a>
+                                </div>
+                            </div>
+                        <?php else: ?>
+                            <div style="width: 100%; height: 100%; background: #0a0f18; display:flex; align-items:center; justify-content:center;">
+                                <a href="<?= e($blog['media_url']) ?>" target="_blank" style="color:var(--neon-pink); opacity:0.8; transition:transform 0.3s ease;" onmouseover="this.style.transform='scale(1.2)'" onmouseout="this.style.transform='scale(1)'">
+                                    <svg width="50" height="50" viewBox="0 0 24 24" fill="currentColor"><path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"/></svg>
+                                </a>
+                            </div>
+                        <?php endif; ?>
                     <?php else: ?>
                         <img src="<?= !empty($blog['media_url']) ? baseUrl($blog['media_url']) : baseUrl('assets/images/placeholder.webp') ?>" alt="<?= e($blog['title'] ?? '') ?>" style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.8s ease; opacity: 0.9;">
                     <?php endif; ?>

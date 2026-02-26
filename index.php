@@ -39,6 +39,8 @@ if ($path === '/' || $path === '/index.php' || $path === '') {
 } elseif (preg_match('#^/blog/([^/]+)$#', $path, $matches)) {
     require_once __DIR__ . '/controllers/BlogController.php';
     showBlogDetail($matches[1]);
+} elseif ($path === '/portfolio') {
+    require_once __DIR__ . '/controllers/PortfolioController.php';
 } elseif ($path === '/admin/login') {
     require_once __DIR__ . '/controllers/AdminController.php';
     adminLogin();
@@ -96,20 +98,10 @@ if ($path === '/' || $path === '/index.php' || $path === '') {
     } elseif ($path === '/admin/logout') {
         adminLogout();
     } else {
-        // Handle other admin routes or 404
-        if (file_exists(__DIR__ . '/views/errors/404.php')) {
-            require_once __DIR__ . '/views/errors/404.php';
-        } else {
-            http_response_code(404);
-            echo "404 Not Found";
-        }
+        // Handle other admin routes or 404 by redirecting to home
+        require_once __DIR__ . '/controllers/HomeController.php';
     }
 } else {
-    // 404
-    if (file_exists(__DIR__ . '/views/errors/404.php')) {
-        require_once __DIR__ . '/views/errors/404.php';
-    } else {
-        http_response_code(404);
-        echo "404 Not Found";
-    }
+    // Catch-all: Route unknown requests to the home page instead of 404
+    require_once __DIR__ . '/controllers/HomeController.php';
 }

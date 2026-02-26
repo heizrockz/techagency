@@ -4,7 +4,7 @@ $seo = getSeoMeta('blogs');
 $title = $seo['title'] ?? 'Our Projects | Mico Sage';
 ?>
 
-<section class="page-hero" style="padding: 140px 0 80px; position: relative; overflow: hidden; background: #05080f;">
+<section class="page-hero" style="padding: 140px 0 80px; position: relative; overflow: hidden; background: var(--bg-primary);">
     <div class="blog-background-effects" style="position:absolute; inset:0; pointer-events:none; z-index:0;">
         <div style="position:absolute; top:-10%; left:-10%; width:40%; height:40%; background:radial-gradient(circle, rgba(var(--neon-violet-rgb), 0.1) 0%, transparent 70%); filter:blur(100px);"></div>
         <div style="position:absolute; bottom:-10%; right:-10%; width:40%; height:40%; background:radial-gradient(circle, rgba(var(--neon-emerald-rgb), 0.1) 0%, transparent 70%); filter:blur(100px);"></div>
@@ -13,24 +13,24 @@ $title = $seo['title'] ?? 'Our Projects | Mico Sage';
     <div class="section-container" style="position: relative; z-index: 1;">
         <div class="section-heading animate-on-scroll">
             <h1 class="gradient-text" style="font-size: 3rem; margin-bottom: 20px;"><?= e(getContent('blog_title')) ?></h1>
-            <p style="color: rgba(255,255,255,0.6); font-size: 1.1rem; max-width: 600px; margin: 0 auto;"><?= e(getContent('blog_subtitle')) ?></p>
+            <p style="color: var(--text-secondary); font-size: 1.1rem; max-width: 600px; margin: 0 auto;"><?= e(getContent('blog_subtitle')) ?></p>
             <div class="heading-line" style="margin: 30px auto; width: 80px; height: 4px; background: linear-gradient(90deg, var(--neon-cyan), var(--neon-violet)); border-radius: 2px;"></div>
         </div>
     </div>
 </section>
 
-<section class="blog-grid-section" style="padding: 60px 0 100px; background: #050810;">
+<section class="blog-grid-section" style="padding: 60px 0 100px; background: var(--bg-primary);">
     <div class="section-container">
         <?php if (empty($blogs)): ?>
             <div style="text-align: center; padding: 100px 0;">
-                <h3 style="color: rgba(255,255,255,0.4);">No blog posts found yet.</h3>
+                <h3 style="color: var(--text-muted);">No blog posts found yet.</h3>
             </div>
         <?php else: ?>
             <div class="blog-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 40px;">
                 <?php foreach ($blogs as $i => $blog): ?>
-                <div class="blog-card animate-on-scroll" style="animation-delay: <?= $i * 0.05 ?>s; background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255,255,255,0.08); border-radius: 24px; overflow: hidden; backdrop-filter: blur(12px); transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);">
+                <div class="blog-card animate-on-scroll" style="animation-delay: <?= $i * 0.05 ?>s; background: var(--glass-bg); border: 1px solid var(--glass-border); border-radius: 24px; overflow: hidden; backdrop-filter: blur(12px); transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);">
                     
-                    <div class="blog-media" style="position: relative; height: 240px; overflow: hidden; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                    <div class="blog-media" style="position: relative; height: 240px; overflow: hidden; border-bottom: 1px solid var(--glass-border);">
                         <?php if ($blog['media_type'] === 'video' && !empty($blog['media_url'])): ?>
                             <video autoplay loop muted playsinline style="width: 100%; height: 100%; object-fit: cover; opacity: 0.8; transition: transform 0.8s ease;">
                                 <source src="<?= baseUrl($blog['media_url']) ?>" type="video/<?= pathinfo($blog['media_url'], PATHINFO_EXTENSION) ?>">
@@ -57,18 +57,18 @@ $title = $seo['title'] ?? 'Our Projects | Mico Sage';
                             <img src="<?= baseUrl($blog['media_url']) ?>" alt="<?= e($blog['title'] ?? '') ?>" style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.8s ease; opacity: 0.9;">
                         <?php else: ?>
                             <div style="width:100%; height:100%; background:linear-gradient(135deg, #0a0f18, #141a2a); display:flex; align-items:center; justify-content:center;">
-                                <svg width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="1"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                                <svg width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="var(--glass-border)" stroke-width="1"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
                             </div>
                         <?php endif; ?>
                         <div style="position:absolute; top:0; left:0; width:100%; height:100%; background:linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.6));"></div>
-                        <div style="position:absolute; top:20px; right:20px; padding:6px 14px; background:rgba(0,0,0,0.6); border:1px solid rgba(255,255,255,0.1); border-radius:10px; backdrop-filter:blur(8px); color:#fff; font-size:0.75rem; font-weight:600;">
+                        <div style="position:absolute; top:20px; right:20px; padding:6px 14px; background:var(--bg-primary); border:1px solid var(--glass-border); border-radius:10px; backdrop-filter:blur(8px); color:var(--text-primary); font-size:0.75rem; font-weight:600;">
                             <?= date('M d, Y', strtotime($blog['created_at'])) ?>
                         </div>
                     </div>
 
                     <div class="blog-content" style="padding: 30px;">
-                        <h3 style="font-size: 1.4rem; margin: 0 0 15px 0; color: #fff; line-height: 1.4; font-weight: 600;"><?= e($blog['title'] ?? '') ?></h3>
-                        <p style="color: rgba(255,255,255,0.5); font-size: 0.95rem; line-height: 1.7; margin-bottom: 30px; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;"><?= e($blog['description'] ?? '') ?></p>
+                        <h3 style="font-size: 1.4rem; margin: 0 0 15px 0; color: var(--text-primary); line-height: 1.4; font-weight: 600;"><?= e($blog['title'] ?? '') ?></h3>
+                        <p style="color: var(--text-secondary); font-size: 0.95rem; line-height: 1.7; margin-bottom: 30px; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;"><?= e($blog['description'] ?? '') ?></p>
                         
                         <a href="<?= baseUrl('blog/' . e($blog['slug'])) ?>" class="blog-nav-link" style="color: var(--neon-emerald); font-size: 0.85rem; font-weight: 800; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; letter-spacing: 1px; text-transform: uppercase;">
                             EXPLORE PROJECT
@@ -83,7 +83,7 @@ $title = $seo['title'] ?? 'Our Projects | Mico Sage';
 </section>
 
 <style>
-    .blog-card:hover { transform: translateY(-15px); background: rgba(255,255,255,0.05); border-color: rgba(var(--neon-emerald-rgb), 0.4); box-shadow: 0 30px 60px -15px rgba(0,0,0,0.6); }
+    .blog-card:hover { transform: translateY(-15px); background: var(--glass-hover); border-color: var(--theme-primary); box-shadow: 0 30px 60px -15px rgba(0,0,0,0.3); }
     .blog-card:hover img, .blog-card:hover video { transform: scale(1.1); }
-    .blog-nav-link:hover { color: #fff; gap: 12px; }
+    .blog-nav-link:hover { color: var(--theme-gold); gap: 12px; }
 </style>

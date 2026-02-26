@@ -66,7 +66,7 @@ ON DUPLICATE KEY UPDATE value = VALUES(value);
 -- 7. Insert Sample Blogs to ensure visibility on User Side
 INSERT IGNORE INTO blogs (id, slug, media_type, media_url, sort_order, is_active) VALUES
 (1, 'future-of-ai-engineering', 'image', 'assets/images/placeholder.webp', 1, 1),
-(2, 'modern-windows-ui-design', 'video_link', 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', 2, 1),
+(2, 'modern-windows-ui-design', 'video_link', 'https://youtu.be/dQw4w9WgXcQ?si=ab3ASPhEGHDrkesH', 2, 1),
 (3, 'digital-marketing-trends-2026', 'image', 'assets/images/placeholder.webp', 3, 1);
 
 INSERT IGNORE INTO blog_translations (blog_id, locale, title, description) VALUES

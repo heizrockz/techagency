@@ -300,14 +300,14 @@ html.light-theme .theme-toggle .moon {
 html.light-theme {
     --bg-primary: #f8fafc;
     --bg-secondary: #f1f5f9;
-    --bg-card: rgba(255, 255, 255, 0.9);
-    --glass-bg: rgba(255, 255, 255, 0.8);
-    --glass-border: rgba(0, 0, 0, 0.1);
-    --glass-hover: rgba(0, 0, 0, 0.05);
+    --bg-card: #ffffff;
+    --glass-bg: rgba(255, 255, 255, 0.9);
+    --glass-border: rgba(0, 0, 0, 0.08);
+    --glass-hover: rgba(0, 0, 0, 0.04);
 
     --text-primary: #0f172a;
-    --text-secondary: #475569;
-    --text-muted: #94a3b8;
+    --text-secondary: #334155;
+    --text-muted: #64748b;
 }
 
 html.light-theme body {
@@ -316,8 +316,8 @@ html.light-theme body {
 }
 
 html.light-theme .navbar-island {
-    background: rgba(255, 255, 255, 0.9);
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+    background: rgba(255, 255, 255, 0.95);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.8);
 }
 
 html.light-theme .navbar-island:hover {
@@ -330,22 +330,27 @@ html.light-theme .nav-links a {
 
 html.light-theme .nav-links a:hover {
     color: #0f172a;
-    background: rgba(0, 0, 0, 0.05);
 }
 
 html.light-theme .nav-logo {
     -webkit-text-fill-color: #0f172a;
 }
 
+html.light-theme .hero-section {
+    background: radial-gradient(circle at 10% 20%, rgba(16, 185, 129, 0.05) 0%, transparent 40%),
+        radial-gradient(circle at 90% 80%, rgba(14, 165, 233, 0.05) 0%, transparent 40%),
+        var(--bg-primary);
+}
+
 html.light-theme .hero-subtitle {
-    color: #475569;
+    color: #334155;
 }
 
 html.light-theme .floating-code {
-    background: rgba(255, 255, 255, 0.9) !important;
+    background: #ffffff !important;
     border: 1px solid rgba(0, 0, 0, 0.1) !important;
-    color: #334155 !important;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1) !important;
+    color: #0f172a !important;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.06) !important;
 }
 
 html.light-theme .step-circle {
@@ -356,7 +361,8 @@ html.light-theme .step-circle {
 
 html.light-theme .step-content {
     background: #ffffff;
-    border-color: rgba(0, 0, 0, 0.1);
+    border-color: rgba(0, 0, 0, 0.08);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
 }
 
 html.light-theme .step-content h3 {
@@ -369,8 +375,8 @@ html.light-theme .step-content p {
 
 html.light-theme .service-card {
     background: #ffffff;
-    border-color: rgba(0, 0, 0, 0.1);
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    border-color: rgba(0, 0, 0, 0.06);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
 }
 
 html.light-theme .service-card h3 {
@@ -383,7 +389,7 @@ html.light-theme .service-card p {
 
 html.light-theme .tagline-card {
     background: #ffffff;
-    border-color: rgba(0, 0, 0, 0.1);
+    border-color: rgba(0, 0, 0, 0.06);
 }
 
 html.light-theme .tagline-card h3 {
@@ -404,8 +410,8 @@ html.light-theme .section-heading p {
 
 html.light-theme .blog-card {
     background: #ffffff !important;
-    border-color: rgba(0, 0, 0, 0.1) !important;
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1) !important;
+    border-color: rgba(0, 0, 0, 0.06) !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04) !important;
 }
 
 html.light-theme .blog-card h3 {
@@ -420,9 +426,30 @@ html.light-theme .blog-nav-link:hover {
     color: var(--neon-emerald) !important;
 }
 
+html.light-theme .booking-card {
+    background: #ffffff;
+    border-color: rgba(0, 0, 0, 0.06);
+    box-shadow: 0 10px 50px rgba(0, 0, 0, 0.05);
+}
+
+html.light-theme .form-group label {
+    color: #0f172a;
+}
+
+html.light-theme .form-input {
+    background: #f8fafc;
+    border-color: rgba(0, 0, 0, 0.1);
+    color: #0f172a;
+}
+
+html.light-theme .form-input:focus {
+    background: #ffffff;
+    border-color: var(--theme-primary);
+}
+
 html.light-theme .stat-card {
     background: #ffffff;
-    border-color: rgba(0, 0, 0, 0.1);
+    border-color: rgba(0, 0, 0, 0.06);
 }
 
 html.light-theme .stat-label {
@@ -430,7 +457,7 @@ html.light-theme .stat-label {
 }
 
 html.light-theme .about-text p {
-    color: #475569;
+    color: #334155;
 }
 
 html.light-theme .about-section h2 {
@@ -468,8 +495,8 @@ html.light-theme .floating-call-btn {
 
 html.light-theme #chatbotPanel {
     background: #ffffff;
-    border-color: rgba(0, 0, 0, 0.1);
-    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+    border-color: rgba(0, 0, 0, 0.08);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.1);
 }
 
 html.light-theme .chat-msg.bot {
@@ -666,6 +693,15 @@ html.light-theme .chat-msg.user {
     100% {
         background-position: 0% center;
     }
+}
+
+.gradient-text {
+    background: linear-gradient(135deg, var(--theme-primary) 0%, var(--theme-gold) 50%, var(--neon-cyan) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    background-size: 200% auto;
+    animation: gradientShift 4s ease-in-out infinite;
 }
 
 .hero-subtitle {
