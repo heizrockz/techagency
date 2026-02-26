@@ -90,6 +90,127 @@
     <!-- Mobile Nav -->
     <?php require __DIR__ . '/../user/partials/mobile-nav.php'; ?>
 
+    <!-- Dynamic Island Announcement Logic -->
+    <?php
+    $announcementActive = getSetting('announcement_active', '0') === '1';
+    if ($announcementActive) {
+        $msgEn = getSetting('announcement_message', '');
+        $msgAr = getSetting('announcement_message_ar', '');
+        $announcementMsg = getCurrentLocale() === 'ar' && !empty($msgAr) ? $msgAr : $msgEn;
+        
+        $announcementDur = (int)getSetting('announcement_duration', '5');
+        $announcementEnd = getSetting('announcement_end_date', '');
+        $showAnnouncement = !empty($announcementMsg);
+
+        if ($showAnnouncement && !empty($announcementEnd)) {
+            if (strtotime($announcementEnd) < time()) {
+                $showAnnouncement = false;
+            }
+        }
+        
+        if ($showAnnouncement):
+    ?>
+    <style>
+    /* Dynamic Island Navbar Styles */
+    .navbar-island {
+        transition: width 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), 
+                    height 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), 
+                    padding 0.6s cubic-bezier(0.34, 1.56, 0.64, 1),
+                    background 0.6s ease,
+                    border-radius 0.6s ease,
+                    top 0.6s ease;
+        overflow: hidden;
+        border: 1px solid rgba(255,255,255,0.08); /* Default sub-border */
+    }
+    
+    /* When island mode is active */
+    .navbar-island.is-island {
+        width: 100%;
+        max-width: 600px;
+        height: 60px; /* Taller island height for emphasis */
+        padding: 0 25px;
+        background: rgba(10, 10, 15, 0.95);
+        border: 1px solid var(--neon-cyan);
+        border-radius: 30px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.8), inset 0 0 0 1px rgba(255,255,255,0.05);
+        top: 20px;
+        justify-content: center;
+    }
+    
+    /* Standard navbar children transitions */
+    .nav-links, .nav-logo, .nav-lang-btn, .theme-toggle, .nav-hamburger {
+        transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        opacity: 1;
+        transform: scale(1);
+    }
+    
+    /* Hide standard children when island is active */
+    .navbar-island.is-island > *:not(.island-content) {
+        opacity: 0;
+        pointer-events: none;
+        transform: scale(0.95);
+        position: absolute; 
+    }
+    
+    /* New dynamic island content */
+    .island-content {
+        display: none;
+        align-items: center;
+        gap: 12px;
+        color: #fff;
+        font-size: 1rem;
+        font-weight: 500;
+        white-space: nowrap;
+        opacity: 0;
+        transform: scale(0.9);
+        transition: opacity 0.5s ease 0.3s, transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0.3s;
+    }
+    .navbar-island.is-island .island-content {
+        display: flex;
+        opacity: 1;
+        transform: scale(1);
+    }
+    
+    @media (max-width: 768px) {
+        .navbar-island.is-island {
+            width: 95%;
+            height: 55px;
+        }
+        .island-content { font-size: 0.85rem; }
+    }
+    </style>
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const nav = document.getElementById('mainNavbar');
+        const msg = <?= json_encode($announcementMsg) ?>;
+        const dur = <?= $announcementDur ?>;
+        
+        if (nav && msg) {
+            // Create island content container
+            const islandContent = document.createElement('div');
+            islandContent.className = 'island-content';
+            islandContent.innerHTML = `<span style="font-size:1.2rem;">📣</span> <span>${msg}</span>`;
+            nav.appendChild(islandContent);
+
+            // Trigger island effect slightly after load
+            setTimeout(() => {
+                // Record original width/height if needed, but CSS handles standard view
+                nav.classList.add('is-island');
+                
+                // If it's not permanent, schedule the return
+                if (dur > 0) {
+                    setTimeout(() => {
+                        nav.classList.remove('is-island');
+                        // Clean up island content after animation
+                        setTimeout(() => nav.removeChild(islandContent), 600);
+                    }, dur * 1000);
+                }
+            }, 800); // Wait 800ms before triggering
+        }
+    });
+    </script>
+    <?php endif; } ?>
+
     <!-- Main Content -->
     <main>
         <?php
@@ -183,6 +304,34 @@
         window.chatbotData = <?= json_encode($chatbotData) ?>;
     </script>
     <?php endif; ?>
+
+    <!-- Global Broken Image Fallback -->
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // A clean, standalone SVG placeholder representing a missing image in our brand style
+        const fallbackSvgUrl = "data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='600' viewBox='0 0 800 600'%3E%3Crect width='800' height='600' fill='%231a1d24'/%3E%3Ctext x='50%25' y='50%25' fill='%23475569' font-family='sans-serif' font-size='32' text-anchor='middle' dy='.3em'%3EImage Unavailable%3C/text%3E%3C/svg%3E";
+        
+        document.querySelectorAll('img').forEach(img => {
+            // Handle dynamically loaded / erroring images robustly
+            img.addEventListener('error', function() {
+                if(this.src !== fallbackSvgUrl && !this.dataset.fallbackApplied) {
+                    this.dataset.fallbackApplied = 'true'; // Anti-loop
+                    this.src = fallbackSvgUrl;
+                    this.style.objectFit = 'cover';
+                    this.alt = 'Image unavailable';
+                }
+            });
+            // If the image is ALREADY broken by the time this script runs
+            if(img.complete && img.naturalHeight === 0) {
+                if(img.src !== fallbackSvgUrl && !img.dataset.fallbackApplied) {
+                    img.dataset.fallbackApplied = 'true';
+                    img.src = fallbackSvgUrl;
+                    img.style.objectFit = 'cover';
+                }
+            }
+        });
+    });
+    </script>
 
     <!-- Scripts -->
     <script src="<?= baseUrl('assets/js/app.js') ?>"></script>

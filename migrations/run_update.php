@@ -28,7 +28,14 @@ try {
 
         "ALTER TABLE invoices ADD COLUMN contact_id INT DEFAULT NULL",
         "ALTER TABLE invoices ADD COLUMN invoice_currency VARCHAR(10) DEFAULT 'USD'",
-        "ALTER TABLE invoices ADD COLUMN payment_terms TEXT DEFAULT NULL"
+        "ALTER TABLE invoices ADD COLUMN payment_terms TEXT DEFAULT NULL",
+
+        "CREATE TABLE IF NOT EXISTS announcement_history (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            message_en TEXT,
+            message_ar TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci"
     ];
 
     foreach ($queries as $sql) {

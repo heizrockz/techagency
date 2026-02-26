@@ -301,8 +301,34 @@ function adminSettings(): void {
     $db = getDB();
     $saved = false;
 
+    // Auto-migrate announcement_history (since CLI php is unavailable in current ENV)
+    $db->exec("CREATE TABLE IF NOT EXISTS announcement_history (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        message_en TEXT,
+        message_ar TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $settings = $_POST['settings'] ?? [];
+        
+        // Check if announcement changed to log history
+        $oldMsgEn = getSetting('announcement_message', '');
+        $oldMsgAr = getSetting('announcement_message_ar', '');
+        $oldActive = getSetting('announcement_active', '0');
+        
+        $newMsgEn = trim($settings['announcement_message'] ?? '');
+        $newMsgAr = trim($settings['announcement_message_ar'] ?? '');
+        $newActive = isset($_POST['settings']['announcement_active']) ? '1' : '0';
+
+        // If it's active and either message changed, log to history
+        if ($newActive === '1' && ($newMsgEn !== $oldMsgEn || $newMsgAr !== $oldMsgAr || $oldActive === '0')) {
+            if (!empty($newMsgEn) || !empty($newMsgAr)) {
+                $hstmt = $db->prepare('INSERT INTO announcement_history (message_en, message_ar) VALUES (?, ?)');
+                $hstmt->execute([$newMsgEn, $newMsgAr]);
+            }
+        }
+
         foreach ($settings as $key => $value) {
             $db->prepare('INSERT INTO site_settings (setting_key, setting_value) VALUES (?, ?)
                 ON DUPLICATE KEY UPDATE setting_value = VALUES(setting_value)')
@@ -313,7 +339,7 @@ function adminSettings(): void {
             'show_clients_section', 'show_products_section', 'show_stats_section', 
             'show_marketing_section', 'show_team', 'show_testimonials',
             'show_tagline_section', 'show_process_section', 'show_blog_section',
-            'show_booking_section', 'show_contact_section'
+            'show_booking_section', 'show_contact_section', 'announcement_active'
         ];
         foreach ($toggles as $toggle) {
             $val = isset($_POST['settings'][$toggle]) ? '1' : '0';
@@ -354,6 +380,11 @@ function adminSettings(): void {
     foreach ($rows as $r) {
         $settings[$r['setting_key']] = $r;
     }
+
+    // Fetch history
+    $historyCount = $db->query('SELECT COUNT(*) FROM announcement_history')->fetchColumn();
+    $announcementHistory = $db->query('SELECT * FROM announcement_history ORDER BY created_at DESC LIMIT 15')->fetchAll();
+
     require __DIR__ . '/../views/admin/settings.php';
 }
 

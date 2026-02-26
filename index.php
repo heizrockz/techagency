@@ -41,6 +41,12 @@ if ($path === '/' || $path === '/index.php' || $path === '') {
     showBlogDetail($matches[1]);
 } elseif ($path === '/portfolio') {
     require_once __DIR__ . '/controllers/PortfolioController.php';
+} elseif ($path === '/booking/submit') {
+    require_once __DIR__ . '/controllers/BookingController.php';
+    handleBookingSubmit();
+} elseif ($path === '/booking/success') {
+    require_once __DIR__ . '/controllers/BookingController.php';
+    showBookingSuccess();
 } elseif ($path === '/admin/login') {
     require_once __DIR__ . '/controllers/AdminController.php';
     adminLogin();
