@@ -4,6 +4,7 @@
  */
 
 $seo = getSeoMeta('portfolio');
+$seo['canonical_link'] = baseUrl('portfolio');
 $locale = getCurrentLocale();
 $dir = isRTL() ? 'rtl' : 'ltr';
 $viewFile = 'portfolio';

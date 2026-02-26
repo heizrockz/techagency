@@ -670,11 +670,12 @@ function adminBlogs(): void {
         }
 
         foreach (SUPPORTED_LOCALES as $loc) {
-            $title = trim($_POST['title_' . $loc] ?? '');
-            $desc  = trim($_POST['desc_' . $loc] ?? '');
-            $db->prepare('INSERT INTO blog_translations (blog_id, locale, title, description)
-                VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE title = VALUES(title), description = VALUES(description)')
-               ->execute([$id, $loc, $title, $desc]);
+            $title   = trim($_POST['title_' . $loc] ?? '');
+            $desc    = trim($_POST['desc_' . $loc] ?? '');
+            $content = $_POST['content_' . $loc] ?? '';
+            $db->prepare('INSERT INTO blog_translations (blog_id, locale, title, description, content)
+                VALUES (?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE title = VALUES(title), description = VALUES(description), content = VALUES(content)')
+               ->execute([$id, $loc, $title, $desc, $content]);
         }
         $saved = true;
         // if want to redirect instead of stay: 

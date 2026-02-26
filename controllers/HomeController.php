@@ -4,6 +4,7 @@
  */
 
 $seo = getSeoMeta('home');
+$seo['canonical_link'] = baseUrl('/');
 
 // Track website visit
 try {

@@ -69,8 +69,12 @@
                                 <input type="text" name="title_<?= $loc ?>" class="form-input" value="<?= e($editBlog['translations'][$loc]['title'] ?? '') ?>" dir="<?= $loc === 'ar' ? 'rtl' : 'ltr' ?>" required>
                             </div>
                             <div class="form-group" style="margin-top: 10px;">
-                                <label>Description (Markdown/HTML supported)</label>
-                                <textarea name="desc_<?= $loc ?>" class="form-input" rows="8" dir="<?= $loc === 'ar' ? 'rtl' : 'ltr' ?>"><?= e($editBlog['translations'][$loc]['description'] ?? '') ?></textarea>
+                                <label>Short Description (Under Title)</label>
+                                <textarea name="desc_<?= $loc ?>" class="form-input" rows="3" dir="<?= $loc === 'ar' ? 'rtl' : 'ltr' ?>"><?= e($editBlog['translations'][$loc]['description'] ?? '') ?></textarea>
+                            </div>
+                            <div class="form-group" style="margin-top: 10px;">
+                                <label>Main Content (After Image - HTML allowed)</label>
+                                <textarea name="content_<?= $loc ?>" class="form-input" rows="12" dir="<?= $loc === 'ar' ? 'rtl' : 'ltr' ?>"><?= e($editBlog['translations'][$loc]['content'] ?? '') ?></textarea>
                             </div>
                         </div>
                     <?php endforeach; ?>
@@ -83,13 +87,14 @@
             </div>
         <?php else: ?>
             <div class="admin-card">
-                <div style="overflow-x: auto;">
+                <div class="mobile-table-wrapper" style="overflow-x: auto;">
                     <table class="admin-table">
                     <thead>
                         <tr>
                             <th>Slug</th>
                             <th>Translations</th>
                             <th>Media Type</th>
+                            <th>Views</th>
                             <th>Sort</th>
                             <th>Status</th>
                             <th>Actions</th>
@@ -98,12 +103,13 @@
                     <tbody>
                         <?php foreach ($blogs as $b): ?>
                         <tr>
-                            <td><?= e($b['slug']) ?></td>
-                            <td style="max-width:300px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"><?= e($b['trans'] ?? '') ?></td>
-                            <td><span style="padding:4px 8px;border-radius:4px;background:rgba(255,255,255,0.1);font-size:0.7rem;"><?= e($b['media_type']) ?></span></td>
-                            <td><?= $b['sort_order'] ?></td>
-                            <td><?= $b['is_active'] ? '<span style="color:var(--neon-emerald)">Active</span>' : '<span style="color:var(--text-muted)">Inactive</span>' ?></td>
-                            <td>
+                            <td data-label="Slug"><?= e($b['slug']) ?></td>
+                            <td data-label="Translations" style="max-width:300px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"><?= e($b['trans'] ?? '') ?></td>
+                            <td data-label="Media Type"><span style="padding:4px 8px;border-radius:4px;background:rgba(255,255,255,0.1);font-size:0.7rem;"><?= e($b['media_type']) ?></span></td>
+                            <td data-label="Views"><?= number_format($b['view_count'] ?? 0) ?></td>
+                            <td data-label="Sort"><?= $b['sort_order'] ?></td>
+                            <td data-label="Status"><?= $b['is_active'] ? '<span style="color:var(--neon-emerald)">Active</span>' : '<span style="color:var(--text-muted)">Inactive</span>' ?></td>
+                            <td data-label="Actions">
                                 <a href="<?= baseUrl('admin/blogs?action=edit&id='.$b['id']) ?>" style="color: var(--neon-cyan); margin-right: 10px;">Edit</a>
                                 <a href="<?= baseUrl('admin/blogs?action=delete&id='.$b['id']) ?>" style="color: var(--neon-pink);" onclick="return confirm('Delete this blog?');">Delete</a>
                             </td>
@@ -111,12 +117,43 @@
                         <?php endforeach; ?>
                         <?php if(empty($blogs)): ?>
                         <tr>
-                            <td colspan="6" style="text-align:center; padding: 20px;">No blogs found.</td>
+                            <td colspan="7" style="text-align:center; padding: 20px;">No blogs found.</td>
                         </tr>
                         <?php endif; ?>
                     </tbody>
                     </table>
                 </div>
+
+    <style>
+        @media screen and (max-width: 768px) {
+            .admin-table thead { display: none; }
+            .admin-table tr { 
+                display: block; 
+                margin-bottom: 20px; 
+                background: rgba(255,255,255,0.03); 
+                border-radius: 12px; 
+                padding: 10px;
+                border: 1px solid var(--glass-border);
+            }
+            .admin-table td { 
+                display: flex; 
+                justify-content: space-between; 
+                align-items: center; 
+                text-align: right; 
+                padding: 10px 5px; 
+                border-bottom: 1px solid rgba(255,255,255,0.05);
+            }
+            .admin-table td:last-child { border-bottom: none; }
+            .admin-table td::before { 
+                content: attr(data-label); 
+                font-weight: 700; 
+                text-transform: uppercase; 
+                font-size: 0.75rem; 
+                color: var(--neon-cyan);
+                margin-right: 15px;
+            }
+        }
+    </style>
             </div>
         <?php endif; ?>
     </div>

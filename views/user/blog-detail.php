@@ -39,94 +39,121 @@
         </header>
 
         <!-- Main Content Area -->
-        <div class="blog-content-wrapper" style="display: grid; grid-template-columns: 1fr; gap: 48px;">
+        <div class="blog-container" style="display: grid; grid-template-columns: 1fr 350px; gap: 48px;">
             
-            <!-- Blog Featured Media -->
-            <div class="blog-featured-media animate-on-scroll" style="border-radius:24px; overflow:hidden; border:1px solid var(--glass-border); background:var(--glass-bg); backdrop-filter: blur(10px); box-shadow:0 30px 60px -12px rgba(0,0,0,0.25);">
-                <?php
-                    $mediaType = $blog['media_type'] ?? 'image';
-                    $mediaUrl  = $blog['media_url'] ?? '';
+            <div class="blog-main-column">
+                <!-- Blog Featured Media — Now under title -->
+                <div class="blog-featured-media animate-on-scroll" style="border-radius:24px; overflow:hidden; border:1px solid var(--glass-border); background:var(--glass-bg); backdrop-filter: blur(10px); box-shadow:0 30px 60px -12px rgba(0,0,0,0.25); margin-bottom: 40px;">
+                    <?php
+                        $mediaType = $blog['media_type'] ?? 'image';
+                        $mediaUrl  = $blog['media_url'] ?? '';
 
-                    // Helper: extract YouTube video ID from various URL formats
-                    function extractYouTubeId($url) {
-                        $patterns = [
-                            '/youtube\.com\/watch\?.*v=([a-zA-Z0-9_-]{11})/',
-                            '/youtu\.be\/([a-zA-Z0-9_-]{11})/',
-                            '/youtube\.com\/embed\/([a-zA-Z0-9_-]{11})/',
-                            '/youtube\.com\/shorts\/([a-zA-Z0-9_-]{11})/',
-                            '/v=([a-zA-Z0-9_-]{11})/',
-                            '/^([a-zA-Z0-9_-]{11})$/'
-                        ];
-                        foreach ($patterns as $p) {
-                            if (preg_match($p, $url, $m)) return $m[1];
+                        // Helper: extract YouTube video ID from various URL formats
+                        if (!function_exists('extractYouTubeIdDetail')) {
+                            function extractYouTubeIdDetail($url) {
+                                $patterns = [
+                                    '/youtube\.com\/watch\?.*v=([a-zA-Z0-9_-]{11})/',
+                                    '/youtu\.be\/([a-zA-Z0-9_-]{11})/',
+                                    '/youtube\.com\/embed\/([a-zA-Z0-9_-]{11})/',
+                                    '/youtube\.com\/shorts\/([a-zA-Z0-9_-]{11})/',
+                                    '/v=([a-zA-Z0-9_-]{11})/',
+                                    '/^([a-zA-Z0-9_-]{11})$/'
+                                ];
+                                foreach ($patterns as $p) {
+                                    if (preg_match($p, $url, $m)) return $m[1];
+                                }
+                                return null;
+                            }
                         }
-                        return null;
-                    }
-                    
-                    // Helper: extract Vimeo video ID
-                    function extractVimeoId($url) {
-                        if (preg_match('/vimeo\.com\/(?:video\/)?(\d+)/', $url, $m)) return $m[1];
-                        return null;
-                    }
-                ?>
+                        
+                        // Helper: extract Vimeo video ID
+                        if (!function_exists('extractVimeoIdDetail')) {
+                            function extractVimeoIdDetail($url) {
+                                if (preg_match('/vimeo\.com\/(?:video\/)?(\d+)/', $url, $m)) return $m[1];
+                                return null;
+                            }
+                        }
+                    ?>
 
-                <?php if ($mediaType === 'video' && !empty($mediaUrl)): ?>
-                    <!-- Uploaded video file — native HTML5 player -->
-                    <video controls playsinline style="width:100%; display:block; background:#000;">
-                        <source src="<?= baseUrl($mediaUrl) ?>" type="video/<?= pathinfo($mediaUrl, PATHINFO_EXTENSION) ?>">
-                        Your browser does not support the video tag.
-                    </video>
-
-                <?php elseif ($mediaType === 'video_link' && !empty($mediaUrl)): ?>
-                    <?php $ytId = extractYouTubeId($mediaUrl); $vmId = extractVimeoId($mediaUrl); ?>
-
-                    <?php if ($ytId): ?>
-                        <!-- YouTube embed -->
-                        <div style="position:relative; padding-bottom:56.25%; height:0; overflow:hidden;">
-                            <iframe style="position:absolute; top:0; left:0; width:100%; height:100%; border:0;"
-                                    src="https://www.youtube.com/embed/<?= e($ytId) ?>?rel=0"
-                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                    allowfullscreen></iframe>
-                        </div>
-                    <?php elseif ($vmId): ?>
-                        <!-- Vimeo embed -->
-                        <div style="position:relative; padding-bottom:56.25%; height:0; overflow:hidden;">
-                            <iframe style="position:absolute; top:0; left:0; width:100%; height:100%; border:0;"
-                                    src="https://player.vimeo.com/video/<?= e($vmId) ?>"
-                                    allow="autoplay; fullscreen; picture-in-picture"
-                                    allowfullscreen></iframe>
-                        </div>
+                    <?php if ($mediaType === 'video' && !empty($mediaUrl)): ?>
+                        <video controls playsinline style="width:100%; display:block; background:#000;">
+                            <source src="<?= baseUrl($mediaUrl) ?>" type="video/<?= pathinfo($mediaUrl, PATHINFO_EXTENSION) ?>">
+                            Your browser does not support the video tag.
+                        </video>
+                    <?php elseif ($mediaType === 'video_link' && !empty($mediaUrl)): ?>
+                        <?php $ytId = extractYouTubeIdDetail($mediaUrl); $vmId = extractVimeoIdDetail($mediaUrl); ?>
+                        <?php if ($ytId): ?>
+                            <div style="position:relative; padding-bottom:56.25%; height:0; overflow:hidden;">
+                                <iframe style="position:absolute; top:0; left:0; width:100%; height:100%; border:0;"
+                                        src="https://www.youtube.com/embed/<?= e($ytId) ?>?rel=0"
+                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                        allowfullscreen></iframe>
+                            </div>
+                        <?php elseif ($vmId): ?>
+                            <div style="position:relative; padding-bottom:56.25%; height:0; overflow:hidden;">
+                                <iframe style="position:absolute; top:0; left:0; width:100%; height:100%; border:0;"
+                                        src="https://player.vimeo.com/video/<?= e($vmId) ?>"
+                                        allow="autoplay; fullscreen; picture-in-picture"
+                                        allowfullscreen></iframe>
+                            </div>
+                        <?php else: ?>
+                            <div style="position:relative; padding-bottom:56.25%; height:0; overflow:hidden;">
+                                <iframe style="position:absolute; top:0; left:0; width:100%; height:100%; border:0;"
+                                        src="<?= e($mediaUrl) ?>"
+                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                        allowfullscreen></iframe>
+                            </div>
+                        <?php endif; ?>
+                    <?php elseif (!empty($mediaUrl)): ?>
+                        <img src="<?= baseUrl($mediaUrl) ?>" alt="<?= e($blog['title']) ?>" style="width:100%; height:auto; display:block;">
                     <?php else: ?>
-                        <!-- Fallback: generic external video link -->
-                        <div style="position:relative; padding-bottom:56.25%; height:0; overflow:hidden;">
-                            <iframe style="position:absolute; top:0; left:0; width:100%; height:100%; border:0;"
-                                    src="<?= e($mediaUrl) ?>"
-                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                    allowfullscreen></iframe>
+                        <div style="width:100%; aspect-ratio:16/9; background:var(--bg-secondary); display:flex; align-items:center; justify-content:center; color:var(--text-muted);">
+                            <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
                         </div>
                     <?php endif; ?>
+                </div>
 
-                <?php elseif (!empty($mediaUrl)): ?>
-                    <!-- Image -->
-                    <img src="<?= baseUrl($mediaUrl) ?>" alt="<?= e($blog['title']) ?>" style="width:100%; height:auto; display:block;">
+                <!-- Blog Rich Text Content -->
+                <div class="blog-rich-content animate-on-scroll" style="font-size:1.15rem; line-height:1.9; color:var(--text-primary); font-weight: 400;">
+                    <?= ($blog['content']) ?>
+                </div>
+            </div>
 
-                <?php else: ?>
-                    <!-- No media placeholder -->
-                    <div style="width:100%; aspect-ratio:16/9; background:var(--bg-secondary); display:flex; align-items:center; justify-content:center; color:var(--text-muted);">
-                        <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+            <!-- Blog Sidebar: Latest Blogs -->
+            <aside class="blog-sidebar">
+                <div class="sidebar-widget animate-on-scroll" style="background:var(--glass-bg); border:1px solid var(--glass-border); border-radius:20px; padding:24px; backdrop-filter:blur(10px); position: sticky; top: 120px;">
+                    <h3 style="font-size:1.2rem; color:var(--text-primary); margin-bottom:20px; display:flex; align-items:center; gap:10px;">
+                        <span style="width:3px; height:15px; background:var(--neon-emerald); border-radius:3px;"></span>
+                        <?= getCurrentLocale() === 'en' ? 'Latest Insights' : 'أحدث المقالات' ?>
+                    </h3>
+                    <div class="recent-posts" style="display:flex; flex-direction:column; gap:20px;">
+                        <?php 
+                        $allBlogs = getBlogs();
+                        $recentBlogs = array_slice(array_filter($allBlogs, function($b) use ($blog) { return $b['slug'] !== $blog['slug']; }), 0, 5);
+                        foreach ($recentBlogs as $rb): 
+                        ?>
+                        <a href="<?= baseUrl('blog/' . $rb['slug']) ?>" class="recent-post-item" style="display:flex; gap:12px; text-decoration:none; group;">
+                            <div class="recent-thumb" style="width:70px; height:70px; border-radius:10px; overflow:hidden; flex-shrink:0; background:var(--bg-secondary);">
+                                <?php if ($rb['media_type'] === 'video_link' && preg_match('/(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/', $rb['media_url'], $m)): ?>
+                                    <img src="https://img.youtube.com/vi/<?= $m[1] ?>/hqdefault.jpg" style="width:100%; height:100%; object-fit:cover;">
+                                <?php else: ?>
+                                    <img src="<?= baseUrl($rb['media_url'] ?: 'assets/images/placeholder.webp') ?>" alt="" style="width:100%; height:100%; object-fit:cover;">
+                                <?php endif; ?>
+                            </div>
+                            <div class="recent-info" style="flex: 1; overflow: hidden;">
+                                <span style="font-size:0.75rem; color:var(--neon-emerald);"><?= date('M d, Y', strtotime($rb['created_at'])) ?></span>
+                                <h4 style="font-size:0.95rem; color:var(--text-primary); margin:4px 0 0 0; line-height:1.4; transition:0.3s; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" class="recent-title"><?= e($rb['title']) ?></h4>
+                            </div>
+                        </a>
+                        <?php endforeach; ?>
                     </div>
-                <?php endif; ?>
-            </div>
-
-            <!-- Blog Rich Text Content -->
-            <div class="blog-rich-content animate-on-scroll" style="font-size:1.15rem; line-height:1.9; color:var(--text-primary); max-width:850px; margin:0 auto; font-weight: 400;">
-                <?= ($blog['content']) ?> <!-- Already sanitized or assuming HTML from admin -->
-            </div>
+                </div>
+            </aside>
 
         </div>
 
         <!-- Share Section -->
-        <div class="blog-footer animate-on-scroll" style="margin-top:80px; padding-top:40px; border-top:1px solid var(--glass-border); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:24px;">
+        <div class="blog-footer animate-on-scroll" style="margin-top:60px; padding:30px 0; border-top:1px solid var(--glass-border); border-bottom:1px solid var(--glass-border); display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:24px;">
             <div class="share-title" style="font-weight:600; color:var(--text-primary);"><?= getCurrentLocale() === 'en' ? 'Share this Insight' : 'شارك هذا المقال' ?></div>
             <div class="social-share-links" style="display:flex; gap:16px;">
                 <a href="#" class="share-btn" style="width:40px; height:40px; border-radius:50%; background:var(--glass-bg); border:1px solid var(--glass-border); display:flex; align-items:center; justify-content:center; color:var(--text-primary); transition:0.3s;"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path></svg></a>
@@ -134,6 +161,39 @@
                 <a href="#" class="share-btn" style="width:40px; height:40px; border-radius:50%; background:var(--glass-bg); border:1px solid var(--glass-border); display:flex; align-items:center; justify-content:center; color:var(--text-primary); transition:0.3s;"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect x="2" y="9" width="4" height="12"></rect><circle cx="4" cy="4" r="2"></circle></svg></a>
             </div>
         </div>
+
+        <!-- More Insights / Most Viewed Bottom Section -->
+        <section class="more-insights" style="margin-top: 80px;">
+            <h3 style="font-size:1.8rem; color:var(--text-primary); margin-bottom:40px; display:flex; align-items:center; gap:12px;">
+                <span style="width:4px; height:24px; background:var(--neon-emerald); border-radius:4px;"></span>
+                <?= getCurrentLocale() === 'en' ? 'More Insights' : 'مقالات إضافية' ?>
+            </h3>
+            <div class="recent-posts-grid" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap:30px;">
+                <?php 
+                $allBlogs = getBlogs();
+                // Get most viewed blogs excluding current one
+                $trending = array_filter($allBlogs, function($b) use ($blog) { return $b['slug'] !== $blog['slug']; });
+                usort($trending, function($a, $b) { return ($b['view_count'] ?? 0) - ($a['view_count'] ?? 0); });
+                $bottomBlogs = array_slice($trending, 0, 3);
+                
+                foreach ($bottomBlogs as $rb): 
+                ?>
+                <a href="<?= baseUrl('blog/' . $rb['slug']) ?>" class="bottom-insight-card" style="text-decoration:none; display:block; background:var(--glass-bg); border:1px solid var(--glass-border); border-radius:20px; overflow:hidden; transition:0.3s;">
+                    <div style="height:180px; position:relative; overflow:hidden;">
+                        <?php if ($rb['media_type'] === 'video_link' && preg_match('/(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/', $rb['media_url'], $m)): ?>
+                            <img src="https://img.youtube.com/vi/<?= $m[1] ?>/hqdefault.jpg" style="width:100%; height:100%; object-fit:cover;">
+                        <?php else: ?>
+                            <img src="<?= baseUrl($rb['media_url'] ?: 'assets/images/placeholder.webp') ?>" style="width:100%; height:100%; object-fit:cover;">
+                        <?php endif; ?>
+                    </div>
+                    <div style="padding:20px;">
+                        <span style="font-size:0.75rem; color:var(--neon-emerald); font-weight:600;"><?= date('M d, Y', strtotime($rb['created_at'])) ?></span>
+                        <h4 style="color:var(--text-primary); margin:8px 0 0 0; line-height:1.4; font-size:1.1rem;"><?= e($rb['title']) ?></h4>
+                    </div>
+                </a>
+                <?php endforeach; ?>
+            </div>
+        </section>
     </div>
 </article>
 
@@ -145,4 +205,12 @@
     .blog-rich-content ul { padding-left: 1.5rem; margin-bottom: 1.5rem; }
     .blog-rich-content li { margin-bottom: 0.75rem; list-style-type: square; color: var(--text-secondary); }
     .share-btn:hover { background: var(--neon-emerald) !important; color: #fff !important; transform: translateY(-3px); box-shadow:0 10px 20px -5px rgba(16,185,129,0.3); border-color: var(--neon-emerald) !important; }
+    
+    @media (max-width: 991px) {
+        .blog-container { grid-template-columns: 1fr !important; gap: 40px !important; }
+        .blog-sidebar { order: 2; }
+        .blog-main-column { order: 1; }
+    }
+    .recent-post-item:hover .recent-title { color: var(--neon-emerald) !important; transform: translateX(5px); }
+    .bottom-insight-card:hover { transform: translateY(-10px); border-color: var(--neon-emerald); box-shadow: 0 20px 40px -10px rgba(0,0,0,0.3); }
 </style>

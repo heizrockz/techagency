@@ -233,11 +233,18 @@ function getBlogs(): array {
     try {
         $db = getDB();
         $locale = getCurrentLocale();
-        $sql = 'SELECT b.*, bt.title, bt.description
+        // Check if view_count column exists to avoid crash before migration
+        $viewCountPart = '';
+        try {
+            $db->query("SELECT view_count FROM blogs LIMIT 1");
+            $viewCountPart = ", b.view_count";
+        } catch (Exception $e) {}
+
+        $sql = "SELECT b.*, bt.title, bt.description $viewCountPart
                 FROM blogs b
                 LEFT JOIN blog_translations bt ON b.id = bt.blog_id AND bt.locale = ?
                 WHERE b.is_active = 1
-                ORDER BY b.sort_order ASC, b.created_at DESC';
+                ORDER BY b.sort_order ASC, b.created_at DESC";
         $stmt = $db->prepare($sql);
         $stmt->execute([$locale]);
         return $stmt->fetchAll();
@@ -250,11 +257,18 @@ function getBlogBySlug(string $slug): ?array {
     try {
         $db = getDB();
         $locale = getCurrentLocale();
-        $sql = 'SELECT b.*, bt.title, bt.description, bt.content
+        // Check if view_count column exists
+        $viewCountPart = '';
+        try {
+            $db->query("SELECT view_count FROM blogs LIMIT 1");
+            $viewCountPart = ", b.view_count";
+        } catch (Exception $e) {}
+
+        $sql = "SELECT b.*, bt.title, bt.description, bt.content $viewCountPart
                 FROM blogs b
                 LEFT JOIN blog_translations bt ON b.id = bt.blog_id AND bt.locale = ?
                 WHERE b.slug = ? AND b.is_active = 1
-                LIMIT 1';
+                LIMIT 1";
         $stmt = $db->prepare($sql);
         $stmt->execute([$locale, $slug]);
         return $stmt->fetch() ?: null;

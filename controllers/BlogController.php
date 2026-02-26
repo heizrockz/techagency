@@ -67,18 +67,3 @@ function showAll(): void {
     $viewFile = 'blogs';
     require __DIR__ . '/../views/layouts/main.php';
 }
-
-function showAll(): void {
-    $locale = getCurrentLocale();
-    $seo = getSeoMeta('blogs');
-    
-    $seo = [
-        'title' => ($seo['title'] ?? 'Our Projects') . ' | ' . APP_NAME,
-        'description' => $seo['description'] ?? '',
-        'keywords' => $seo['keywords'] ?? '',
-        'canonical_link' => baseUrl('blogs')
-    ];
-
-    $viewFile = 'blogs';
-    require __DIR__ . '/../views/layouts/main.php';
-}

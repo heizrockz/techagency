@@ -517,89 +517,139 @@ $blogs = getBlogs();
             <div class="heading-line" style="margin: 20px auto; width: 60px; height: 3px; background: linear-gradient(90deg, var(--neon-cyan), var(--neon-violet));"></div>
         </div>
 
-        <div class="blog-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; margin-top: 60px;">
+        <div class="blog-slider-container">
+            <div class="blog-grid" id="blog-grid">
             <?php 
-            $latestBlogs = array_slice($blogs, 0, 3);
-            foreach ($latestBlogs as $i => $blog): 
+            $homeBlogs = array_slice($blogs, 0, 3);
+            foreach ($homeBlogs as $i => $blog): 
             ?>
-            <div class="blog-card animate-on-scroll" style="animation-delay: <?= $i * 0.1 ?>s; background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255,255,255,0.08); border-radius: 20px; overflow: hidden; backdrop-filter: blur(12px); transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);">
-                
-                <div class="blog-media" style="position: relative; height: 200px; overflow: hidden; border-bottom: 1px solid rgba(255,255,255,0.05);">
-                    <?php if ($blog['media_type'] === 'video' && !empty($blog['media_url'])): ?>
-                        <video autoplay loop muted playsinline style="width: 100%; height: 100%; object-fit: cover; opacity: 0.8; transition: transform 0.8s ease;">
-                            <source src="<?= baseUrl($blog['media_url']) ?>" type="video/<?= pathinfo($blog['media_url'], PATHINFO_EXTENSION) ?>">
-                        </video>
-                    <?php elseif ($blog['media_type'] === 'video_link' && !empty($blog['media_url'])): 
-                            $isYoutube = false;
-                            $ytId = null;
-                            $patterns = [
-                                '/youtube\.com\/watch\?.*v=([a-zA-Z0-9_-]{11})/',
-                                '/youtu\.be\/([a-zA-Z0-9_-]{11})/',
-                                '/youtube\.com\/embed\/([a-zA-Z0-9_-]{11})/',
-                                '/youtube\.com\/shorts\/([a-zA-Z0-9_-]{11})/',
-                                '/v=([a-zA-Z0-9_-]{11})/',
-                                '/^([a-zA-Z0-9_-]{11})$/'
-                            ];
-                            foreach ($patterns as $p) {
-                                if (preg_match($p, $blog['media_url'], $m)) {
-                                    $isYoutube = true;
-                                    $ytId = $m[1];
-                                    break;
-                                }
-                            }
-                        ?>
-                        <?php if ($isYoutube && $ytId): ?>
-                            <div style="width: 100%; height: 100%; position: relative;">
-                                <img src="https://img.youtube.com/vi/<?= $ytId ?>/maxresdefault.jpg" alt="<?= e($blog['title'] ?? '') ?>" style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.8s ease; opacity: 0.9;" onerror="this.src='https://img.youtube.com/vi/<?= $ytId ?>/hqdefault.jpg'">
-                                <div style="position: absolute; inset: 0; display:flex; align-items:center; justify-content:center; background: rgba(0,0,0,0.3);">
-                                    <a href="<?= e($blog['media_url']) ?>" target="_blank" style="color:var(--neon-pink); opacity:0.9; transition:transform 0.3s ease; filter: drop-shadow(0 0 10px rgba(0,0,0,0.5));" onmouseover="this.style.transform='scale(1.2)'" onmouseout="this.style.transform='scale(1)'">
-                                        <svg width="60" height="60" viewBox="0 0 24 24" fill="currentColor"><path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"/></svg>
-                                    </a>
-                                </div>
-                            </div>
-                        <?php else: ?>
-                            <div style="width: 100%; height: 100%; background: #0a0f18; display:flex; align-items:center; justify-content:center;">
-                                <a href="<?= e($blog['media_url']) ?>" target="_blank" style="color:var(--neon-pink); opacity:0.8; transition:transform 0.3s ease;" onmouseover="this.style.transform='scale(1.2)'" onmouseout="this.style.transform='scale(1)'">
-                                    <svg width="50" height="50" viewBox="0 0 24 24" fill="currentColor"><path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"/></svg>
-                                </a>
-                            </div>
-                        <?php endif; ?>
-                    <?php else: ?>
-                        <img src="<?= !empty($blog['media_url']) ? baseUrl($blog['media_url']) : baseUrl('assets/images/placeholder.webp') ?>" alt="<?= e($blog['title'] ?? '') ?>" style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.8s ease; opacity: 0.9;">
-                    <?php endif; ?>
-                    <div style="position:absolute; top:0; left:0; width:100%; height:100%; background:linear-gradient(to bottom, transparent 60%, rgba(0,0,0,0.4));"></div>
-                </div>
-
-                <div class="blog-content" style="padding: 25px;">
-                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
-                        <span style="padding: 4px 10px; background: rgba(var(--neon-cyan-rgb),0.1); color: var(--neon-cyan); font-size: 0.65rem; border-radius: 4px; font-weight: 700; letter-spacing: 1px;"><?= strtoupper(date('M d', strtotime($blog['created_at']))) ?></span>
-                    </div>
-                    <h3 style="font-size: 1.2rem; margin: 0 0 12px 0; color: #fff; line-height: 1.4; font-weight: 600;"><?= e($blog['title'] ?? '') ?></h3>
-                    <p style="color: rgba(255,255,255,0.5); font-size: 0.85rem; line-height: 1.6; margin-bottom: 25px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;"><?= e($blog['description'] ?? '') ?></p>
+            <div class="blog-card-item" data-index="<?= $i ?>">
+                <div class="blog-card animate-on-scroll" style="animation-delay: <?= $i * 0.1 ?>s; background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255,255,255,0.08); border-radius: 20px; overflow: hidden; backdrop-filter: blur(12px); transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1); height: 100%; display: flex; flex-direction: column;">
                     
-                    <a href="<?= baseUrl('blog/' . e($blog['slug'])) ?>" class="blog-nav-link" style="color: var(--neon-emerald); font-size: 0.8rem; font-weight: 800; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; letter-spacing: 1px;">
-                        READ PROJECT
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                    </a>
+                    <div class="blog-media" style="position: relative; height: 200px; overflow: hidden; border-bottom: 1px solid rgba(255,255,255,0.05); flex-shrink: 0;">
+                        <?php if ($blog['media_type'] === 'video' && !empty($blog['media_url'])): ?>
+                            <video autoplay loop muted playsinline style="width: 100%; height: 100%; object-fit: cover; opacity: 0.8; transition: transform 0.8s ease;">
+                                <source src="<?= baseUrl($blog['media_url']) ?>" type="video/<?= pathinfo($blog['media_url'], PATHINFO_EXTENSION) ?>">
+                            </video>
+                        <?php elseif ($blog['media_type'] === 'video_link' && !empty($blog['media_url'])): 
+                                $isYoutube = false;
+                                $ytId = null;
+                                $patterns = [
+                                    '/youtube\.com\/watch\?.*v=([a-zA-Z0-9_-]{11})/',
+                                    '/youtu\.be\/([a-zA-Z0-9_-]{11})/',
+                                    '/youtube\.com\/embed\/([a-zA-Z0-9_-]{11})/',
+                                    '/youtube\.com\/shorts\/([a-zA-Z0-9_-]{11})/',
+                                    '/v=([a-zA-Z0-9_-]{11})/',
+                                    '/^([a-zA-Z0-9_-]{11})$/'
+                                ];
+                                foreach ($patterns as $p) {
+                                    if (preg_match($p, $blog['media_url'], $m)) {
+                                        $isYoutube = true;
+                                        $ytId = $m[1];
+                                        break;
+                                    }
+                                }
+                            ?>
+                            <?php if ($isYoutube && $ytId): ?>
+                                <div style="width: 100%; height: 100%; position: relative;">
+                                    <img src="https://img.youtube.com/vi/<?= $ytId ?>/maxresdefault.jpg" alt="<?= e($blog['title'] ?? '') ?>" style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.8s ease; opacity: 0.9;" onerror="this.src='https://img.youtube.com/vi/<?= $ytId ?>/hqdefault.jpg'">
+                                    <div style="position: absolute; inset: 0; display:flex; align-items:center; justify-content:center; background: rgba(0,0,0,0.3);">
+                                        <div style="color:var(--neon-pink); opacity:0.9; transition:transform 0.3s ease; filter: drop-shadow(0 0 10px rgba(0,0,0,0.5));">
+                                            <svg width="60" height="60" viewBox="0 0 24 24" fill="currentColor"><path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"/></svg>
+                                        </div>
+                                    </div>
+                                </div>
+                            <?php else: ?>
+                                <div style="width: 100%; height: 100%; background: #0a0f18; display:flex; align-items:center; justify-content:center;">
+                                    <div style="color:var(--neon-pink); opacity:0.8;">
+                                        <svg width="50" height="50" viewBox="0 0 24 24" fill="currentColor"><path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"/></svg>
+                                    </div>
+                                </div>
+                            <?php endif; ?>
+                        <?php else: ?>
+                            <img src="<?= !empty($blog['media_url']) ? baseUrl($blog['media_url']) : baseUrl('assets/images/placeholder.webp') ?>" alt="<?= e($blog['title'] ?? '') ?>" style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.8s ease; opacity: 0.9;">
+                        <?php endif; ?>
+                        <div style="position:absolute; top:0; left:0; width:100%; height:100%; background:linear-gradient(to bottom, transparent 60%, rgba(0,0,0,0.4));"></div>
+                    </div>
+
+                    <div class="blog-content" style="padding: 25px; flex-grow: 1; display: flex; flex-direction: column;">
+                        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+                            <span style="padding: 4px 10px; background: rgba(var(--neon-cyan-rgb),0.1); color: var(--neon-cyan); font-size: 0.65rem; border-radius: 4px; font-weight: 700; letter-spacing: 1px;"><?= strtoupper(date('M d', strtotime($blog['created_at']))) ?></span>
+                            <?php if(isset($blog['view_count']) && $blog['view_count'] > 0): ?>
+                                <span style="font-size: 0.7rem; color: var(--text-muted); display: flex; align-items: center; gap: 4px;">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                                    <?= number_format($blog['view_count']) ?>
+                                </span>
+                            <?php endif; ?>
+                        </div>
+                        <h3 style="font-size: 1.2rem; margin: 0 0 12px 0; color: #fff; line-height: 1.4; font-weight: 600;"><?= e($blog['title'] ?? '') ?></h3>
+                        <p style="color: rgba(255,255,255,0.5); font-size: 0.85rem; line-height: 1.6; margin-bottom: 25px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; flex-grow: 1;"><?= e($blog['description'] ?? '') ?></p>
+                        
+                        <a href="<?= baseUrl('blog/' . e($blog['slug'])) ?>" class="blog-nav-link" style="color: var(--neon-emerald); font-size: 0.8rem; font-weight: 800; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; letter-spacing: 1px; margin-top: auto;">
+                            READ ARTICLE
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                        </a>
+                    </div>
                 </div>
             </div>
             <?php endforeach; ?>
+            </div>
         </div>
 
         <?php if (count($blogs) > 3): ?>
-        <div style="text-align: center; margin-top: 50px;">
-            <a href="<?= baseUrl('blogs') ?>" class="btn-ghost" style="border: 1px solid rgba(var(--neon-cyan-rgb), 0.3); padding: 12px 30px; border-radius: 30px; color: var(--neon-cyan); text-decoration: none; font-weight: 600; transition: all 0.3s ease;">
-                SEE MORE PROJECTS
-                <svg style="margin-left: 8px; vertical-align: middle;" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        <div style="display: flex; justify-content: center; margin-top: 50px;">
+            <a href="<?= baseUrl('blogs') ?>" class="btn-ghost show-more-btn" style="display:inline-flex; align-items:center; justify-content:center; gap:10px; border: 1px solid rgba(var(--neon-cyan-rgb), 0.3); padding: 12px 35px; border-radius: 30px; color: var(--neon-cyan); text-decoration: none; font-weight: 600; transition: all 0.3s ease; white-space: nowrap;">
+                VIEW ALL NEWS
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
             </a>
         </div>
         <?php endif; ?>
     </div>
-    
+
     <style>
-        .blog-card:hover { transform: translateY(-12px); background: rgba(255,255,255,0.05); border-color: rgba(var(--neon-emerald-rgb), 0.4); box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); }
-        .blog-card:hover img, .blog-card:hover video { transform: scale(1.1); }
-        .blog-nav-link:hover { color: #fff; gap: 10px; }
+        .blog-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+            margin-top: 60px;
+        }
+
+        @media (max-width: 991px) {
+            .blog-grid {
+                grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            }
+        }
+
+        @media (max-width: 768px) {
+            .blog-slider-container {
+                margin: 0 -20px;
+                padding: 0 20px 20px;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+                scrollbar-width: none; /* Firefox */
+            }
+            .blog-slider-container::-webkit-scrollbar {
+                display: none; /* Chrome/Safari */
+            }
+            .blog-grid {
+                display: flex !important;
+                grid-template-columns: none !important;
+                gap: 20px;
+                width: max-content;
+                padding-bottom: 20px;
+            }
+            .blog-card-item {
+                width: 300px;
+                flex-shrink: 0;
+            }
+        }
+
+        .show-more-btn:hover {
+            background: rgba(var(--neon-cyan-rgb), 0.1);
+            border-color: var(--neon-cyan);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px -5px rgba(var(--neon-cyan-rgb), 0.2);
+        }
     </style>
 </section>
 <?php endif; ?>
