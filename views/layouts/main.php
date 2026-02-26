@@ -13,17 +13,40 @@
         <link rel="canonical" href="<?= e($canonical) ?>">
     <?php endif; ?>
     
-    <?php if($ogUrl = getSetting('seo_og_url')): ?>
-        <meta property="og:url" content="<?= e($ogUrl) ?>">
+    <!-- Open Graph / Social Sharing Meta -->
+    <?php
+        $ogTitle       = $seo['title'] ?? APP_NAME;
+        $ogDesc        = $seo['description'] ?? getSetting('seo_og_desc', '');
+        $ogUrl         = $seo['canonical_link'] ?? getSetting('seo_og_url', baseUrl());
+        $ogType        = isset($blog) ? 'article' : 'website';
+        // Determine best OG image: blog image > blog YT thumbnail > site default
+        $ogImage = '';
+        if (!empty($seo['og_image'])) {
+            $ogImage = $seo['og_image'];
+        } elseif (!empty($seo['og_yt_thumbnail'])) {
+            $ogImage = $seo['og_yt_thumbnail'];
+        } elseif ($siteOg = getSetting('seo_og_image')) {
+            $ogImage = baseUrl($siteOg);
+        }
+    ?>
+    <meta property="og:type"        content="<?= e($ogType) ?>">
+    <meta property="og:title"       content="<?= e($ogTitle) ?>">
+    <meta property="og:description" content="<?= e($ogDesc) ?>">
+    <meta property="og:url"         content="<?= e($ogUrl) ?>">
+    <?php if ($ogImage): ?>
+    <meta property="og:image"       content="<?= e($ogImage) ?>">
+    <meta property="og:image:width"  content="1200">
+    <meta property="og:image:height" content="630">
     <?php endif; ?>
-    <?php if($ogSiteName = getSetting('seo_og_sitename')): ?>
-        <meta property="og:site_name" content="<?= e($ogSiteName) ?>">
+    <?php if ($ogSiteName = getSetting('seo_og_sitename', APP_NAME)): ?>
+    <meta property="og:site_name"   content="<?= e($ogSiteName) ?>">
     <?php endif; ?>
-    <?php if($ogImage = getSetting('seo_og_image')): ?>
-        <meta property="og:image" content="<?= baseUrl($ogImage) ?>">
-    <?php endif; ?>
-    <?php if($ogDesc = getSetting('seo_og_desc')): ?>
-        <meta property="og:description" content="<?= e($ogDesc) ?>">
+    <!-- Twitter Card -->
+    <meta name="twitter:card"        content="summary_large_image">
+    <meta name="twitter:title"       content="<?= e($ogTitle) ?>">
+    <meta name="twitter:description" content="<?= e($ogDesc) ?>">
+    <?php if ($ogImage): ?>
+    <meta name="twitter:image"       content="<?= e($ogImage) ?>">
     <?php endif; ?>
 
     <?php if($favicon = getSetting('seo_favicon')): ?>
