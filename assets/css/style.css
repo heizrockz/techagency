@@ -1982,31 +1982,6 @@ body[dir="rtl"] .admin-form-group select {
     box-shadow: 0 8px 30px rgba(16, 185, 129, 0.4);
 }
 
-/* ── Footer ───────────────────────────────────────────────── */
-.footer {
-    position: relative;
-    z-index: 1;
-    border-top: 1px solid var(--glass-border);
-    padding: 40px 0;
-    text-align: center;
-}
-
-.footer-content {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 24px;
-}
-
-.footer-tagline {
-    font-size: 0.85rem;
-    color: var(--text-muted);
-    margin-bottom: 8px;
-}
-
-.footer-copy {
-    font-size: 0.8rem;
-    color: var(--text-muted);
-}
 
 /* ── Animations ───────────────────────────────────────────── */
 @keyframes fadeInUp {
@@ -2880,12 +2855,12 @@ body[dir="rtl"] .admin-main {
 
 @media (max-width: 768px) {
     .admin-table {
-        min-width: 900px;
+        min-width: 100%;
     }
 
     .admin-table th,
     .admin-table td {
-        white-space: nowrap !important;
+        white-space: normal !important;
     }
 }
 
@@ -3140,8 +3115,9 @@ body[dir="rtl"] .admin-main {
     .admin-main {
         margin-left: 0 !important;
         padding: 20px 15px;
-        word-break: break-word;
-        overflow-wrap: break-word;
+        word-break: break-all;
+        overflow-wrap: anywhere;
+        overflow-x: hidden;
     }
 
     body[dir="rtl"] .admin-main {
@@ -3622,9 +3598,28 @@ body[dir="rtl"] .floating-wa-btn {
 }
 
 @media (max-width: 576px) {
+    .footer {
+        padding-top: 60px;
+    }
+
     .footer-grid {
         grid-template-columns: 1fr;
         gap: 40px;
+        text-align: center;
+    }
+
+    .footer-socials {
+        justify-content: center;
+    }
+
+    .footer-links a {
+        justify-content: center;
+    }
+
+    .footer-logo {
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
     }
 }
 

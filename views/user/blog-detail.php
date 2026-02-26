@@ -5,22 +5,25 @@
 ?>
 
 <!-- futuristic Blog Detail UI -->
-<article class="blog-detail-section" style="padding: 120px 0 80px; position: relative; overflow: hidden;">
+<article class="blog-detail-section" style="padding: 160px 0 80px; position: relative; overflow-wrap: break-word;">
     <!-- Background Accents -->
     <div class="bg-accents" style="position:absolute; inset:0; pointer-events:none; z-index:0;">
         <div style="position:absolute; top:10%; right:-5%; width:30%; height:40%; background:radial-gradient(circle, rgba(var(--neon-violet-rgb), 0.1) 0%, transparent 70%); filter:blur(100px);"></div>
         <div style="position:absolute; bottom:10%; left:-5%; width:30%; height:40%; background:radial-gradient(circle, rgba(var(--neon-emerald-rgb), 0.1) 0%, transparent 70%); filter:blur(100px);"></div>
     </div>
 
-    <div class="section-container" style="position: relative; z-index: 1;">
+    <div class="section-container" style="position: relative; z-index: 1; max-width: 1200px; margin: 0 auto; padding: 0 20px; width: 100%; box-sizing: border-box;">
         <!-- Back Link -->
         <a href="<?= baseUrl('/') ?>#blogs" class="back-link animate-on-scroll" style="display:inline-flex; align-items:center; gap:8px; color:var(--text-secondary); text-decoration:none; margin-bottom:32px; font-weight:500; transition:all 0.3s ease;">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
             <?= getCurrentLocale() === 'en' ? 'Back to Insights' : 'العودة للمقالات' ?>
         </a>
+        
+        <!-- Swiper CSS -->
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
 
         <!-- Blog Header -->
-        <header class="blog-header animate-on-scroll" style="margin-bottom: 48px;">
+        <header class="blog-header animate-on-scroll" style="margin-bottom: 32px;">
             <div class="blog-meta" style="margin-bottom:16px; display:flex; align-items:center; gap:16px;">
                 <span class="blog-date" style="font-size:0.9rem; color:var(--neon-emerald); font-weight:600; text-transform:uppercase; letter-spacing:1px;">
                     <?= date('M d, Y', strtotime($blog['created_at'])) ?>
@@ -33,7 +36,7 @@
             <h1 class="gradient-text" style="font-size: clamp(2.5rem, 5vw, 4rem); line-height: 1.1; margin-bottom: 24px;">
                 <?= e($blog['title']) ?>
             </h1>
-            <p class="blog-lead" style="font-size: 1.25rem; color: var(--text-secondary); max-width: 800px; line-height: 1.6; font-weight: 400;">
+            <p class="blog-lead" style="font-size: 1.25rem; color: var(--text-secondary); max-width: 800px; line-height: 1.6; font-weight: 400; overflow-wrap: break-word; word-wrap: break-word;">
                 <?= e($blog['description']) ?>
             </p>
         </header>
@@ -43,78 +46,86 @@
             
             <div class="blog-main-column">
                 <!-- Blog Featured Media — Now under title -->
-                <div class="blog-featured-media animate-on-scroll" style="border-radius:24px; overflow:hidden; border:1px solid var(--glass-border); background:var(--glass-bg); backdrop-filter: blur(10px); box-shadow:0 30px 60px -12px rgba(0,0,0,0.25); margin-bottom: 40px;">
+                <!-- Blog Multi-Media Gallery -->
+                <div class="blog-media-container animate-on-scroll" style="margin-bottom: 32px; max-width: 1000px; margin-left: auto; margin-right: auto;">
                     <?php
-                        $mediaType = $blog['media_type'] ?? 'image';
-                        $mediaUrl  = $blog['media_url'] ?? '';
-
-                        // Helper: extract YouTube video ID from various URL formats
-                        if (!function_exists('extractYouTubeIdDetail')) {
-                            function extractYouTubeIdDetail($url) {
-                                $patterns = [
-                                    '/youtube\.com\/watch\?.*v=([a-zA-Z0-9_-]{11})/',
-                                    '/youtu\.be\/([a-zA-Z0-9_-]{11})/',
-                                    '/youtube\.com\/embed\/([a-zA-Z0-9_-]{11})/',
-                                    '/youtube\.com\/shorts\/([a-zA-Z0-9_-]{11})/',
-                                    '/v=([a-zA-Z0-9_-]{11})/',
-                                    '/^([a-zA-Z0-9_-]{11})$/'
-                                ];
-                                foreach ($patterns as $p) {
-                                    if (preg_match($p, $url, $m)) return $m[1];
-                                }
-                                return null;
-                            }
+                        $mediaGallery = $blog['media'] ?? [];
+                        if (empty($mediaGallery) && !empty($blog['media_url'])) {
+                            $mediaGallery = [['media_type' => $blog['media_type'], 'media_url' => $blog['media_url']]];
                         }
-                        
-                        // Helper: extract Vimeo video ID
-                        if (!function_exists('extractVimeoIdDetail')) {
-                            function extractVimeoIdDetail($url) {
-                                if (preg_match('/vimeo\.com\/(?:video\/)?(\d+)/', $url, $m)) return $m[1];
-                                return null;
-                            }
-                        }
+                        $isSlider = count($mediaGallery) > 1;
                     ?>
 
-                    <?php if ($mediaType === 'video' && !empty($mediaUrl)): ?>
-                        <video controls playsinline style="width:100%; display:block; background:#000;">
-                            <source src="<?= baseUrl($mediaUrl) ?>" type="video/<?= pathinfo($mediaUrl, PATHINFO_EXTENSION) ?>">
-                            Your browser does not support the video tag.
-                        </video>
-                    <?php elseif ($mediaType === 'video_link' && !empty($mediaUrl)): ?>
-                        <?php $ytId = extractYouTubeIdDetail($mediaUrl); $vmId = extractVimeoIdDetail($mediaUrl); ?>
-                        <?php if ($ytId): ?>
-                            <div style="position:relative; padding-bottom:56.25%; height:0; overflow:hidden;">
-                                <iframe style="position:absolute; top:0; left:0; width:100%; height:100%; border:0;"
-                                        src="https://www.youtube.com/embed/<?= e($ytId) ?>?rel=0"
-                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                        allowfullscreen></iframe>
+                    <?php if ($isSlider): ?>
+                        <!-- Swiper Slider -->
+                        <div class="swiper blog-media-slider" style="border-radius:24px; overflow:hidden; border:1px solid var(--glass-border); background:var(--glass-bg); backdrop-filter: blur(10px); box-shadow:0 15px 35px -5px rgba(0,0,0,0.15); height: 400px;">
+                            <div class="swiper-wrapper" style="height: 100%;">
+                                <?php foreach ($mediaGallery as $mIdx => $media): 
+                                    $mediaType = $media['media_type'] ?? 'image';
+                                    $mediaUrl  = $media['media_url'] ?? '';
+                                    if (empty($mediaUrl)) continue;
+                                ?>
+                                    <div class="swiper-slide" style="height: 100%;">
+                                        <?php if ($mediaType === 'video'): ?>
+                                            <video controls playsinline style="width:100%; height:100%; display:block; background:#000; object-fit: cover;">
+                                                <source src="<?= baseUrl($mediaUrl) ?>" type="video/<?= pathinfo($mediaUrl, PATHINFO_EXTENSION) ?>">
+                                            </video>
+                                        <?php elseif ($mediaType === 'video_link'): ?>
+                                            <?php $ytId = extractYouTubeIdDetail($mediaUrl); $vmId = extractVimeoIdDetail($mediaUrl); ?>
+                                            <div class="video-container" style="position:relative; width:100%; height:100%; overflow:hidden;">
+                                                <?php if ($ytId): ?>
+                                                    <iframe style="position:absolute; top:0; left:0; width:100%; height:100%; border:0;" src="https://www.youtube.com/embed/<?= e($ytId) ?>?rel=0" allowfullscreen></iframe>
+                                                <?php elseif ($vmId): ?>
+                                                    <iframe style="position:absolute; top:0; left:0; width:100%; height:100%; border:0;" src="https://player.vimeo.com/video/<?= e($vmId) ?>" allowfullscreen></iframe>
+                                                <?php else: ?>
+                                                    <iframe style="position:absolute; top:0; left:0; width:100%; height:100%; border:0;" src="<?= e($mediaUrl) ?>" allowfullscreen></iframe>
+                                                <?php endif; ?>
+                                            </div>
+                                        <?php else: ?>
+                                            <img src="<?= baseUrl($mediaUrl) ?>" alt="<?= e($blog['title']) ?>" style="width:100%; height:100%; object-fit: cover; display:block;">
+                                        <?php endif; ?>
+                                    </div>
+                                <?php endforeach; ?>
                             </div>
-                        <?php elseif ($vmId): ?>
-                            <div style="position:relative; padding-bottom:56.25%; height:0; overflow:hidden;">
-                                <iframe style="position:absolute; top:0; left:0; width:100%; height:100%; border:0;"
-                                        src="https://player.vimeo.com/video/<?= e($vmId) ?>"
-                                        allow="autoplay; fullscreen; picture-in-picture"
-                                        allowfullscreen></iframe>
-                            </div>
-                        <?php else: ?>
-                            <div style="position:relative; padding-bottom:56.25%; height:0; overflow:hidden;">
-                                <iframe style="position:absolute; top:0; left:0; width:100%; height:100%; border:0;"
-                                        src="<?= e($mediaUrl) ?>"
-                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                        allowfullscreen></iframe>
+                            <!-- Swiper Navigation -->
+                            <div class="swiper-button-next"></div>
+                            <div class="swiper-button-prev"></div>
+                            <!-- Swiper Pagination -->
+                            <div class="swiper-pagination"></div>
+                        </div>
+                    <?php else: ?>
+                        <!-- Single Media Item -->
+                        <?php if (!empty($mediaGallery)): 
+                            $media = $mediaGallery[0];
+                            $mediaType = $media['media_type'] ?? 'image';
+                            $mediaUrl  = $media['media_url'] ?? '';
+                        ?>
+                            <div class="single-gallery-item" style="border-radius:24px; overflow:hidden; border:1px solid var(--glass-border); background:var(--glass-bg); backdrop-filter: blur(10px); box-shadow:0 15px 35px -5px rgba(0,0,0,0.15); height: 400px;">
+                                <?php if ($mediaType === 'video'): ?>
+                                    <video controls playsinline style="width:100%; height:100%; display:block; background:#000; object-fit: cover;">
+                                        <source src="<?= baseUrl($mediaUrl) ?>" type="video/<?= pathinfo($mediaUrl, PATHINFO_EXTENSION) ?>">
+                                    </video>
+                                <?php elseif ($mediaType === 'video_link'): ?>
+                                    <?php $ytId = extractYouTubeIdDetail($mediaUrl); $vmId = extractVimeoIdDetail($mediaUrl); ?>
+                                    <div style="position:relative; width:100%; height:100%; overflow:hidden;">
+                                        <?php if ($ytId): ?>
+                                            <iframe style="position:absolute; top:0; left:0; width:100%; height:100%; border:0;" src="https://www.youtube.com/embed/<?= e($ytId) ?>?rel=0" allowfullscreen></iframe>
+                                        <?php elseif ($vmId): ?>
+                                            <iframe style="position:absolute; top:0; left:0; width:100%; height:100%; border:0;" src="https://player.vimeo.com/video/<?= e($vmId) ?>" allowfullscreen></iframe>
+                                        <?php else: ?>
+                                            <iframe style="position:absolute; top:0; left:0; width:100%; height:100%; border:0;" src="<?= e($mediaUrl) ?>" allowfullscreen></iframe>
+                                        <?php endif; ?>
+                                    </div>
+                                <?php else: ?>
+                                    <img src="<?= baseUrl($mediaUrl) ?>" alt="<?= e($blog['title']) ?>" style="width:100%; height:100%; object-fit: cover; display:block;">
+                                <?php endif; ?>
                             </div>
                         <?php endif; ?>
-                    <?php elseif (!empty($mediaUrl)): ?>
-                        <img src="<?= baseUrl($mediaUrl) ?>" alt="<?= e($blog['title']) ?>" style="width:100%; height:auto; display:block;">
-                    <?php else: ?>
-                        <div style="width:100%; aspect-ratio:16/9; background:var(--bg-secondary); display:flex; align-items:center; justify-content:center; color:var(--text-muted);">
-                            <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-                        </div>
                     <?php endif; ?>
                 </div>
 
                 <!-- Blog Rich Text Content -->
-                <div class="blog-rich-content animate-on-scroll" style="font-size:1.15rem; line-height:1.9; color:var(--text-primary); font-weight: 400;">
+                <div class="blog-rich-content animate-on-scroll" style="font-size:1.15rem; line-height:1.9; color:var(--text-primary); font-weight: 400; overflow-wrap: break-word; word-wrap: break-word; word-break: break-word;">
                     <?= ($blog['content']) ?>
                 </div>
             </div>
@@ -197,6 +208,28 @@
     </div>
 </article>
 
+<!-- Swiper JS -->
+<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        if (document.querySelector('.blog-media-slider')) {
+            new Swiper('.blog-media-slider', {
+                loop: true,
+                speed: 800,
+                autoHeight: false,
+                pagination: {
+                    el: '.swiper-pagination',
+                    clickable: true,
+                },
+                navigation: {
+                    nextEl: '.swiper-button-next',
+                    prevEl: '.swiper-button-prev',
+                },
+            });
+        }
+    });
+</script>
+
 <style>
     .back-link:hover { color: var(--neon-emerald) !important; transform: translateX(-5px); }
     .blog-rich-content h2, .blog-rich-content h3 { color: var(--text-primary); margin-top: 2.5rem; margin-bottom: 1.25rem; font-weight: 700; }
@@ -207,10 +240,59 @@
     .share-btn:hover { background: var(--neon-emerald) !important; color: #fff !important; transform: translateY(-3px); box-shadow:0 10px 20px -5px rgba(16,185,129,0.3); border-color: var(--neon-emerald) !important; }
     
     @media (max-width: 991px) {
-        .blog-container { grid-template-columns: 1fr !important; gap: 40px !important; }
-        .blog-sidebar { order: 2; }
-        .blog-main-column { order: 1; }
+        .blog-container { display: flex !important; flex-direction: column !important; gap: 30px !important; }
+        .blog-sidebar { order: 2; width: 100% !important; }
+        .blog-main-column { order: 1; width: 100% !important; min-width: 0 !important; }
+        .blog-media-slider, .single-gallery-item { height: 300px !important; width: 100% !important; max-width: 100vw !important; }
+    }
+    @media (max-width: 768px) {
+        .blog-detail-section { padding-top: 200px !important; }
+        .blog-header h1 { font-size: 1.8rem !important; line-height: 1.2 !important; overflow-wrap: anywhere !important; }
+        .blog-header { margin-bottom: 24px !important; }
+        .blog-meta { flex-wrap: wrap; gap: 10px !important; }
+        .blog-media-container { margin-bottom: 24px !important; max-width: 100% !important; padding: 0 !important; }
+        .section-container { padding: 0 16px !important; overflow-x: hidden !important; }
+    }
+    @media (max-width: 576px) {
+        .blog-detail-section { padding-top: 180px !important; }
+        .blog-header h1 { font-size: 1.5rem !important; }
+        .blog-media-slider, .single-gallery-item { height: 180px !important; }
+        .blog-rich-content { font-size: 1.05rem !important; overflow-wrap: anywhere !important; }
     }
     .recent-post-item:hover .recent-title { color: var(--neon-emerald) !important; transform: translateX(5px); }
     .bottom-insight-card:hover { transform: translateY(-10px); border-color: var(--neon-emerald); box-shadow: 0 20px 40px -10px rgba(0,0,0,0.3); }
+
+    /* Swiper Styling Overrides */
+    .blog-media-slider .swiper-button-next,
+    .blog-media-slider .swiper-button-prev {
+        color: var(--neon-emerald);
+        background: rgba(var(--bg-secondary-rgb), 0.5);
+        backdrop-filter: blur(10px);
+        width: 45px;
+        height: 45px;
+        border-radius: 50%;
+        border: 1px solid var(--glass-border);
+        transition: all 0.3s ease;
+    }
+    .blog-media-slider .swiper-button-next:after,
+    .blog-media-slider .swiper-button-prev:after {
+        font-size: 1.2rem;
+        font-weight: bold;
+    }
+    .blog-media-slider .swiper-button-next:hover,
+    .blog-media-slider .swiper-button-prev:hover {
+        background: var(--neon-emerald);
+        color: #fff;
+    }
+    .blog-media-slider .swiper-pagination-bullet {
+        background: var(--text-muted);
+        opacity: 0.5;
+    }
+    .blog-media-slider .swiper-pagination-bullet-active {
+        background: var(--neon-emerald);
+        opacity: 1;
+        width: 25px;
+        border-radius: 5px;
+        transition: width 0.3s ease;
+    }
 </style>

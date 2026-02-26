@@ -626,6 +626,19 @@ function adminBlogs(): void {
     $saved = false;
     $action = $_GET['action'] ?? 'list';
 
+    // Migration: Create blog_media table if not exists
+    try {
+        $db->exec("CREATE TABLE IF NOT EXISTS blog_media (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            blog_id INT NOT NULL,
+            media_type ENUM('image', 'video', 'video_link') NOT NULL DEFAULT 'image',
+            media_url TEXT NOT NULL,
+            sort_order INT DEFAULT 0,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (blog_id) REFERENCES blogs(id) ON DELETE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
+    } catch (Exception $e) { /* ignore if already exists or other issues */ }
+
     if ($action === 'delete' && isset($_GET['id'])) {
         $db->prepare('DELETE FROM blogs WHERE id = ?')->execute([intval($_GET['id'])]);
         header('Location: ' . baseUrl('admin/blogs'));
@@ -677,6 +690,46 @@ function adminBlogs(): void {
                 VALUES (?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE title = VALUES(title), description = VALUES(description), content = VALUES(content)')
                ->execute([$id, $loc, $title, $desc, $content]);
         }
+
+        // Handle Additional Media
+        $db->prepare('DELETE FROM blog_media WHERE blog_id = ?')->execute([$id]);
+        
+        // Save primary media to gallery too if it's the first time or if it's explicitly wanted
+        // Actually, let's just save whatever is in the multi-media inputs
+        if (isset($_POST['media_items']) && is_array($_POST['media_items'])) {
+            $uploadDir = __DIR__ . '/../assets/uploads/';
+            if (!is_dir($uploadDir)) mkdir($uploadDir, 0777, true);
+
+            foreach ($_POST['media_items'] as $index => $item) {
+                $mType = $item['type'] ?? 'image';
+                $mUrl = $item['url'] ?? '';
+                $mSort = intval($item['sort'] ?? 0);
+
+                // Handle file upload if present for this row
+                if (isset($_FILES['media_files']['name'][$index]) && $_FILES['media_files']['error'][$index] === UPLOAD_ERR_OK) {
+                    $fileInfo = pathinfo($_FILES['media_files']['name'][$index]);
+                    $ext = strtolower($fileInfo['extension']);
+                    if (in_array($ext, ['jpg', 'jpeg', 'png', 'svg', 'webp', 'gif', 'mp4', 'webm'])) {
+                        $filename = 'blog_gallery_' . $id . '_' . $index . '_' . time() . '.' . $ext;
+                        if (move_uploaded_file($_FILES['media_files']['tmp_name'][$index], $uploadDir . $filename)) {
+                            $mUrl = 'assets/uploads/' . $filename;
+                        }
+                    }
+                }
+
+                if (!empty($mUrl)) {
+                    $db->prepare('INSERT INTO blog_media (blog_id, media_type, media_url, sort_order) VALUES (?, ?, ?, ?)')
+                       ->execute([$id, $mType, $mUrl, $mSort]);
+                    
+                    // Update main blog media_url if this is the first item (thumb)
+                    if ($index === 0) {
+                        $db->prepare('UPDATE blogs SET media_type = ?, media_url = ? WHERE id = ?')
+                           ->execute([$mType, $mUrl, $id]);
+                    }
+                }
+            }
+        }
+
         $saved = true;
         // if want to redirect instead of stay: 
         header('Location: ' . baseUrl('admin/blogs'));
@@ -695,12 +748,17 @@ function adminBlogs(): void {
             foreach ($stmt2->fetchAll() as $t) {
                 $editBlog['translations'][$t['locale']] = $t;
             }
+
+            // Fetch Media Gallery
+            $stmt3 = $db->prepare('SELECT * FROM blog_media WHERE blog_id = ? ORDER BY sort_order ASC');
+            $stmt3->execute([$editBlog['id']]);
+            $editBlog['media'] = $stmt3->fetchAll();
         }
     }
 
     $blogs = $db->query('SELECT b.*, GROUP_CONCAT(CONCAT(bt.locale,":",bt.title) SEPARATOR "|") as trans
         FROM blogs b LEFT JOIN blog_translations bt ON b.id = bt.blog_id
-        GROUP BY b.id ORDER BY b.sort_order')->fetchAll();
+        GROUP BY b.id ORDER BY b.sort_order DESC, b.created_at DESC')->fetchAll();
 
     require __DIR__ . '/../views/admin/blogs.php';
 }

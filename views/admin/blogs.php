@@ -24,33 +24,13 @@
             <div class="admin-card" style="margin-bottom: 30px;">
                 <form method="POST" action="<?= baseUrl('admin/blogs') ?>" enctype="multipart/form-data">
                     <input type="hidden" name="id" value="<?= $editBlog['id'] ?? 0 ?>">
-                    <div class="admin-grid-2">
+                    <div class="admin-grid-3">
                         <div class="form-group">
                             <label>Slug (URL-friendly name, auto-generated if empty)</label>
                             <input type="text" name="slug" class="form-input" value="<?= e($editBlog['slug'] ?? '') ?>" placeholder="e.g. my-first-blog">
                         </div>
                         <div class="form-group">
-                            <label>Media Type</label>
-                            <select name="media_type" class="form-input">
-                                <?php $mt = $editBlog['media_type'] ?? 'image'; ?>
-                                <option value="image" <?= $mt==='image'?'selected':'' ?>>Image (.jpg, .png)</option>
-                                <option value="video" <?= $mt==='video'?'selected':'' ?>>Video File (.mp4, .webm)</option>
-                                <option value="video_link" <?= $mt==='video_link'?'selected':'' ?>>External Video Link</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>Media File Upload</label>
-                            <input type="file" name="media_file" class="form-input" accept="image/*,video/mp4,video/webm">
-                            <?php if(!empty($editBlog['media_url']) && !str_starts_with($editBlog['media_url'], 'http')): ?>
-                                <small style="display:block; margin-top:5px; color:var(--text-muted)">Current: <a href="<?= baseUrl($editBlog['media_url']) ?>" target="_blank" style="color:var(--neon-cyan)">View Media</a></small>
-                            <?php endif; ?>
-                        </div>
-                        <div class="form-group">
-                            <label>Media URL (External Link)</label>
-                            <input type="text" name="media_url" class="form-input" value="<?= e($editBlog['media_url'] ?? '') ?>" placeholder="https://youtube.com/...">
-                        </div>
-                        <div class="form-group">
-                            <label>Sort Order</label>
+                            <label>Sort Order (Higher = first)</label>
                             <input type="number" name="sort_order" class="form-input" value="<?= $editBlog['sort_order'] ?? 0 ?>">
                         </div>
                         <div class="form-group" style="display: flex; align-items: center; margin-top: 25px; gap: 20px;">
@@ -60,6 +40,115 @@
                             </label>
                         </div>
                     </div>
+
+                    <div class="admin-card" style="margin-top:20px; border-color:var(--neon-cyan);">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                            <h4 style="margin:0;">🖼️ Media Gallery</h4>
+                            <button type="button" class="btn-primary" style="padding:4px 12px; font-size:0.8rem;" onclick="addMediaRow()">+ Add Media</button>
+                        </div>
+                        <div id="media-rows-container">
+                            <?php 
+                            $mediaItems = $editBlog['media'] ?? [];
+                            if (empty($mediaItems) && !empty($editBlog['media_url'])) {
+                                // Default row if editing old blog
+                                $mediaItems = [['media_type' => $editBlog['media_type'], 'media_url' => $editBlog['media_url'], 'sort_order' => 0]];
+                            }
+                            ?>
+                            <?php if (empty($mediaItems)): ?>
+                                <!-- Initialize at least one empty row -->
+                                <div class="media-row admin-grid-4" style="align-items:end; padding-bottom:15px; border-bottom:1px solid rgba(255,255,255,0.05); margin-bottom:15px;">
+                                    <div class="form-group">
+                                        <label>Type</label>
+                                        <select name="media_items[0][type]" class="form-input">
+                                            <option value="image">Image</option>
+                                            <option value="video">Video File</option>
+                                            <option value="video_link">Video Link</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Upload File</label>
+                                        <input type="file" name="media_files[0]" class="form-input">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>OR Media URL</label>
+                                        <input type="text" name="media_items[0][url]" class="form-input" placeholder="https://...">
+                                    </div>
+                                    <div class="form-group" style="display:flex; gap:10px; align-items:center;">
+                                        <div style="flex:1;">
+                                            <label>Sort</label>
+                                            <input type="number" name="media_items[0][sort]" class="form-input" value="0">
+                                        </div>
+                                        <button type="button" class="btn-ghost" style="color:var(--neon-pink); padding:8px; margin-top:25px;" onclick="this.parentElement.parentElement.remove()">✕</button>
+                                    </div>
+                                </div>
+                            <?php else: ?>
+                                <?php foreach ($mediaItems as $idx => $m): ?>
+                                    <div class="media-row admin-grid-4" style="align-items:end; padding-bottom:15px; border-bottom:1px solid rgba(255,255,255,0.05); margin-bottom:15px;">
+                                        <div class="form-group">
+                                            <label>Type</label>
+                                            <select name="media_items[<?= $idx ?>][type]" class="form-input">
+                                                <option value="image" <?= $m['media_type'] === 'image' ? 'selected' : '' ?>>Image</option>
+                                                <option value="video" <?= $m['media_type'] === 'video' ? 'selected' : '' ?>>Video File</option>
+                                                <option value="video_link" <?= $m['media_type'] === 'video_link' ? 'selected' : '' ?>>Video Link</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Upload File (Replace)</label>
+                                            <input type="file" name="media_files[<?= $idx ?>]" class="form-input">
+                                        </div>
+                                        <div class="form-group">
+                                            <label>OR Media URL</label>
+                                            <input type="text" name="media_items[<?= $idx ?>][url]" class="form-input" value="<?= e($m['media_url']) ?>">
+                                        </div>
+                                        <div class="form-group" style="display:flex; gap:10px; align-items:center;">
+                                            <div style="flex:1;">
+                                                <label>Sort</label>
+                                                <input type="number" name="media_items[<?= $idx ?>][sort]" class="form-input" value="<?= $m['sort_order'] ?>">
+                                            </div>
+                                            <button type="button" class="btn-ghost" style="color:var(--neon-pink); padding:8px; margin-top:25px;" onclick="this.parentElement.parentElement.remove()">✕</button>
+                                        </div>
+                                    </div>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+
+                    <script>
+                        let mediaRowCount = <?= max(count($mediaItems), 1) ?>;
+                        function addMediaRow() {
+                            const container = document.getElementById('media-rows-container');
+                            const row = document.createElement('div');
+                            row.className = 'media-row admin-grid-4';
+                            row.style = 'align-items:end; padding-bottom:15px; border-bottom:1px solid rgba(255,255,255,0.05); margin-bottom:15px;';
+                            row.innerHTML = `
+                                <div class="form-group">
+                                    <label>Type</label>
+                                    <select name="media_items[${mediaRowCount}][type]" class="form-input">
+                                        <option value="image">Image</option>
+                                        <option value="video">Video File</option>
+                                        <option value="video_link">Video Link</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Upload File</label>
+                                    <input type="file" name="media_files[${mediaRowCount}]" class="form-input">
+                                </div>
+                                <div class="form-group">
+                                    <label>OR Media URL</label>
+                                    <input type="text" name="media_items[${mediaRowCount}][url]" class="form-input" placeholder="https://...">
+                                </div>
+                                <div class="form-group" style="display:flex; gap:10px; align-items:center;">
+                                    <div style="flex:1;">
+                                        <label>Sort</label>
+                                        <input type="number" name="media_items[${mediaRowCount}][sort]" class="form-input" value="${mediaRowCount}">
+                                    </div>
+                                    <button type="button" class="btn-ghost" style="color:var(--neon-pink); padding:8px; margin-top:25px;" onclick="this.parentElement.parentElement.remove()">✕</button>
+                                </div>
+                            `;
+                            container.appendChild(row);
+                            mediaRowCount++;
+                        }
+                    </script>
 
                     <?php foreach (SUPPORTED_LOCALES as $loc): ?>
                         <div style="margin-top: 20px; padding: 15px; background: rgba(255,255,255,0.02); border-radius: 8px;">
@@ -130,6 +219,7 @@
             .admin-table, .admin-table tbody, .admin-table tr, .admin-table td { 
                 display: block; 
                 width: 100%; 
+                min-width: auto !important;
             }
             .admin-table tr { 
                 margin-bottom: 25px; 

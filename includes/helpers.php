@@ -259,7 +259,7 @@ function getBlogs(): array {
                 FROM blogs b
                 LEFT JOIN blog_translations bt ON b.id = bt.blog_id AND bt.locale = ?
                 WHERE b.is_active = 1
-                ORDER BY b.sort_order ASC, b.created_at DESC";
+                ORDER BY b.sort_order DESC, b.created_at DESC";
         $stmt = $db->prepare($sql);
         $stmt->execute([$locale]);
         return $stmt->fetchAll();
@@ -286,7 +286,15 @@ function getBlogBySlug(string $slug): ?array {
                 LIMIT 1";
         $stmt = $db->prepare($sql);
         $stmt->execute([$locale, $slug]);
-        return $stmt->fetch() ?: null;
+        $blog = $stmt->fetch();
+        
+        if ($blog) {
+            $stmtM = $db->prepare("SELECT * FROM blog_media WHERE blog_id = ? ORDER BY sort_order ASC");
+            $stmtM->execute([$blog['id']]);
+            $blog['media'] = $stmtM->fetchAll();
+        }
+        
+        return $blog ?: null;
     } catch (Exception $e) {
         return null;
     }
