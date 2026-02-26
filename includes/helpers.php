@@ -189,6 +189,21 @@ function baseUrl(string $path = ''): string {
     return $base . '/' . ltrim($path, '/');
 }
 
+/**
+ * Returns current URL with a modified lang parameter
+ */
+function getCurrentUrlWithLang(string $lang): string {
+    $uri = $_SERVER['REQUEST_URI'];
+    $parts = parse_url($uri);
+    $query = [];
+    if (isset($parts['query'])) {
+        parse_str($parts['query'], $query);
+    }
+    $query['lang'] = $lang;
+    $newQuery = http_build_query($query);
+    return $parts['path'] . '?' . $newQuery;
+}
+
 if (!function_exists('getColorRgb')) {
     function getColorRgb(string $color = 'cobalt'): string {
         $colors = [

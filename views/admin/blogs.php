@@ -125,32 +125,46 @@
                 </div>
 
     <style>
-        @media screen and (max-width: 768px) {
+        @media screen and (max-width: 991px) {
             .admin-table thead { display: none; }
-            .admin-table tr { 
+            .admin-table, .admin-table tbody, .admin-table tr, .admin-table td { 
                 display: block; 
-                margin-bottom: 20px; 
-                background: rgba(255,255,255,0.03); 
-                border-radius: 12px; 
-                padding: 10px;
+                width: 100%; 
+            }
+            .admin-table tr { 
+                margin-bottom: 25px; 
+                background: rgba(255,255,255,0.02); 
+                border-radius: 16px; 
+                padding: 15px;
                 border: 1px solid var(--glass-border);
+                box-shadow: 0 4px 15px rgba(0,0,0,0.1);
             }
             .admin-table td { 
                 display: flex; 
                 justify-content: space-between; 
                 align-items: center; 
                 text-align: right; 
-                padding: 10px 5px; 
+                padding: 12px 0; 
                 border-bottom: 1px solid rgba(255,255,255,0.05);
+                font-size: 0.9rem;
             }
-            .admin-table td:last-child { border-bottom: none; }
+            .admin-table td:last-child { border-bottom: none; padding-top: 15px; }
             .admin-table td::before { 
                 content: attr(data-label); 
                 font-weight: 700; 
                 text-transform: uppercase; 
-                font-size: 0.75rem; 
+                font-size: 0.7rem; 
                 color: var(--neon-cyan);
-                margin-right: 15px;
+                letter-spacing: 1px;
+                text-align: left;
+            }
+            .admin-table td[data-label="Translations"] {
+                flex-direction: column;
+                align-items: flex-start;
+                text-align: left;
+            }
+            .admin-table td[data-label="Translations"]::before {
+                margin-bottom: 8px;
             }
         }
     </style>

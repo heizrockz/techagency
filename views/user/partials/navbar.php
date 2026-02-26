@@ -21,7 +21,7 @@
         <li><a href="<?= baseUrl('/') ?>#booking" class="nav-cta-btn"><?= t('nav_booking') ?></a></li>
     </ul>
 
-    <a href="<?= baseUrl('?lang=' . (getCurrentLocale() === 'en' ? 'ar' : 'en')) ?>" class="nav-lang-btn">
+    <a href="<?= getCurrentUrlWithLang(getCurrentLocale() === 'en' ? 'ar' : 'en') ?>" class="nav-lang-btn">
         <?= t('nav_lang') ?>
     </a>
 
