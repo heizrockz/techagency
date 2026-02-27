@@ -10,7 +10,7 @@
             ?>
             <?php if(!empty($footerLogo)): ?>
             <div class="footer-logo">
-                <img src="<?= baseUrl($footerLogo) ?>" alt="<?= e($companyName) ?>" style="max-height:40px;">
+                <img src="<?= baseUrl($footerLogo) ?>" alt="<?= e($companyName) ?>" style="max-height:30px;">
                 <span class="footer-company-name"><?= e($companyName) ?></span>
             </div>
             <?php else: ?>
