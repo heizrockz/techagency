@@ -190,6 +190,29 @@ function baseUrl(string $path = ''): string {
 }
 
 /**
+ * Returns an absolute URL including protocol and host
+ */
+function fullUrl(string $path = ''): string {
+    $protocol = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http");
+    $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
+    $base = rtrim(BASE_URL, '/');
+    
+    // If BASE_URL already contains protocol, use it
+    if (preg_match('~^https?://~', $base)) {
+        $fullBase = $base;
+    } else {
+        $fullBase = $protocol . "://" . $host . $base;
+    }
+    
+    $fullBase = rtrim($fullBase, '/');
+    
+    if ($path === '' || $path === '/') {
+        return $fullBase . '/';
+    }
+    return $fullBase . '/' . ltrim($path, '/');
+}
+
+/**
  * Returns current URL with a modified lang parameter
  */
 function getCurrentUrlWithLang(string $lang): string {

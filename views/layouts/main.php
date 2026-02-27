@@ -8,8 +8,8 @@
     <meta name="keywords" content="<?= e($seo['keywords'] ?? '') ?>">
     
     <?php 
-        $currentUrl = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]";
-        $canonicalUrl = $seo['canonical_link'] ?? $currentUrl;
+        $currentUrl = fullUrl($_SERVER['REQUEST_URI']);
+        $canonicalUrl = !empty($seo['canonical_link']) ? (preg_match('~^https?://~', $seo['canonical_link']) ? $seo['canonical_link'] : fullUrl($seo['canonical_link'])) : $currentUrl;
         // Strip query params for a cleaner canonical if they aren't part of the core content
         $canonicalUrl = strtok($canonicalUrl, '?');
     ?>
@@ -30,8 +30,8 @@
       "@context": "https://schema.org",
       "@type": "Organization",
       "name": "<?= e(getSetting('site_name', APP_NAME)) ?>",
-      "url": "<?= baseUrl() ?>",
-      "logo": "<?= baseUrl(getSetting('site_logo')) ?>",
+      "url": "<?= fullUrl() ?>",
+      "logo": "<?= fullUrl(getSetting('site_logo')) ?>",
       "description": "<?= e($seo['description'] ?? '') ?>",
       "sameAs": [
         "https://facebook.com/micosage",
@@ -60,11 +60,12 @@
     <meta property="og:type"        content="<?= e($ogType) ?>">
     <meta property="og:title"       content="<?= e($ogTitle) ?>">
     <meta property="og:description" content="<?= e($ogDesc) ?>">
-    <meta property="og:url"         content="<?= e($ogUrl) ?>">
+    <meta property="og:url"         content="<?= e(preg_match('~^https?://~', $ogUrl) ? $ogUrl : fullUrl($ogUrl)) ?>">
     <?php if ($ogImage): ?>
-    <meta property="og:image"       content="<?= e($ogImage) ?>">
-    <meta property="og:image:width"  content="1200">
-    <meta property="og:image:height" content="630">
+    <?php $fullOgImage = preg_match('~^https?://~', $ogImage) ? $ogImage : fullUrl($ogImage); ?>
+    <meta property="og:image"       content="<?= e($fullOgImage) ?>">
+    <meta property="og:image:width"  content="600">
+    <meta property="og:image:height" content="360">
     <?php endif; ?>
     <?php if ($ogSiteName = getSetting('seo_og_sitename', APP_NAME)): ?>
     <meta property="og:site_name"   content="<?= e($ogSiteName) ?>">
@@ -74,12 +75,12 @@
     <meta name="twitter:title"       content="<?= e($ogTitle) ?>">
     <meta name="twitter:description" content="<?= e($ogDesc) ?>">
     <?php if ($ogImage): ?>
-    <meta name="twitter:image"       content="<?= e($ogImage) ?>">
+    <meta name="twitter:image"       content="<?= e($fullOgImage) ?>">
     <?php endif; ?>
 
     <?php if($favicon = getSetting('seo_favicon')): ?>
-        <link rel="icon" type="image/x-icon" href="<?= baseUrl($favicon) ?>">
-        <link rel="apple-touch-icon" href="<?= baseUrl($favicon) ?>">
+        <link rel="icon" type="image/x-icon" href="<?= fullUrl($favicon) ?>">
+        <link rel="apple-touch-icon" href="<?= fullUrl($favicon) ?>">
     <?php endif; ?>
 
     <!-- Fonts -->
