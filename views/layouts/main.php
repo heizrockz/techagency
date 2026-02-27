@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= e($seo['title'] ?? APP_NAME) ?></title>
+    <title><?= e(mb_strimwidth($seo['title'] ?? APP_NAME, 0, 60, "...")) ?></title>
     <meta name="description" content="<?= e($seo['description'] ?? '') ?>">
     <meta name="keywords" content="<?= e($seo['keywords'] ?? '') ?>">
     
@@ -51,6 +51,7 @@
 
     <?php if($favicon = getSetting('seo_favicon')): ?>
         <link rel="icon" type="image/x-icon" href="<?= baseUrl($favicon) ?>">
+        <link rel="apple-touch-icon" href="<?= baseUrl($favicon) ?>">
     <?php endif; ?>
 
     <!-- Fonts -->

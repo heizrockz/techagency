@@ -316,6 +316,21 @@ function getBlogBySlug(string $slug): ?array {
 }
 
 /**
+ * Returns social share links for the current page
+ */
+function getSocialShareLinks(): array {
+    $url = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]";
+    $title = APP_NAME;
+    
+    return [
+        'facebook' => "https://www.facebook.com/sharer/sharer.php?u=" . urlencode($url),
+        'twitter'  => "https://twitter.com/intent/tweet?url=" . urlencode($url) . "&text=" . urlencode($title),
+        'linkedin' => "https://www.linkedin.com/sharing/share-offsite/?url=" . urlencode($url),
+        'whatsapp' => "https://api.whatsapp.com/send?text=" . urlencode($title . " " . $url)
+    ];
+}
+
+/**
  * Extract YouTube ID for detail page logic
  */
 function extractYouTubeIdDetail(string $url): ?string {
