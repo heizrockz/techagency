@@ -1876,15 +1876,17 @@ body[dir="rtl"] .admin-form-group select {
     top: calc(100% + 8px);
     left: 0;
     right: 0;
-    background: #111116;
-    /* very dark fallback */
-    background: var(--glass-bg);
+    background: #0f1115;
+    /* Solid fallback */
+    background: rgba(15, 17, 21, 0.98);
+    /* Almost solid charcoal for readability */
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     border: 1px solid var(--theme-primary);
     border-radius: var(--radius-sm);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 20px rgba(16, 185, 129, 0.1);
-    z-index: 50;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6), 0 0 20px rgba(16, 185, 129, 0.15);
+    z-index: 1005;
+    /* High enough to stay above everything but the chatbot */
     opacity: 0;
     visibility: hidden;
     transform: translateY(-10px);
