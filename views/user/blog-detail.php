@@ -82,7 +82,7 @@
                                                 <?php endif; ?>
                                             </div>
                                         <?php else: ?>
-                                            <img src="<?= baseUrl($mediaUrl) ?>" alt="<?= e($blog['title']) ?>" style="width:100%; height:100%; object-fit: cover; display:block;">
+                                            <img src="<?= baseUrl($mediaUrl) ?>" alt="<?= e($blog['title']) ?>" title="<?= e($blog['title']) ?>" fetchpriority="high" style="width:100%; height:100%; object-fit: cover; display:block;">
                                         <?php endif; ?>
                                     </div>
                                 <?php endforeach; ?>
@@ -117,7 +117,7 @@
                                         <?php endif; ?>
                                     </div>
                                 <?php else: ?>
-                                    <img src="<?= baseUrl($mediaUrl) ?>" alt="<?= e($blog['title']) ?>" style="width:100%; height:100%; object-fit: cover; display:block;">
+                                    <img src="<?= baseUrl($media['media_url']) ?>" alt="<?= e($blog['title']) ?>" title="<?= e($blog['title']) ?>" fetchpriority="high" style="width:100%; height:100%; max-height: 500px; display:block; object-fit: cover; border:1px solid var(--glass-border); border-radius:24px;">
                                 <?php endif; ?>
                             </div>
                         <?php endif; ?>
