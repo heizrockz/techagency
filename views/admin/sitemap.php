@@ -56,7 +56,7 @@ $currentPage = 'sitemap';
                     
                     <div class="form-actions" style="margin-top: 20px; display:flex; gap:15px;">
                         <button type="submit" class="btn-primary">Save Manual Changes</button>
-                        <a href="<?= baseUrl('sitemap.xml') ?>" target="_blank" class="btn-secondary">View Live XML</a>
+                        <a href="<?= baseUrl('sitemap.xml') ?>" target="_blank" rel="noopener noreferrer" class="btn-secondary">View Live XML</a>
                     </div>
                 </form>
             </div>

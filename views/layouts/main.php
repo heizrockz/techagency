@@ -100,25 +100,26 @@
     </noscript>
 
     <!-- Tailwind CSS CDN -->
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Tailwind Config -->
     <script>
-        // Config before load is better for Tailwind CDN to avoid FOUC but can be render blocking
-        // We use a small inline config to prevent large style shifts
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: {
-                        sans: ['Inter', 'IBM Plex Sans Arabic', 'system-ui', 'sans-serif'],
-                        mono: ['JetBrains Mono', 'monospace'],
+        tailwind = {
+            config: {
+                theme: {
+                    extend: {
+                        fontFamily: {
+                            sans: ['Inter', 'IBM Plex Sans Arabic', 'system-ui', 'sans-serif'],
+                            mono: ['JetBrains Mono', 'monospace'],
+                        }
                     }
                 }
             }
         };
     </script>
+    <script src="https://cdn.tailwindcss.com" defer></script>
 
-    <!-- Custom CSS -->
-    <link rel="stylesheet" href="<?= baseUrl('assets/css/style.css') ?>">
+    <!-- Custom CSS (Deferred) -->
+    <link rel="preload" href="<?= baseUrl('assets/css/style.css') ?>" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="<?= baseUrl('assets/css/style.css') ?>"></noscript>
 </head>
 <body dir="<?= $dir ?>" data-baseurl="<?= baseUrl() ?>">
 
@@ -279,7 +280,7 @@
         </button>
         <div class="floating-cta-popup" id="floatingCtaPopup">
             <?php if(!empty($wa)): ?>
-            <a href="https://wa.me/<?= e(preg_replace('/[^0-9]/', '', $wa)) ?>?text=Hello%20<?= urlencode(APP_NAME) ?>!" target="_blank" class="cta-popup-item wa">
+            <a href="https://wa.me/<?= e(preg_replace('/[^0-9]/', '', $wa)) ?>?text=Hello%20<?= urlencode(APP_NAME) ?>!" target="_blank" rel="noopener noreferrer" class="cta-popup-item wa">
                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12.031 2.01c-5.518 0-9.998 4.48-9.998 9.998 0 1.763.46 3.486 1.332 5.006L2 22l5.12-1.341c1.472.825 3.149 1.26 4.908 1.26h.005c5.517 0 9.995-4.478 9.995-9.995 0-5.517-4.478-9.996-9.997-9.996zm5.498 14.414c-.22.62-1.28 1.189-1.789 1.246-.464.053-1.056.126-3.32-.813-2.887-1.196-4.735-4.14-4.877-4.329-.142-.189-1.163-1.547-1.163-2.95 0-1.403.734-2.095.992-2.383.258-.288.563-.36.75-.36s.374-.005.541.002c.181.01.425-.07.662.502.247.596.598 1.458.649 1.562.052.104.086.225.015.367-.07.142-.104.231-.208.354-.104.122-.218.261-.31.365-.104.116-.214.244-.092.455.122.21 5.4 5.4 5.611 5.722z"/></svg>
                WhatsApp Us
             </a>

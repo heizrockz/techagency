@@ -74,7 +74,7 @@ $currentPage = 'invoices';
                                 <td><?= date('M j, Y', strtotime($inv['created_at'])) ?></td>
                                 <td>
                                     <a href="<?= baseUrl('admin/invoices?action=edit&id=' . $inv['id']) ?>" class="admin-btn" style="padding: 6px 12px; font-size: 0.8rem;">Edit</a>
-                                    <a href="<?= baseUrl('admin/invoices?action=print&id=' . $inv['id']) ?>" target="_blank" class="admin-btn" style="padding: 6px 12px; font-size: 0.8rem; border-color: var(--theme-gold); color: var(--theme-gold);">Print</a>
+                                    <a href="<?= baseUrl('admin/invoices?action=print&id=' . $inv['id']) ?>" target="_blank" rel="noopener noreferrer" class="admin-btn" style="padding: 6px 12px; font-size: 0.8rem; border-color: var(--theme-gold); color: var(--theme-gold);">Print</a>
                                     <a href="<?= baseUrl('admin/invoices?action=delete&id=' . $inv['id']) ?>" class="admin-btn" style="padding: 6px 12px; font-size: 0.8rem; color: #f43f5e; border-color: rgba(244, 63, 94, 0.3);" onclick="return confirm('Delete this record? This cannot be undone.')">Delete</a>
                                 </td>
                             </tr>

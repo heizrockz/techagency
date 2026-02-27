@@ -67,7 +67,7 @@
         </div>
         
         <div style="margin-top: 30px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.05);">
-            <a href="<?= baseUrl('/') ?>" target="_blank" style="color: var(--theme-gold); display: flex; align-items: center; justify-content: space-between;">
+            <a href="<?= baseUrl('/') ?>" target="_blank" rel="noopener noreferrer" style="color: var(--theme-gold); display: flex; align-items: center; justify-content: space-between;">
                 <span>🌐 View Live Site</span>
                 <span style="font-size: 0.8rem;">↗</span>
             </a>

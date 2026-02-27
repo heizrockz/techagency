@@ -19,8 +19,9 @@
             <?= getCurrentLocale() === 'en' ? 'Back to Insights' : 'العودة للمقالات' ?>
         </a>
         
-        <!-- Swiper CSS -->
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+        <!-- Swiper CSS Deferred -->
+        <link rel="preload" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+        <noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css"></noscript>
 
         <!-- Blog Header -->
         <header class="blog-header animate-on-scroll" style="margin-bottom: 32px;">

@@ -35,9 +35,9 @@ $currencies = ['AED' => 'AED (د.إ)', 'USD' => 'USD ($)', 'EUR' => 'EUR (€)',
                 <h1 style="color: var(--theme-gold); margin:0;">🧾 <?= e($title) ?></h1>
                 <p style="color: var(--text-muted); font-size: 0.9rem;">Fill in the details below to generate.</p>
             </div>
-            <div class="admin-header-actions">
-                <?php if (!$isNew): ?>
-                    <a href="<?= baseUrl('admin/invoices?action=print&id=' . $invoice['id']) ?>" target="_blank" class="btn-secondary">🖨️ Print / PDF</a>
+            <div class="admin-actions">
+                <?php if ($invoice['id']): ?>
+                    <a href="<?= baseUrl('admin/invoices?action=print&id=' . $invoice['id']) ?>" target="_blank" rel="noopener noreferrer" class="btn-secondary">🖨️ Print / PDF</a>
                 <?php endif; ?>
                 <a href="<?= baseUrl('admin/invoices') ?>" class="btn-ghost">← Back to List</a>
             </div>
