@@ -105,11 +105,13 @@ if ($path === '/' || $path === '/index.php' || $path === '') {
         adminLogout();
     } else {
         // Serve the custom 404 page
+        http_response_code(404);
         $viewFile = '404';
         require_once __DIR__ . '/views/layouts/main.php';
     }
 } else {
     // Catch-all: Route unknown requests to the custom 404 page
+    http_response_code(404);
     $viewFile = '404';
     require_once __DIR__ . '/views/layouts/main.php';
 }
