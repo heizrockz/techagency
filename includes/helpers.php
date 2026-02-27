@@ -279,6 +279,7 @@ function getBlogBySlug(string $slug): ?array {
             $viewCountPart = ", b.view_count";
         } catch (Exception $e) {}
 
+        // Fallback: If title is missing for current locale, try to fetch the default locale (English)
         $sql = "SELECT b.*, bt.title, bt.description, bt.content $viewCountPart
                 FROM blogs b
                 LEFT JOIN blog_translations bt ON b.id = bt.blog_id AND bt.locale = ?
@@ -287,6 +288,20 @@ function getBlogBySlug(string $slug): ?array {
         $stmt = $db->prepare($sql);
         $stmt->execute([$locale, $slug]);
         $blog = $stmt->fetch();
+        
+        // If we found a blog but title is null (meaning no translation for the current locale), try 'en'
+        if ($blog && empty($blog['title']) && $locale !== DEFAULT_LOCALE) {
+            $stmt = $db->prepare("SELECT b.*, bt.title, bt.description, bt.content $viewCountPart
+                                 FROM blogs b
+                                 LEFT JOIN blog_translations bt ON b.id = bt.blog_id AND bt.locale = ?
+                                 WHERE b.id = ? 
+                                 LIMIT 1");
+            $stmt->execute([DEFAULT_LOCALE, $blog['id']]);
+            $fallback = $stmt->fetch();
+            if ($fallback) {
+                $blog = $fallback;
+            }
+        }
         
         if ($blog) {
             $stmtM = $db->prepare("SELECT * FROM blog_media WHERE blog_id = ? ORDER BY sort_order ASC");
@@ -298,6 +313,30 @@ function getBlogBySlug(string $slug): ?array {
     } catch (Exception $e) {
         return null;
     }
+}
+
+/**
+ * Extract YouTube ID for detail page logic
+ */
+function extractYouTubeIdDetail(string $url): ?string {
+    $patterns = [
+        '/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/',
+        '/youtube\.com\/shorts\/([a-zA-Z0-9_-]{11})/',
+    ];
+    foreach ($patterns as $p) {
+        if (preg_match($p, $url, $m)) return $m[1];
+    }
+    return null;
+}
+
+/**
+ * Extract Vimeo ID for detail page logic
+ */
+function extractVimeoIdDetail(string $url): ?string {
+    if (preg_match('/vimeo\.com\/(?:channels\/(?:\w+\/)?|groups\/(?:[^\/]*)\/videos\/|album\/(?:\d+)\/video\/|video\/|)(\d+)(?:$|\/|\?)/', $url, $m)) {
+        return $m[1];
+    }
+    return null;
 }
 
 /* ── SVG Icon helper (inline SVGs for service/product cards) ── */

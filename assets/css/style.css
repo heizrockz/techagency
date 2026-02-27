@@ -36,8 +36,8 @@
     --font-en: 'Outfit', 'Inter', system-ui, sans-serif;
     --font-ar: 'IBM Plex Sans Arabic', 'Amiri', sans-serif;
 
-    --transition-smooth: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-    --transition-bounce: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+    --transition-smooth: opacity 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), background 0.4s ease, color 0.4s ease, box-shadow 0.4s ease;
+    --transition-bounce: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.5s ease;
 }
 
 /* ── Base ──────────────────────────────────────────────────── */
@@ -92,16 +92,21 @@ body[dir="rtl"] {
     position: absolute;
     top: 0;
     left: 0;
-    width: 100%;
-    height: 100%;
-    background:
-        radial-gradient(2px 2px at 10% 20%, rgba(255, 255, 255, 0.3), transparent),
-        radial-gradient(2px 2px at 30% 70%, rgba(255, 255, 255, 0.2), transparent),
-        radial-gradient(1px 1px at 60% 30%, rgba(255, 255, 255, 0.25), transparent),
-        radial-gradient(1px 1px at 80% 80%, rgba(255, 255, 255, 0.15), transparent),
-        radial-gradient(2px 2px at 50% 50%, rgba(255, 255, 255, 0.1), transparent),
-        radial-gradient(1px 1px at 90% 15%, rgba(255, 255, 255, 0.2), transparent);
+    width: 0;
+    height: 0;
+    background: transparent;
+    box-shadow:
+        10vw 20vh 1px 0px rgba(255, 255, 255, 0.3),
+        30vw 70vh 1px 0px rgba(255, 255, 255, 0.2),
+        60vw 30vh 1px 0px rgba(255, 255, 255, 0.25),
+        80vw 80vh 1px 0px rgba(255, 255, 255, 0.15),
+        50vw 50vh 1px 0px rgba(255, 255, 255, 0.1),
+        95vw 15vh 1px 0px rgba(255, 255, 255, 0.2),
+        /* Additional stars for coverage */
+        15vw 85vh 1px 0px rgba(255, 255, 255, 0.2),
+        75vw 10vh 1px 0px rgba(255, 255, 255, 0.15);
     animation: starTwinkle 8s ease-in-out infinite alternate;
+    will-change: opacity;
 }
 
 @keyframes starTwinkle {
@@ -121,6 +126,7 @@ body[dir="rtl"] {
     pointer-events: none;
     z-index: 0;
     animation: orbFloat 20s ease-in-out infinite;
+    will-change: transform;
 }
 
 .nebula-orb-1 {
@@ -178,8 +184,8 @@ body[dir="rtl"] {
     transform: translateX(-50%);
     z-index: 1000;
     background: rgba(10, 10, 30, 0.65);
-    backdrop-filter: blur(24px);
-    -webkit-backdrop-filter: blur(24px);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
     border: 1px solid var(--glass-border);
     border-radius: 999px;
     padding: 12px 32px;
@@ -196,7 +202,6 @@ body[dir="rtl"] {
     background: rgba(10, 10, 30, 0.8);
     border-color: rgba(16, 185, 129, 0.2);
     box-shadow: 0 8px 48px rgba(16, 185, 129, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.08);
-    padding: 12px 40px;
 }
 
 .nav-logo {
@@ -940,7 +945,9 @@ html.light-theme .chat-msg.user {
 
 /* ── Tagline Section ────────────────────────────────────────── */
 .tagline-section {
-    padding: 80px 0 40px;
+    padding: 60px 0;
+    content-visibility: auto;
+    contain-intrinsic-size: 1px 200px;
     position: relative;
     z-index: 2;
 }
@@ -1017,7 +1024,9 @@ html.light-theme .chat-msg.user {
 
 /* ── Services Bento Grid ──────────────────────────────────── */
 .services-section {
-    padding: 120px 0;
+    padding: 80px 0;
+    content-visibility: auto;
+    contain-intrinsic-size: 1px 700px;
 }
 
 .bento-grid {
@@ -1142,9 +1151,10 @@ html.light-theme .chat-msg.user {
 
 /* ── Our Process Section ────────────────────────────────────── */
 .process-section {
-    padding: 120px 0;
+    padding: 80px 0;
     position: relative;
-    overflow: hidden;
+    content-visibility: auto;
+    contain-intrinsic-size: 1px 800px;
 }
 
 .process-timeline {
@@ -1310,7 +1320,10 @@ html.light-theme .chat-msg.user {
 
 /* ── About Section ────────────────────────────────────────── */
 .about-section {
-    padding: 120px 0;
+    padding: 80px 0;
+    position: relative;
+    content-visibility: auto;
+    contain-intrinsic-size: 1px 800px;
 }
 
 .about-grid {
@@ -1380,9 +1393,11 @@ html.light-theme .chat-msg.user {
 
 /* ── Digital Marketing Section ────────────────────────────── */
 .marketing-section {
-    padding: 120px 0;
+    padding: 80px 0;
     position: relative;
     overflow: hidden;
+    content-visibility: auto;
+    contain-intrinsic-size: 1px 600px;
 }
 
 .marketing-section::before {
@@ -1493,8 +1508,10 @@ body[dir="rtl"] .marketing-orb {
 
 /* ── Products / Solutions Section ─────────────────────────── */
 .products-section {
-    padding: 120px 0;
+    padding: 80px 0;
     position: relative;
+    content-visibility: auto;
+    contain-intrinsic-size: 1px 600px;
 }
 
 .products-section::before {
@@ -1631,8 +1648,10 @@ body[dir="rtl"] .marketing-orb {
 
 /* ── Clients Section ─────────────────────────────────────── */
 .clients-section {
-    padding: 100px 0;
+    padding: 60px 0;
     overflow: hidden;
+    content-visibility: auto;
+    contain-intrinsic-size: 1px 300px;
 }
 
 .clients-marquee {
@@ -1655,21 +1674,21 @@ body[dir="rtl"] .clients-track {
 
 @keyframes marqueeScroll {
     0% {
-        transform: translateX(0);
+        transform: translate3d(0, 0, 0);
     }
 
     100% {
-        transform: translateX(-50%);
+        transform: translate3d(-50%, 0, 0);
     }
 }
 
 @keyframes marqueeScrollRtl {
     0% {
-        transform: translateX(0);
+        transform: translate3d(0, 0, 0);
     }
 
     100% {
-        transform: translateX(50%);
+        transform: translate3d(50%, 0, 0);
     }
 }
 
@@ -1739,7 +1758,9 @@ body[dir="rtl"] .clients-track {
 
 /* ── Booking Section ──────────────────────────────────────── */
 .booking-section {
-    padding: 120px 0 160px;
+    padding: 80px 0 100px;
+    content-visibility: auto;
+    contain-intrinsic-size: 1px 700px;
 }
 
 .booking-card {
@@ -3767,8 +3788,10 @@ body[dir="rtl"] .footer-links a:hover {
    Our Team Section
    ═══════════════════════════════════════════════════════════════ */
 .team-section {
-    padding: 120px 0;
+    padding: 80px 0;
     position: relative;
+    content-visibility: auto;
+    contain-intrinsic-size: 1px 800px;
 }
 
 .team-section::before {
@@ -3917,8 +3940,10 @@ body[dir="rtl"] .footer-links a:hover {
    Testimonials Section
    ═══════════════════════════════════════════════════════════════ */
 .testimonials-section {
-    padding: 120px 0;
+    padding: 80px 0;
     position: relative;
+    content-visibility: auto;
+    contain-intrinsic-size: 1px 500px;
 }
 
 .testimonials-section::before {
@@ -5025,4 +5050,9 @@ body[dir="rtl"] .testimonial-card::before {
         flex: 1;
         min-width: 0;
     }
+}
+
+.blog-section {
+    content-visibility: auto;
+    contain-intrinsic-size: 1px 500px;
 }

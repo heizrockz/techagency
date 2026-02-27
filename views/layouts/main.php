@@ -56,21 +56,25 @@
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+    <link rel="dns-prefetch" href="https://fonts.googleapis.com">
+    <link rel="dns-prefetch" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
 
     <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.tailwindcss.com" defer></script>
     <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: {
-                        sans: ['Inter', 'IBM Plex Sans Arabic', 'system-ui', 'sans-serif'],
-                        mono: ['JetBrains Mono', 'monospace'],
+        window.addEventListener('load', function() {
+            tailwind.config = {
+                theme: {
+                    extend: {
+                        fontFamily: {
+                            sans: ['Inter', 'IBM Plex Sans Arabic', 'system-ui', 'sans-serif'],
+                            mono: ['JetBrains Mono', 'monospace'],
+                        }
                     }
                 }
             }
-        }
+        });
     </script>
 
     <!-- Custom CSS -->
@@ -334,6 +338,6 @@
     </script>
 
     <!-- Scripts -->
-    <script src="<?= baseUrl('assets/js/app.js') ?>"></script>
+    <script src="<?= baseUrl('assets/js/app.js') ?>" defer></script>
 </body>
 </html>

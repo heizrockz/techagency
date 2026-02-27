@@ -393,7 +393,7 @@ $blogs = getBlogs();
                 <?php foreach ($clients as $client): ?>
                 <div class="client-card">
                     <?php if (!empty($client['logo_url'])): ?>
-                        <img src="<?= e($client['logo_url']) ?>" alt="<?= e($client['name']) ?>" class="client-logo">
+                        <img src="<?= e($client['logo_url']) ?>" alt="<?= e($client['name']) ?>" class="client-logo" loading="lazy" decoding="async">
                     <?php else: ?>
                         <div class="client-initials"><?= e(mb_substr($client['name'], 0, 2)) ?></div>
                     <?php endif; ?>
@@ -404,7 +404,7 @@ $blogs = getBlogs();
                 <?php foreach ($clients as $client): ?>
                 <div class="client-card">
                     <?php if (!empty($client['logo_url'])): ?>
-                        <img src="<?= e($client['logo_url']) ?>" alt="<?= e($client['name']) ?>" class="client-logo">
+                        <img src="<?= e($client['logo_url']) ?>" alt="<?= e($client['name']) ?>" class="client-logo" loading="lazy" decoding="async">
                     <?php else: ?>
                         <div class="client-initials"><?= e(mb_substr($client['name'], 0, 2)) ?></div>
                     <?php endif; ?>
@@ -434,7 +434,7 @@ $blogs = getBlogs();
             <div class="team-card animate-on-scroll" style="animation-delay: <?= $i * 0.1 ?>s;">
                 <div class="team-avatar">
                     <?php if (!empty($member['image_url'])): ?>
-                        <img src="<?= e($member['image_url']) ?>" alt="<?= e($member['name'] ?? '') ?>">
+                        <img src="<?= e($member['image_url']) ?>" alt="<?= e($member['name'] ?? '') ?>" loading="lazy" decoding="async">
                     <?php else: ?>
                         <div class="team-avatar-initials">
                             <?= strtoupper(mb_substr($member['name'] ?? 'M', 0, 1)) ?>
@@ -479,7 +479,7 @@ $blogs = getBlogs();
                 <p class="testimonial-content">"<?= e($t['content'] ?? '') ?>"</p>
                 <div class="testimonial-author">
                     <?php if (!empty($t['client_image_url'])): ?>
-                        <img src="<?= e($t['client_image_url']) ?>" alt="<?= e($t['client_name'] ?? '') ?>" class="testimonial-avatar">
+                        <img src="<?= e($t['client_image_url']) ?>" alt="<?= e($t['client_name'] ?? '') ?>" class="testimonial-avatar" loading="lazy" decoding="async">
                     <?php else: ?>
                         <div class="testimonial-avatar-initials">
                             <?= strtoupper(mb_substr($t['client_name'] ?? 'C', 0, 1)) ?>
@@ -567,7 +567,7 @@ $blogs = getBlogs();
                                 </div>
                             <?php endif; ?>
                         <?php else: ?>
-                            <img src="<?= !empty($blog['media_url']) ? baseUrl($blog['media_url']) : baseUrl('assets/images/placeholder.webp') ?>" alt="<?= e($blog['title'] ?? '') ?>" style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.8s ease; opacity: 0.9;">
+                            <img src="<?= !empty($blog['media_url']) ? baseUrl($blog['media_url']) : baseUrl('assets/images/placeholder.webp') ?>" alt="<?= e($blog['title'] ?? '') ?>" style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.8s ease; opacity: 0.9;" loading="lazy" decoding="async">
                         <?php endif; ?>
                         <div style="position:absolute; top:0; left:0; width:100%; height:100%; background:linear-gradient(to bottom, transparent 60%, rgba(0,0,0,0.4));"></div>
                     </div>

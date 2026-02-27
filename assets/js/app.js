@@ -56,12 +56,19 @@ document.addEventListener('DOMContentLoaded', () => {
     // ── Navbar background on scroll ────────────────────────
     const navbar = document.querySelector('.navbar-island');
     if (navbar) {
+        let scrollScheduled = false;
         window.addEventListener('scroll', () => {
-            const isLight = document.documentElement.classList.contains('light-theme');
-            if (window.scrollY > 100) {
-                navbar.style.background = isLight ? 'rgba(255,255,255,0.9)' : 'rgba(10, 10, 30, 0.85)';
-            } else {
-                navbar.style.background = isLight ? 'rgba(255,255,255,0.75)' : 'rgba(10, 10, 30, 0.65)';
+            if (!scrollScheduled) {
+                requestAnimationFrame(() => {
+                    const isLight = document.documentElement.classList.contains('light-theme');
+                    if (window.scrollY > 100) {
+                        navbar.style.background = isLight ? 'rgba(255,255,255,0.9)' : 'rgba(10, 10, 30, 0.85)';
+                    } else {
+                        navbar.style.background = isLight ? 'rgba(255,255,255,0.75)' : 'rgba(10, 10, 30, 0.65)';
+                    }
+                    scrollScheduled = false;
+                });
+                scrollScheduled = true;
             }
         });
     }
@@ -101,13 +108,20 @@ document.addEventListener('DOMContentLoaded', () => {
     // ── Parallax on floating elements ──────────────────────
     const floatingElements = document.querySelectorAll('.floating-code');
     if (floatingElements.length > 0) {
+        let mouseScheduled = false;
         window.addEventListener('mousemove', (e) => {
-            const x = (e.clientX / window.innerWidth - 0.5) * 2;
-            const y = (e.clientY / window.innerHeight - 0.5) * 2;
-            floatingElements.forEach((el, i) => {
-                const speed = (i + 1) * 5;
-                el.style.transform = `translate(${x * speed}px, ${y * speed}px)`;
-            });
+            if (!mouseScheduled) {
+                requestAnimationFrame(() => {
+                    const x = (e.clientX / window.innerWidth - 0.5) * 2;
+                    const y = (e.clientY / window.innerHeight - 0.5) * 2;
+                    floatingElements.forEach((el, i) => {
+                        const speed = (i + 1) * 5;
+                        el.style.transform = `translate3d(${x * speed}px, ${y * speed}px, 0)`;
+                    });
+                    mouseScheduled = false;
+                });
+                mouseScheduled = true;
+            }
         });
     }
 
@@ -514,12 +528,13 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // Initialize particles based on screen width
-        const particleCount = Math.min(Math.floor(width / 15), 100);
+        const isMobile = window.innerWidth < 768;
+        const particleCount = isMobile ? 30 : Math.min(Math.floor(width / 15), 100);
         for (let i = 0; i < particleCount; i++) {
             particles.push(new Particle());
         }
 
-        function animate() {
+        function animate(time) {
             ctx.clearRect(0, 0, width, height);
 
             // Update and draw particles
@@ -528,26 +543,23 @@ document.addEventListener('DOMContentLoaded', () => {
                 p.draw();
             });
 
-            // Draw connections
+            // Draw connections - limited distance and density
+            const maxConnectDist = isMobile ? 100 : 150;
             for (let i = 0; i < particles.length; i++) {
                 for (let j = i + 1; j < particles.length; j++) {
                     const dx = particles[i].x - particles[j].x;
                     const dy = particles[i].y - particles[j].y;
-                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    const distanceSq = dx * dx + dy * dy;
 
-                    if (distance < 150) {
+                    if (distanceSq < maxConnectDist * maxConnectDist) {
+                        const distance = Math.sqrt(distanceSq);
                         ctx.beginPath();
                         ctx.moveTo(particles[i].x, particles[i].y);
                         ctx.lineTo(particles[j].x, particles[j].y);
-                        // Opacity based on distance
-                        const alpha = 1 - (distance / 150);
-                        // Gradient connection
-                        const grad = ctx.createLinearGradient(particles[i].x, particles[i].y, particles[j].x, particles[j].y);
-                        grad.addColorStop(0, `rgba(${particles[i].color}, ${alpha * 0.5})`);
-                        grad.addColorStop(1, `rgba(${particles[j].color}, ${alpha * 0.5})`);
 
-                        ctx.strokeStyle = grad;
-                        ctx.lineWidth = 1;
+                        const alpha = 1 - (distance / maxConnectDist);
+                        ctx.strokeStyle = `rgba(16, 185, 129, ${alpha * 0.2})`;
+                        ctx.lineWidth = 0.5;
                         ctx.stroke();
                     }
                 }

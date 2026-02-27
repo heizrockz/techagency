@@ -1,0 +1,1 @@
+[2026-02-27 09:09:08] Chatbot Save Error (127.0.0.1): SQLSTATE[42S22]: Column not found: 1054 Unknown column 'is_read' in 'field list'
