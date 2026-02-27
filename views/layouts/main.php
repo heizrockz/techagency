@@ -7,11 +7,39 @@
     <meta name="description" content="<?= e($seo['description'] ?? '') ?>">
     <meta name="keywords" content="<?= e($seo['keywords'] ?? '') ?>">
     
-    <?php if(!empty($seo['canonical_link'])): ?>
-        <link rel="canonical" href="<?= e($seo['canonical_link']) ?>">
-    <?php elseif($canonical = getSetting('seo_canonical')): ?>
-        <link rel="canonical" href="<?= e($canonical) ?>">
-    <?php endif; ?>
+    <?php 
+        $currentUrl = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]";
+        $canonicalUrl = $seo['canonical_link'] ?? $currentUrl;
+        // Strip query params for a cleaner canonical if they aren't part of the core content
+        $canonicalUrl = strtok($canonicalUrl, '?');
+    ?>
+    <link rel="canonical" href="<?= e($canonicalUrl) ?>">
+    
+    <!-- Google Analytics Placeholder -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-XXXXXXXXXX');
+    </script>
+
+    <!-- Structured Data (JSON-LD) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "<?= e(getSetting('site_name', APP_NAME)) ?>",
+      "url": "<?= baseUrl() ?>",
+      "logo": "<?= baseUrl(getSetting('site_logo')) ?>",
+      "description": "<?= e($seo['description'] ?? '') ?>",
+      "sameAs": [
+        "https://facebook.com/micosage",
+        "https://twitter.com/micosage",
+        "https://linkedin.com/company/micosage"
+      ]
+    }
+    </script>
     
     <!-- Open Graph / Social Sharing Meta -->
     <?php

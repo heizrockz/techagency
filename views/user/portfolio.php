@@ -89,7 +89,7 @@ $isAr = getCurrentLocale() === 'ar';
                         <?php endif; ?>
 
                         <?php if (!empty($proj['demo_url'])): ?>
-                        <a href="<?= e($proj['demo_url']) ?>" target="_blank" class="portfolio-card__cta" aria-label="<?= getCurrentLocale() === 'en' ? 'View demo of ' . e($proj['title']) : 'عرض تجربة ' . e($proj['title']) ?>" style="color: rgba(<?= $colorRgb ?>, 1);">
+                        <a href="<?= e($proj['demo_url']) ?>" target="_blank" rel="noopener noreferrer" class="portfolio-card__cta" aria-label="<?= getCurrentLocale() === 'en' ? 'View demo of ' . e($proj['title']) : 'عرض تجربة ' . e($proj['title']) ?>" style="color: rgba(<?= $colorRgb ?>, 1);">
                             <?= t('portfolio_view') ?>
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
                         </a>

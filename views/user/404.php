@@ -1,27 +1,35 @@
 <?php
-$seo = ['title' => 'Page Not Found | ' . APP_NAME];
+/**
+ * Custom 404 Error Page
+ */
+$seo = [
+    'title' => '404 - Page Not Found | ' . getSetting('site_name', APP_NAME),
+    'description' => 'Sorry, the page you are looking for does not exist or has been moved.',
+    'keywords' => '404, page not found'
+];
+$locale = getCurrentLocale();
+$dir = isRTL() ? 'rtl' : 'ltr';
 ?>
-<section class="min-h-[80vh] flex items-center justify-center px-4 relative overflow-hidden">
-    <div class="max-w-2xl w-full text-center relative z-10 py-16 px-8 rounded-3xl backdrop-blur-xl bg-white/5 border border-white/10 shadow-2xl">
-        <h1 class="text-9xl font-black mb-4 bg-gradient-to-r from-cyan-400 to-blue-600 bg-clip-text text-transparent opacity-50">404</h1>
-        <h2 class="text-3xl md:text-4xl font-bold mb-6 text-white leading-tight">
-            Lost in the <span class="text-cyan-400">Digital Void?</span>
-        </h2>
-        <p class="text-lg text-gray-400 mb-10 max-w-md mx-auto">
-            The page you are looking for might have been moved, deleted, or never existed in this dimension.
+
+<section class="error-404-section" style="padding: 120px 0; text-align: center; min-height: 70vh; display: flex; align-items: center; justify-content: center;">
+    <div class="section-container">
+        <div class="error-visual" style="margin-bottom: 40px;">
+            <h1 style="font-size: 8rem; font-weight: 900; background: linear-gradient(135deg, var(--theme-primary), var(--theme-gold)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; line-height: 1;">404</h1>
+            <div class="orb" style="width: 200px; height: 200px; background: radial-gradient(circle, var(--theme-primary), transparent); position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); opacity: 0.2; filter: blur(40px); z-index: -1;"></div>
+        </div>
+        
+        <h2 style="font-size: 2rem; margin-bottom: 20px;"><?= $locale === 'ar' ? 'الصفحة غير موجودة' : 'Oops! Page Not Found' ?></h2>
+        <p style="color: var(--text-secondary); max-width: 600px; margin: 0 auto 40px; font-size: 1.1rem;">
+            <?= $locale === 'ar' ? 'عذراً، الصفحة التي تبحث عنها قد تم نقلها أو أنها لم تعد موجودة.' : 'The page you are looking for might have been removed, had its name changed, or is temporarily unavailable.' ?>
         </p>
-        <div class="flex flex-col sm:flex-row gap-4 justify-center">
-            <a href="<?= baseUrl() ?>" class="inline-flex items-center justify-center px-8 py-4 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-bold transition-all hover:scale-105 active:scale-95 shadow-lg shadow-cyan-500/20">
-                <svg class="mr-2" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
-                Back to Reality
+        
+        <div class="error-actions" style="display: flex; gap: 20px; justify-content: center;">
+            <a href="<?= baseUrl('/') ?>" class="btn-primary">
+                <?= $locale === 'ar' ? 'العودة للرئيسية' : 'Back to Home' ?>
             </a>
-            <a href="<?= baseUrl('contact') ?>" class="inline-flex items-center justify-center px-8 py-4 rounded-xl bg-white/10 text-white font-semibold backdrop-blur-md border border-white/10 transition-all hover:bg-white/20">
-                Contact Support
+            <a href="<?= baseUrl('/#booking') ?>" class="btn-secondary" style="background: var(--glass-bg); border: 1px solid var(--glass-border); padding: 12px 30px; border-radius: 999px; text-decoration: none; color: var(--text-primary);">
+                <?= $locale === 'ar' ? 'تواصل معنا' : 'Contact Support' ?>
             </a>
         </div>
     </div>
-    
-    <!-- Decorative Elements -->
-    <div class="absolute top-1/4 -left-20 w-64 h-64 bg-cyan-600/20 rounded-full blur-3xl animate-pulse"></div>
-    <div class="absolute bottom-1/4 -right-20 w-80 h-80 bg-blue-600/20 rounded-full blur-3xl animate-pulse" style="animation-delay: 2s;"></div>
 </section>

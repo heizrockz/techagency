@@ -104,10 +104,12 @@ if ($path === '/' || $path === '/index.php' || $path === '') {
     } elseif ($path === '/admin/logout') {
         adminLogout();
     } else {
-        // Handle other admin routes or 404 by redirecting to home
-        require_once __DIR__ . '/controllers/HomeController.php';
+        // Serve the custom 404 page
+        $viewFile = '404';
+        require_once __DIR__ . '/views/layouts/main.php';
     }
 } else {
-    // Catch-all: Route unknown requests to the home page instead of 404
-    require_once __DIR__ . '/controllers/HomeController.php';
+    // Catch-all: Route unknown requests to the custom 404 page
+    $viewFile = '404';
+    require_once __DIR__ . '/views/layouts/main.php';
 }
