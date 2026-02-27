@@ -7,7 +7,7 @@
     ?>
     <?php if(!empty($navLogo)): ?>
         <a href="<?= baseUrl('/') ?>" class="nav-logo">
-            <img src="<?= baseUrl($navLogo) ?>" alt="<?= e($companyName) ?>" style="max-height:24px;">
+            <img src="<?= baseUrl($navLogo) ?>" alt="<?= e($companyName) ?>" title="<?= e($companyName) ?>" style="max-height:24px;">
             <span class="company-name-text"><?= e($companyName) ?></span>
         </a>
     <?php else: ?>

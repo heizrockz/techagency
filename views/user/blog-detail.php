@@ -148,7 +148,10 @@
                                 <?php if ($rb['media_type'] === 'video_link' && preg_match('/(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/', $rb['media_url'], $m)): ?>
                                     <img src="https://img.youtube.com/vi/<?= $m[1] ?>/hqdefault.jpg" style="width:100%; height:100%; object-fit:cover;">
                                 <?php else: ?>
-                                    <img src="<?= baseUrl($rb['media_url'] ?: 'assets/images/placeholder.webp') ?>" alt="" style="width:100%; height:100%; object-fit:cover;">
+                                    <img src="<?= baseUrl($rb['media_url'] ?: 'assets/images/placeholder.webp') ?>" 
+                                         alt="<?= e($rb['title']) ?>" 
+                                         title="<?= e($rb['title']) ?>"
+                                         style="width:100%; height:100%; object-fit:cover;">
                                 <?php endif; ?>
                             </div>
                             <div class="recent-info" style="flex: 1; overflow: hidden;">
@@ -168,10 +171,22 @@
             <div class="share-title" style="font-weight:600; color:var(--text-primary);"><?= getCurrentLocale() === 'en' ? 'Share this Insight' : 'شارك هذا المقال' ?></div>
             <div class="social-share-links" style="display:flex; gap:16px;">
                 <?php $shareLinks = getSocialShareLinks(); ?>
-                <a href="<?= e($shareLinks['facebook']) ?>" target="_blank" class="share-btn" title="Share on Facebook" style="width:40px; height:40px; border-radius:50%; background:var(--glass-bg); border:1px solid var(--glass-border); display:flex; align-items:center; justify-content:center; color:var(--text-primary); transition:0.3s;"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path></svg></a>
-                <a href="<?= e($shareLinks['twitter']) ?>" target="_blank" class="share-btn" title="Share on Twitter" style="width:40px; height:40px; border-radius:50%; background:var(--glass-bg); border:1px solid var(--glass-border); display:flex; align-items:center; justify-content:center; color:var(--text-primary); transition:0.3s;"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"></path></svg></a>
-                <a href="<?= e($shareLinks['linkedin']) ?>" target="_blank" class="share-btn" title="Share on LinkedIn" style="width:40px; height:40px; border-radius:50%; background:var(--glass-bg); border:1px solid var(--glass-border); display:flex; align-items:center; justify-content:center; color:var(--text-primary); transition:0.3s;"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect x="2" y="9" width="4" height="12"></rect><circle cx="4" cy="4" r="2"></circle></svg></a>
-                <a href="<?= e($shareLinks['whatsapp']) ?>" target="_blank" class="share-btn" title="Share on WhatsApp" style="width:40px; height:40px; border-radius:50%; background:var(--glass-bg); border:1px solid var(--glass-border); display:flex; align-items:center; justify-content:center; color:var(--text-primary); transition:0.3s;"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12.031 2.01c-5.518 0-9.998 4.48-9.998 9.998 0 1.763.46 3.486 1.332 5.006L2 22l5.12-1.341c1.472.825 3.149 1.26 4.908 1.26h.005c5.517 0 9.995-4.478 9.995-9.995 0-5.517-4.478-9.996-9.997-9.996zm5.498 14.414c-.22.62-1.28 1.189-1.789 1.246-.464.053-1.056.126-3.32-.813-2.887-1.196-4.735-4.14-4.877-4.329-.142-.189-1.163-1.547-1.163-2.95 0-1.403.734-2.095.992-2.383.258-.288.563-.36.75-.36s.374-.005.541.002c.181.01.425-.07.662.502.247.596.598 1.458.649 1.562.052.104.086.225.015.367-.07.142-.104.231-.208.354-.104.122-.218.261-.31.365-.104.116-.214.244-.092.455.122.21 5.4 5.4 5.611 5.722z"/></svg></a>
+                <a href="<?= e($shareLinks['facebook']) ?>" target="_blank" rel="noopener noreferrer" class="share-btn" title="Share on Facebook" aria-label="Share on Facebook" style="width:40px; height:40px; border-radius:50%; background:var(--glass-bg); border:1px solid var(--glass-border); display:flex; align-items:center; justify-content:center; color:var(--text-primary); transition:0.3s;">
+                    <span class="visually-hidden">Facebook</span>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path></svg>
+                </a>
+                <a href="<?= e($shareLinks['twitter']) ?>" target="_blank" rel="noopener noreferrer" class="share-btn" title="Share on Twitter" aria-label="Share on Twitter" style="width:40px; height:40px; border-radius:50%; background:var(--glass-bg); border:1px solid var(--glass-border); display:flex; align-items:center; justify-content:center; color:var(--text-primary); transition:0.3s;">
+                    <span class="visually-hidden">Twitter</span>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"></path></svg>
+                </a>
+                <a href="<?= e($shareLinks['linkedin']) ?>" target="_blank" rel="noopener noreferrer" class="share-btn" title="Share on LinkedIn" aria-label="Share on LinkedIn" style="width:40px; height:40px; border-radius:50%; background:var(--glass-bg); border:1px solid var(--glass-border); display:flex; align-items:center; justify-content:center; color:var(--text-primary); transition:0.3s;">
+                    <span class="visually-hidden">LinkedIn</span>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect x="2" y="9" width="4" height="12"></rect><circle cx="4" cy="4" r="2"></circle></svg>
+                </a>
+                <a href="<?= e($shareLinks['whatsapp']) ?>" target="_blank" rel="noopener noreferrer" class="share-btn" title="Share on WhatsApp" aria-label="Share on WhatsApp" style="width:40px; height:40px; border-radius:50%; background:var(--glass-bg); border:1px solid var(--glass-border); display:flex; align-items:center; justify-content:center; color:var(--text-primary); transition:0.3s;">
+                    <span class="visually-hidden">WhatsApp</span>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12.031 2.01c-5.518 0-9.998 4.48-9.998 9.998 0 1.763.46 3.486 1.332 5.006L2 22l5.12-1.341c1.472.825 3.149 1.26 4.908 1.26h.005c5.517 0 9.995-4.478 9.995-9.995 0-5.517-4.478-9.996-9.997-9.996zm5.498 14.414c-.22.62-1.28 1.189-1.789 1.246-.464.053-1.056.126-3.32-.813-2.887-1.196-4.735-4.14-4.877-4.329-.142-.189-1.163-1.547-1.163-2.95 0-1.403.734-2.095.992-2.383.258-.288.563-.36.75-.36s.374-.005.541.002c.181.01.425-.07.662.502.247.596.598 1.458.649 1.562.052.104.086.225.015.367-.07.142-.104.231-.208.354-.104.122-.218.261-.31.365-.104.116-.214.244-.092.455.122.21 5.4 5.4 5.611 5.722z"/></svg>
+                </a>
             </div>
         </div>
 
@@ -196,7 +211,10 @@
                         <?php if ($rb['media_type'] === 'video_link' && preg_match('/(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/', $rb['media_url'], $m)): ?>
                             <img src="https://img.youtube.com/vi/<?= $m[1] ?>/hqdefault.jpg" style="width:100%; height:100%; object-fit:cover;">
                         <?php else: ?>
-                            <img src="<?= baseUrl($rb['media_url'] ?: 'assets/images/placeholder.webp') ?>" style="width:100%; height:100%; object-fit:cover;">
+                            <img src="<?= baseUrl($rb['media_url'] ?: 'assets/images/placeholder.webp') ?>" 
+                                 alt="<?= e($rb['title']) ?>" 
+                                 title="<?= e($rb['title']) ?>"
+                                 style="width:100%; height:100%; object-fit:cover;">
                         <?php endif; ?>
                     </div>
                     <div style="padding:20px;">

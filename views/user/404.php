@@ -2,6 +2,7 @@
 /**
  * Custom 404 Error Page
  */
+http_response_code(404);
 $seo = [
     'title' => '404 - Page Not Found | ' . getSetting('site_name', APP_NAME),
     'description' => 'Sorry, the page you are looking for does not exist or has been moved.',

@@ -7,6 +7,15 @@
     <meta name="description" content="<?= e($seo['description'] ?? '') ?>">
     <meta name="keywords" content="<?= e($seo['keywords'] ?? '') ?>">
     
+    <!-- Performance Preloads -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" as="style">
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;500;600;700;800&display=swap" as="style">
+    <?php if($navLogo = getSetting('site_logo')): ?>
+    <link rel="preload" href="<?= baseUrl($navLogo) ?>" as="image" fetchpriority="high">
+    <?php endif; ?>
+
     <?php 
         $currentUrl = fullUrl($_SERVER['REQUEST_URI']);
         $canonicalUrl = !empty($seo['canonical_link']) ? (preg_match('~^https?://~', $seo['canonical_link']) ? $seo['canonical_link'] : fullUrl($seo['canonical_link'])) : $currentUrl;
