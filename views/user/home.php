@@ -71,21 +71,21 @@ $blogs = getBlogs();
                 <div class="tagline-icon">
                     <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--theme-primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
                 </div>
-                <h3><?= e(getContent('tagline1_title')) ?></h3>
+                <div class="card-title"><?= e(getContent('tagline1_title')) ?></div>
                 <p><?= e(getContent('tagline1_desc')) ?></p>
             </div>
             <div class="tagline-card animate-on-scroll" style="animation-delay: 0.15s;">
                 <div class="tagline-icon">
                     <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--neon-cyan)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
                 </div>
-                <h3><?= e(getContent('tagline2_title')) ?></h3>
+                <div class="card-title"><?= e(getContent('tagline2_title')) ?></div>
                 <p><?= e(getContent('tagline2_desc')) ?></p>
             </div>
             <div class="tagline-card animate-on-scroll" style="animation-delay: 0.3s;">
                 <div class="tagline-icon">
                     <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--theme-gold)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 3 21 3 21 9"></polyline><polyline points="9 21 3 21 3 15"></polyline><line x1="21" y1="3" x2="14" y2="10"></line><line x1="3" y1="21" x2="10" y2="14"></line></svg>
                 </div>
-                <h3><?= e(getContent('tagline3_title')) ?></h3>
+                <div class="card-title"><?= e(getContent('tagline3_title')) ?></div>
                 <p><?= e(getContent('tagline3_desc')) ?></p>
             </div>
         </div>
@@ -110,7 +110,7 @@ $blogs = getBlogs();
                 <div class="service-icon" style="background: linear-gradient(135deg, rgba(<?= getColorRgb($svc['color']) ?>, 0.15), transparent); box-shadow: 0 0 30px rgba(<?= getColorRgb($svc['color']) ?>, 0.1);">
                     <?= getIconSvg($svc['icon'], $svc['color']) ?>
                 </div>
-                <h3><?= e($svc['title'] ?? '') ?></h3>
+                <div class="card-title"><?= e($svc['title'] ?? '') ?></div>
                 <p><?= e($svc['description'] ?? '') ?></p>
             </div>
             <?php endforeach; ?>
@@ -136,7 +136,7 @@ $blogs = getBlogs();
             <div class="process-step" data-step="1">
                 <div class="step-circle">1</div>
                 <div class="step-content">
-                    <h3><?= e(getContent('process_step1_title')) ?></h3>
+                    <div class="card-title"><?= e(getContent('process_step1_title')) ?></div>
                     <p><?= e(getContent('process_step1_desc')) ?></p>
                 </div>
                 <div class="process-visual">
@@ -156,7 +156,7 @@ $blogs = getBlogs();
             <div class="process-step" data-step="2">
                 <div class="step-circle">2</div>
                 <div class="step-content">
-                    <h3><?= e(getContent('process_step2_title')) ?></h3>
+                    <div class="card-title"><?= e(getContent('process_step2_title')) ?></div>
                     <p><?= e(getContent('process_step2_desc')) ?></p>
                 </div>
                 <div class="process-visual">
@@ -179,7 +179,7 @@ $blogs = getBlogs();
             <div class="process-step" data-step="3">
                 <div class="step-circle">3</div>
                 <div class="step-content">
-                    <h3><?= e(getContent('process_step3_title')) ?></h3>
+                    <div class="card-title"><?= e(getContent('process_step3_title')) ?></div>
                     <p><?= e(getContent('process_step3_desc')) ?></p>
                 </div>
                 <div class="process-visual">
@@ -202,7 +202,7 @@ $blogs = getBlogs();
             <div class="process-step" data-step="4">
                 <div class="step-circle">4</div>
                 <div class="step-content">
-                    <h3><?= e(getContent('process_step4_title')) ?></h3>
+                    <div class="card-title"><?= e(getContent('process_step4_title')) ?></div>
                     <p><?= e(getContent('process_step4_desc')) ?></p>
                 </div>
                 <div class="process-visual">
@@ -279,7 +279,7 @@ $blogs = getBlogs();
                     <div class="marketing-icon">
                         <?= getIconSvg('search', 'cobalt') ?>
                     </div>
-                    <h3><?= e(getContent('marketing_seo_title')) ?></h3>
+                    <div class="card-title"><?= e(getContent('marketing_seo_title')) ?></div>
                     <p><?= e(getContent('marketing_seo_desc')) ?></p>
                 </div>
             </div>
@@ -290,7 +290,7 @@ $blogs = getBlogs();
                     <div class="marketing-icon">
                         <?= getIconSvg('share', 'violet') ?>
                     </div>
-                    <h3><?= e(getContent('marketing_social_title')) ?></h3>
+                    <div class="card-title"><?= e(getContent('marketing_social_title')) ?></div>
                     <p><?= e(getContent('marketing_social_desc')) ?></p>
                 </div>
             </div>
@@ -301,7 +301,7 @@ $blogs = getBlogs();
                     <div class="marketing-icon">
                         <?= getIconSvg('megaphone', 'cyan') ?>
                     </div>
-                    <h3><?= e(getContent('marketing_ppc_title')) ?></h3>
+                    <div class="card-title"><?= e(getContent('marketing_ppc_title')) ?></div>
                     <p><?= e(getContent('marketing_ppc_desc')) ?></p>
                 </div>
             </div>
@@ -312,7 +312,7 @@ $blogs = getBlogs();
                     <div class="marketing-icon">
                         <?= getIconSvg('palette', 'pink') ?>
                     </div>
-                    <h3><?= e(getContent('marketing_brand_title')) ?></h3>
+                    <div class="card-title"><?= e(getContent('marketing_brand_title')) ?></div>
                     <p><?= e(getContent('marketing_brand_desc')) ?></p>
                 </div>
             </div>
@@ -368,7 +368,7 @@ $blogs = getBlogs();
                     <?= getIconSvg($prod['icon'], $prod['color']) ?>
                 </div>
                 <span class="product-category-badge"><?= e(ucfirst($prod['category'])) ?></span>
-                <h3><?= e($prod['title'] ?? '') ?></h3>
+                <div class="card-title"><?= e($prod['title'] ?? '') ?></div>
                 <p><?= e($prod['description'] ?? '') ?></p>
             </div>
             <?php endforeach; ?>
@@ -443,7 +443,7 @@ $blogs = getBlogs();
                     <div class="team-avatar-ring"></div>
                 </div>
                 <div class="team-card-body">
-                    <h3 class="team-name"><?= e($member['name'] ?? '') ?></h3>
+                    <div class="card-title team-name"><?= e($member['name'] ?? '') ?></div>
                     <div class="team-role"><?= e($member['role'] ?? '') ?></div>
                     <?php if (!empty($member['bio'])): ?>
                     <p class="team-bio"><?= e($member['bio']) ?></p>
@@ -582,11 +582,11 @@ $blogs = getBlogs();
                                 </span>
                             <?php endif; ?>
                         </div>
-                        <h3 style="font-size: 1.2rem; margin: 0 0 12px 0; color: #fff; line-height: 1.4; font-weight: 600;"><?= e($blog['title'] ?? '') ?></h3>
+                        <div class="card-title" style="font-size: 1.2rem; margin: 0 0 12px 0; color: #fff; line-height: 1.4; font-weight: 600;"><?= e($blog['title'] ?? '') ?></div>
                         <p style="color: rgba(255,255,255,0.5); font-size: 0.85rem; line-height: 1.6; margin-bottom: 25px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; flex-grow: 1;"><?= e($blog['description'] ?? '') ?></p>
                         
-                        <a href="<?= baseUrl('blog/' . e($blog['slug'])) ?>" class="blog-nav-link" style="color: var(--neon-emerald); font-size: 0.8rem; font-weight: 800; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; letter-spacing: 1px; margin-top: auto;">
-                            READ ARTICLE
+                        <a href="<?= baseUrl('blog/' . e($blog['slug'])) ?>" class="blog-nav-link" aria-label="<?= getCurrentLocale() === 'en' ? 'Read more about ' . e($blog['title']) : 'اقرأ المزيد عن ' . e($blog['title']) ?>" style="color: var(--neon-emerald); font-size: 0.8rem; font-weight: 800; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; letter-spacing: 1px; margin-top: auto;">
+                            <?= getCurrentLocale() === 'en' ? 'READ ARTICLE' : 'اقرأ المقال' ?>
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
                         </a>
                     </div>

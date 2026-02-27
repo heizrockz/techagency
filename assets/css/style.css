@@ -5056,3 +5056,7 @@ body[dir="rtl"] .testimonial-card::before {
     content-visibility: auto;
     contain-intrinsic-size: 1px 500px;
 }
+/* -- SEO Fixes: Card Title Styling -- */
+.card-title { font-weight: 700; line-height: 1.2; color: var(--text-primary); font-size: 1.25rem; margin-bottom: 0.75rem; }
+.team-name.card-title { font-size: 1.2rem; margin-bottom: 0.5rem; }
+.portfolio-card__title.card-title { font-size: 1.3rem; margin-bottom: 1rem; }
