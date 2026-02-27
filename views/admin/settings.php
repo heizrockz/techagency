@@ -67,8 +67,16 @@
                 <h3>Branding</h3>
                 <div class="admin-grid-2" style="margin-top: 15px;">
                     <div class="form-group" style="grid-column: 1 / -1;">
-                        <label>Site Name</label>
+                        <label>Site Name (System)</label>
                         <input type="text" name="settings[site_name]" class="form-input" value="<?= e($settings['site_name']['setting_value'] ?? 'Mico Sage') ?>">
+                    </div>
+                    <div class="form-group">
+                        <label>Company Name (English)</label>
+                        <input type="text" name="settings[company_name_en]" class="form-input" value="<?= e($settings['company_name_en']['setting_value'] ?? '') ?>" placeholder="e.g. Mico Sage">
+                    </div>
+                    <div class="form-group">
+                        <label>Company Name (Arabic)</label>
+                        <input type="text" name="settings[company_name_ar]" class="form-input" value="<?= e($settings['company_name_ar']['setting_value'] ?? '') ?>" placeholder="مثال: ميكو سيج" dir="rtl">
                     </div>
                     <div class="form-group" style="grid-column: 1 / -1; display: flex; align-items: center; gap: 20px;">
                         <div>

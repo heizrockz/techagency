@@ -1,10 +1,17 @@
 <!-- Floating Island Navbar -->
 <nav class="navbar-island" id="mainNavbar">
-    <?php $navLogo = getSetting('site_logo'); ?>
+    <?php 
+        $navLogo = getSetting('site_logo'); 
+        $companyName = getLocaleSetting('company_name');
+        if (empty($companyName)) $companyName = getSetting('site_name', APP_NAME);
+    ?>
     <?php if(!empty($navLogo)): ?>
-        <a href="<?= baseUrl('/') ?>" class="nav-logo"><img src="<?= baseUrl($navLogo) ?>" alt="<?= e(getSetting('site_name', APP_NAME)) ?>" style="max-height:32px;"></a>
+        <a href="<?= baseUrl('/') ?>" class="nav-logo">
+            <img src="<?= baseUrl($navLogo) ?>" alt="<?= e($companyName) ?>" style="max-height:32px;">
+            <span class="company-name-text"><?= e($companyName) ?></span>
+        </a>
     <?php else: ?>
-        <a href="<?= baseUrl('/') ?>" class="nav-logo">⚡ <?= e(getSetting('site_name', APP_NAME)) ?></a>
+        <a href="<?= baseUrl('/') ?>" class="nav-logo">⚡ <?= e($companyName) ?></a>
     <?php endif; ?>
 
     <ul class="nav-links">

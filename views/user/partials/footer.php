@@ -3,14 +3,19 @@
     <div class="footer-grid section-container">
         <!-- Brand & Tagline -->
         <div class="footer-col branding">
-            <?php $footerLogo = getSetting('site_logo'); ?>
+            <?php 
+                $footerLogo = getSetting('site_logo'); 
+                $companyName = getLocaleSetting('company_name');
+                if (empty($companyName)) $companyName = getSetting('site_name', APP_NAME);
+            ?>
             <?php if(!empty($footerLogo)): ?>
             <div class="footer-logo">
-                <img src="<?= baseUrl($footerLogo) ?>" alt="<?= e(getSetting('site_name', APP_NAME)) ?>" style="max-height:40px;">
+                <img src="<?= baseUrl($footerLogo) ?>" alt="<?= e($companyName) ?>" style="max-height:40px;">
+                <span class="footer-company-name"><?= e($companyName) ?></span>
             </div>
             <?php else: ?>
             <h3 class="footer-logo">
-                <span class="gradient-text"><?= e(getSetting('site_name', APP_NAME)) ?></span>
+                <span class="footer-company-name"><?= e($companyName) ?></span>
             </h3>
             <?php endif; ?>
             <p class="footer-tagline">⚡ <?= getContent('footer_tagline', getCurrentLocale()) !== 'footer_tagline' ? e(getContent('footer_tagline', getCurrentLocale())) : e(t('footer_tagline')) ?></p>
