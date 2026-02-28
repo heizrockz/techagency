@@ -96,7 +96,7 @@ CREATE TABLE `crm_stages` (
 ) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ALTER statements for existing tables
-ALTER TABLE `admins` ADD COLUMN IF NOT EXISTS `avatar_emoji` VARCHAR(10) DEFAULT '👤';
+ALTER TABLE `admins` ADD COLUMN IF NOT EXISTS `avatar_emoji` VARCHAR(10) DEFAULT NULL;
 ALTER TABLE `invoices` ADD COLUMN IF NOT EXISTS `opportunity_id` INT DEFAULT NULL;
 
 SET FOREIGN_KEY_CHECKS = 1;
