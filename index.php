@@ -83,6 +83,18 @@ if ($path === '/' || $path === '/index.php' || $path === '') {
         adminBlogs();
     } elseif ($path === '/admin/team') {
         adminTeam();
+    // CRM Routes
+    } elseif ($path === '/admin/crm_pipeline') {
+        require_once __DIR__ . '/controllers/CrmController.php';
+        adminCrmPipeline();
+    } elseif (strpos($path, '/admin/crm_opportunity') === 0) {
+        require_once __DIR__ . '/controllers/CrmController.php';
+        $id = $_GET['id'] ?? null;
+        adminCrmOpportunity($id);
+    } elseif ($path === '/admin/crm_products') {
+        require_once __DIR__ . '/controllers/CrmController.php';
+        adminCrmProducts();
+    // Marketing/Content routes
     } elseif ($path === '/admin/testimonials') {
         adminTestimonials();
     } elseif ($path === '/admin/chatbot') {

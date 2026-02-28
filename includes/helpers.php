@@ -190,6 +190,42 @@ function baseUrl(string $path = ''): string {
 }
 
 /**
+ * Redirect to a specific URL or path and exit
+ */
+function redirect(string $url): void {
+    if (!preg_match('~^https?://~', $url)) {
+        $url = baseUrl($url);
+    }
+    header("Location: $url");
+    exit;
+}
+
+/**
+ * Set a flash message in the session.
+ */
+function setFlash(string $message, string $type = 'success'): void {
+    if (session_status() === PHP_SESSION_NONE) {
+        session_start();
+    }
+    $_SESSION['flash_message'] = ['text' => $message, 'type' => $type];
+}
+
+/**
+ * Get the flash message and clear it.
+ */
+function getFlash(): ?string {
+    if (session_status() === PHP_SESSION_NONE) {
+        session_start();
+    }
+    if (isset($_SESSION['flash_message'])) {
+        $msg = $_SESSION['flash_message']['text'];
+        unset($_SESSION['flash_message']);
+        return $msg;
+    }
+    return null;
+}
+
+/**
  * Returns an absolute URL including protocol and host
  */
 function fullUrl(string $path = ''): string {

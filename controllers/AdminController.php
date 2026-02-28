@@ -1157,6 +1157,7 @@ function adminInvoices(): void {
         $contactId = intval($_POST['contact_id'] ?? 0);
         $invoiceCurrency = $_POST['invoice_currency'] ?? 'AED';
         $paymentTerms = trim($_POST['payment_terms'] ?? '');
+        $amountPaid = floatval($_POST['amount_paid'] ?? 0);
 
         // Check uniqueness of invoice number (skip own record)
         $checkStmt = $db->prepare('SELECT id FROM invoices WHERE invoice_number = ? AND id != ?');
@@ -1166,11 +1167,11 @@ function adminInvoices(): void {
         }
 
         if ($id > 0) {
-            $db->prepare('UPDATE invoices SET type=?, invoice_number=?, client_name=?, client_email=?, client_phone=?, client_address=?, discount=?, vat_rate=?, status=?, notes=?, terms=?, contact_id=?, invoice_currency=?, payment_terms=? WHERE id=?')
-               ->execute([$type, $invoiceNumber, $clientName, $clientEmail, $clientPhone, $clientAddress, $discount, $vatRate, $status, $notes, $terms, $contactId ?: null, $invoiceCurrency, $paymentTerms, $id]);
+            $db->prepare('UPDATE invoices SET type=?, invoice_number=?, client_name=?, client_email=?, client_phone=?, client_address=?, discount=?, vat_rate=?, status=?, notes=?, terms=?, contact_id=?, invoice_currency=?, payment_terms=?, amount_paid=? WHERE id=?')
+               ->execute([$type, $invoiceNumber, $clientName, $clientEmail, $clientPhone, $clientAddress, $discount, $vatRate, $status, $notes, $terms, $contactId ?: null, $invoiceCurrency, $paymentTerms, $amountPaid, $id]);
         } else {
-            $db->prepare('INSERT INTO invoices (type, invoice_number, client_name, client_email, client_phone, client_address, discount, vat_rate, status, notes, terms, contact_id, invoice_currency, payment_terms) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')
-               ->execute([$type, $invoiceNumber, $clientName, $clientEmail, $clientPhone, $clientAddress, $discount, $vatRate, $status, $notes, $terms, $contactId ?: null, $invoiceCurrency, $paymentTerms]);
+            $db->prepare('INSERT INTO invoices (type, invoice_number, client_name, client_email, client_phone, client_address, discount, vat_rate, status, notes, terms, contact_id, invoice_currency, payment_terms, amount_paid) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')
+               ->execute([$type, $invoiceNumber, $clientName, $clientEmail, $clientPhone, $clientAddress, $discount, $vatRate, $status, $notes, $terms, $contactId ?: null, $invoiceCurrency, $paymentTerms, $amountPaid]);
             $id = $db->lastInsertId();
         }
 
@@ -1231,12 +1232,28 @@ function adminInvoices(): void {
         $stmt = $db->prepare('SELECT * FROM invoices WHERE id = ?');
         $stmt->execute([$id]);
         $invoice = $stmt->fetch();
-        
+        if (!$invoice) die('Invoice not found');
+
         $itemsStmt = $db->prepare('SELECT * FROM invoice_items WHERE invoice_id = ? ORDER BY id ASC');
         $itemsStmt->execute([$id]);
         $items = $itemsStmt->fetchAll();
 
         require __DIR__ . '/../views/admin/invoice_print.php';
+        return;
+    }
+
+    if ($action === 'receipt' && isset($_GET['id'])) {
+        $id = intval($_GET['id']);
+        $stmt = $db->prepare('SELECT * FROM invoices WHERE id = ?');
+        $stmt->execute([$id]);
+        $invoice = $stmt->fetch();
+        if (!$invoice) die('Invoice not found');
+
+        $itemsStmt = $db->prepare('SELECT * FROM invoice_items WHERE invoice_id = ? ORDER BY id ASC');
+        $itemsStmt->execute([$id]);
+        $items = $itemsStmt->fetchAll();
+
+        require __DIR__ . '/../views/admin/invoice_receipt.php';
         return;
     }
 

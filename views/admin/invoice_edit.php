@@ -140,44 +140,46 @@ $currencies = ['AED' => 'AED (د.إ)', 'USD' => 'USD ($)', 'EUR' => 'EUR (€)',
 
             <!-- Line Items -->
             <h3 style="color: var(--theme-gold); margin-bottom: 15px; border-bottom: 1px solid var(--glass-border); padding-bottom: 10px; display: flex; justify-content: space-between; align-items: center;">
-                <span>Line Items</span>
-                <button type="button" class="admin-btn" id="add-item-btn" style="padding: 4px 10px; font-size: 0.8rem;">+ Add Item</button>
+                <span>Line Items <span style="cursor:help; color:var(--text-muted); font-size:0.75rem;" title="Add products by typing in the Service Name field — matching CRM products will appear as suggestions. You can also add custom items.">ⓘ</span></span>
+                <div>
+                    <button type="button" class="admin-btn" id="add-item-btn" style="padding: 4px 10px; font-size: 0.8rem;">+ Add a line</button>
+                </div>
             </h3>
 
-            <div style="overflow-x: auto; margin-bottom: 20px;">
+            <div style="overflow-x: visible; margin-bottom: 20px; padding-bottom: 15px;">
                 <table class="admin-table" id="items-table">
                     <thead>
                         <tr>
-                            <th style="width: 30%">Service Name</th>
-                            <th style="width: 30%">Description</th>
-                            <th style="width: 10%">Qty</th>
-                            <th style="width: 10%">Unit Price</th>
-                            <th style="width: 10%">VAT %</th>
-                            <th style="width: 10%">Total</th>
-                            <th></th>
+                            <th style="width: 28%">Product <span style="cursor:help; color:var(--text-muted); font-size:0.7rem;" title="Type to search CRM products or enter a custom name">ⓘ</span></th>
+                            <th style="width: 25%">Description</th>
+                            <th style="width: 8%">Qty</th>
+                            <th style="width: 12%">Unit Price</th>
+                            <th style="width: 8%">VAT % <span style="cursor:help; color:var(--text-muted); font-size:0.7rem;" title="Value Added Tax percentage applied to this line item">ⓘ</span></th>
+                            <th style="width: 12%">Total</th>
+                            <th style="width: 5%"></th>
                         </tr>
                     </thead>
                     <tbody id="items-body">
                         <?php if (empty($items)): ?>
                             <tr class="item-row">
-                                <td><input type="text" name="items[0][service_name]" class="form-input" required></td>
-                                <td><input type="text" name="items[0][description]" class="form-input"></td>
-                                <td><input type="number" step="0.01" name="items[0][qty]" value="1" class="form-input item-qty" required></td>
+                                <td style="position:relative;"><input type="text" name="items[0][service_name]" class="form-input product-search" autocomplete="off" placeholder="Type to find product..." required></td>
+                                <td><input type="text" name="items[0][description]" class="form-input item-desc"></td>
+                                <td><input type="number" step="0.01" name="items[0][qty]" value="1.00" class="form-input item-qty" required></td>
                                 <td><input type="number" step="0.01" name="items[0][unit_price]" value="0.00" class="form-input item-price" required></td>
-                                <td><input type="number" step="0.01" name="items[0][vat_rate]" value="0.00" class="form-input item-vat"></td>
+                                <td><input type="number" step="0.01" name="items[0][vat_rate]" value="5.00" class="form-input item-vat"></td>
                                 <td class="item-line-total">0.00</td>
-                                <td><button type="button" class="admin-btn remove-item" style="color: #f43f5e; border-color: transparent;">X</button></td>
+                                <td><button type="button" class="admin-btn remove-item" style="color: #f43f5e; border-color: transparent;" title="Remove this line">🗑</button></td>
                             </tr>
                         <?php else: ?>
                             <?php foreach ($items as $i => $item): ?>
                                 <tr class="item-row">
-                                    <td><input type="text" name="items[<?= $i ?>][service_name]" value="<?= e($item['service_name']) ?>" class="form-input" required></td>
-                                    <td><input type="text" name="items[<?= $i ?>][description]" value="<?= e($item['description']) ?>" class="form-input"></td>
+                                    <td style="position:relative;"><input type="text" name="items[<?= $i ?>][service_name]" value="<?= e($item['service_name']) ?>" class="form-input product-search" autocomplete="off" placeholder="Type to find product..." required></td>
+                                    <td><input type="text" name="items[<?= $i ?>][description]" value="<?= e($item['description']) ?>" class="form-input item-desc"></td>
                                     <td><input type="number" step="0.01" name="items[<?= $i ?>][qty]" value="<?= e($item['qty']) ?>" class="form-input item-qty" required></td>
                                     <td><input type="number" step="0.01" name="items[<?= $i ?>][unit_price]" value="<?= e($item['unit_price']) ?>" class="form-input item-price" required></td>
                                     <td><input type="number" step="0.01" name="items[<?= $i ?>][vat_rate]" value="<?= e($item['vat_rate']) ?>" class="form-input item-vat"></td>
                                     <td class="item-line-total">0.00</td>
-                                    <td><button type="button" class="admin-btn remove-item" style="color: #f43f5e; border-color: transparent;">X</button></td>
+                                    <td><button type="button" class="admin-btn remove-item" style="color: #f43f5e; border-color: transparent;" title="Remove this line">🗑</button></td>
                                 </tr>
                             <?php endforeach; ?>
                         <?php endif; ?>
@@ -204,6 +206,22 @@ $currencies = ['AED' => 'AED (د.إ)', 'USD' => 'USD ($)', 'EUR' => 'EUR (€)',
                         <span style="color: var(--theme-gold); font-weight: 800;">Total:</span>
                         <strong id="calc-total" style="color: var(--theme-primary);">0.00</strong>
                     </div>
+                    <div style="display: flex; justify-content: space-between; margin-top: 15px; align-items: center;">
+                        <span style="color: var(--text-secondary);">Amount Paid (Split):</span>
+                        <input type="number" step="0.01" name="amount_paid" id="amount-paid" value="<?= e($invoice['amount_paid'] ?? '0.00') ?>" class="form-input" style="width: 100px; padding: 4px 8px; border-color: var(--neon-emerald);">
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-top: 10px; font-size: 1.1rem;">
+                        <span style="color: #f43f5e; font-weight: 600;">Balance Due:</span>
+                        <strong id="calc-balance" style="color: #f43f5e;">0.00</strong>
+                    </div>
+                    
+                    <?php if (($invoice['id'] ?? 0) > 0 && ($invoice['amount_paid'] ?? 0) > 0): ?>
+                        <div style="margin-top: 15px; text-align: right;">
+                            <a href="<?= baseUrl('admin/invoices?action=receipt&id=' . $invoice['id']) ?>" target="_blank" class="admin-btn" style="background: var(--neon-emerald); color: #fff; border:none; padding: 5px 10px; font-size: 0.85rem;">
+                                🧾 View CRM Receipt
+                            </a>
+                        </div>
+                    <?php endif; ?>
                 </div>
             </div>
 
@@ -230,6 +248,82 @@ $currencies = ['AED' => 'AED (د.إ)', 'USD' => 'USD ($)', 'EUR' => 'EUR (€)',
     </div>
 </div>
 
+<!-- Typeahead Dropdown Styles -->
+<style>
+.product-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: var(--theme-darker, #0d1117);
+    border: 1px solid var(--glass-border, rgba(255,255,255,0.1));
+    border-radius: 0 0 8px 8px;
+    max-height: 220px;
+    overflow-y: auto;
+    z-index: 999;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+    display: none;
+}
+.product-dropdown .pd-item {
+    padding: 8px 12px;
+    cursor: pointer;
+    border-bottom: 1px solid rgba(255,255,255,0.03);
+    transition: background 0.15s;
+}
+.product-dropdown .pd-item:hover,
+.product-dropdown .pd-item.active {
+    background: rgba(99, 102, 241, 0.15);
+}
+.product-dropdown .pd-item .pd-name {
+    font-weight: 600;
+    color: var(--text-primary, #fff);
+    font-size: 0.85rem;
+}
+.product-dropdown .pd-item .pd-meta {
+    font-size: 0.7rem;
+    color: var(--text-muted, #64748b);
+    display: flex;
+}
+.product-dropdown .pd-empty {
+    padding: 8px 12px;
+    font-size: 0.8rem;
+    color: var(--text-muted, #64748b);
+    font-style: italic;
+}
+.product-dropdown .pd-create-btn {
+    padding: 8px 12px;
+    cursor: pointer;
+    border-top: 1px solid rgba(255,255,255,0.05);
+    background: rgba(99, 102, 241, 0.1);
+    color: #818cf8;
+    font-size: 0.8rem;
+    font-weight: 500;
+    transition: background 0.15s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.product-dropdown .pd-create-btn:hover {
+    background: rgba(99, 102, 241, 0.25);
+}
+    gap: 12px;
+    margin-top: 2px;
+}
+.product-dropdown .pd-item .pd-meta .pd-price {
+    color: var(--neon-emerald, #10b981);
+    font-weight: 600;
+}
+.product-dropdown .pd-empty {
+    padding: 12px;
+    color: var(--text-muted, #64748b);
+    text-align: center;
+    font-size: 0.8rem;
+    font-style: italic;
+}
+.product-dropdown::-webkit-scrollbar { width: 4px; }
+.product-dropdown::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
+</style>
+
 <script>
 // Auto-fill contact details
 function fillContactDetails(contactId) {
@@ -250,11 +344,53 @@ function fillContactDetails(contactId) {
     }
 }
 
+// Global AJAX create product from invoice typeahead
+function createProductFromTypeahead(e, btn) {
+    e.preventDefault();
+    const name = btn.querySelector('span').textContent;
+    const td = btn.closest('td');
+    const input = td.querySelector('.product-search');
+    const dropdown = td.querySelector('.product-dropdown');
+    
+    let price = 0;
+    
+    const formData = new FormData();
+    formData.append('action', 'ajax_create_product');
+    formData.append('name', name);
+    formData.append('price', price);
+    
+    fetch('<?= htmlspecialchars(BASE_URL) ?>/admin/crm_pipeline', {
+        method: 'POST',
+        body: formData,
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    }).then(r => r.json()).then(data => {
+        if (data.success && data.product) {
+            // Wait for DOMContentLoaded listener to define crmProducts, wait,
+            // we dispatch a custom event or let the row update itself manually.
+            // But we can just dispatch an event on the input.
+            const customEv = new CustomEvent('product-created', { detail: data.product });
+            input.dispatchEvent(customEv);
+            dropdown.style.display = 'none';
+        } else {
+            alert('Failed to create product: ' + (data.error || 'Unknown error'));
+        }
+    }).catch(err => {
+        console.error(err);
+        alert('Server error creating product.');
+    });
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     let itemIdx = <?= empty($items) ? 1 : count($items) ?>;
     const itemsBody = document.getElementById('items-body');
     const btnAdd = document.getElementById('add-item-btn');
     const globalDiscount = document.getElementById('global-discount');
+
+    // CRM Products data for typeahead
+    const crmProducts = <?php
+        $crmProducts = getDB()->query("SELECT * FROM crm_items ORDER BY name ASC")->fetchAll();
+        echo json_encode($crmProducts ?: []);
+    ?>;
 
     function calculateTotals() {
         let subtotal = 0;
@@ -276,28 +412,159 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const discount = parseFloat(globalDiscount.value) || 0;
         const finalTotal = subtotal - discount + totalVat;
+        const amountPaid = parseFloat(document.getElementById('amount-paid').value) || 0;
+        const balanceDue = finalTotal - amountPaid;
 
         document.getElementById('calc-subtotal').textContent = subtotal.toFixed(2);
         document.getElementById('calc-vat').textContent = totalVat.toFixed(2);
         document.getElementById('calc-total').textContent = finalTotal.toFixed(2);
+        document.getElementById('calc-balance').textContent = (balanceDue > 0 ? balanceDue : 0).toFixed(2);
+    }
+
+    // Typeahead for product search
+    function initProductSearch(input) {
+        const td = input.closest('td');
+        td.style.position = 'relative';
+        
+        let dropdown = td.querySelector('.product-dropdown');
+        if (!dropdown) {
+            dropdown = document.createElement('div');
+            dropdown.className = 'product-dropdown';
+            td.appendChild(dropdown);
+        }
+
+        let activeIndex = -1;
+
+        input.addEventListener('input', function() {
+            const query = this.value.toLowerCase().trim();
+            activeIndex = -1;
+            
+            if (query.length < 1) {
+                dropdown.style.display = 'none';
+                return;
+            }
+
+            const matches = crmProducts.filter(p => 
+                p.name.toLowerCase().includes(query) || 
+                (p.category && p.category.toLowerCase().includes(query)) ||
+                (p.description && p.description.toLowerCase().includes(query))
+            ).slice(0, 8);
+
+            if (matches.length === 0) {
+                dropdown.innerHTML = '<div class="pd-empty">No products found.</div>' +
+                                     '<div class="pd-create-btn" onmousedown="createProductFromTypeahead(event, this)"><i class="ph ph-plus"></i> Create "<span>' + escapeHtml(query) + '</span>"</div>';
+            } else {
+                dropdown.innerHTML = matches.map((p, i) => `
+                    <div class="pd-item" data-index="${i}">
+                        <div class="pd-name">${escapeHtml(p.name)}</div>
+                        <div class="pd-meta">
+                            <span class="pd-price">${parseFloat(p.price).toFixed(2)}</span>
+                            ${p.category ? '<span>' + escapeHtml(p.category) + '</span>' : ''}
+                        </div>
+                    </div>
+                `).join('') + '<div class="pd-create-btn" onmousedown="createProductFromTypeahead(event, this)"><i class="ph ph-plus"></i> Create "<span>' + escapeHtml(query) + '</span>"</div>';
+
+                dropdown.querySelectorAll('.pd-item').forEach((item, idx) => {
+                    item.addEventListener('mousedown', (e) => {
+                        e.preventDefault();
+                        selectProduct(input, matches[idx]);
+                        dropdown.style.display = 'none';
+                    });
+                });
+            }
+            dropdown.style.display = 'block';
+        });
+        
+        // Listen for new product creation
+        input.addEventListener('product-created', function(e) {
+            const product = e.detail;
+            crmProducts.push(product); // Add to local array
+            selectProduct(this, product); // Automatically select it
+        });
+
+        input.addEventListener('keydown', function(e) {
+            const items = dropdown.querySelectorAll('.pd-item');
+            if (!items.length || dropdown.style.display === 'none') return;
+
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                activeIndex = Math.min(activeIndex + 1, items.length - 1);
+                items.forEach((it, i) => it.classList.toggle('active', i === activeIndex));
+                items[activeIndex].scrollIntoView({block: 'nearest'});
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                activeIndex = Math.max(activeIndex - 1, 0);
+                items.forEach((it, i) => it.classList.toggle('active', i === activeIndex));
+                items[activeIndex].scrollIntoView({block: 'nearest'});
+            } else if (e.key === 'Enter' && activeIndex >= 0) {
+                e.preventDefault();
+                const query = input.value.toLowerCase().trim();
+                const matches = crmProducts.filter(p => 
+                    p.name.toLowerCase().includes(query) || 
+                    (p.category && p.category.toLowerCase().includes(query))
+                ).slice(0, 8);
+                if (matches[activeIndex]) {
+                    selectProduct(input, matches[activeIndex]);
+                }
+                dropdown.style.display = 'none';
+            } else if (e.key === 'Escape') {
+                dropdown.style.display = 'none';
+            }
+        });
+
+        input.addEventListener('blur', () => {
+            setTimeout(() => dropdown.style.display = 'none', 150);
+        });
+
+        input.addEventListener('focus', function() {
+            if (this.value.trim().length >= 1) {
+                this.dispatchEvent(new Event('input'));
+            }
+        });
+    }
+
+    function selectProduct(input, product) {
+        const row = input.closest('.item-row');
+        input.value = product.name;
+        
+        const descInput = row.querySelector('.item-desc');
+        const priceInput = row.querySelector('.item-price');
+        
+        if (descInput) descInput.value = product.description || '';
+        if (priceInput) priceInput.value = parseFloat(product.price).toFixed(2);
+        
+        // Flash feedback
+        row.style.backgroundColor = 'rgba(16, 185, 129, 0.15)';
+        setTimeout(() => row.style.backgroundColor = '', 600);
+        
+        calculateTotals();
+    }
+
+    function escapeHtml(str) {
+        const div = document.createElement('div');
+        div.textContent = str;
+        return div.innerHTML;
     }
 
     btnAdd.addEventListener('click', () => {
         const tr = document.createElement('tr');
         tr.className = 'item-row';
         tr.innerHTML = `
-            <td><input type="text" name="items[${itemIdx}][service_name]" class="form-input" required></td>
-            <td><input type="text" name="items[${itemIdx}][description]" class="form-input"></td>
-            <td><input type="number" step="0.01" name="items[${itemIdx}][qty]" value="1" class="form-input item-qty" required></td>
+            <td style="position:relative;"><input type="text" name="items[${itemIdx}][service_name]" class="form-input product-search" autocomplete="off" placeholder="Type to find product..." required></td>
+            <td><input type="text" name="items[${itemIdx}][description]" class="form-input item-desc"></td>
+            <td><input type="number" step="0.01" name="items[${itemIdx}][qty]" value="1.00" class="form-input item-qty" required></td>
             <td><input type="number" step="0.01" name="items[${itemIdx}][unit_price]" value="0.00" class="form-input item-price" required></td>
-            <td><input type="number" step="0.01" name="items[${itemIdx}][vat_rate]" value="0.00" class="form-input item-vat"></td>
+            <td><input type="number" step="0.01" name="items[${itemIdx}][vat_rate]" value="5.00" class="form-input item-vat"></td>
             <td class="item-line-total">0.00</td>
-            <td><button type="button" class="admin-btn remove-item" style="color: #f43f5e; border-color: transparent;">X</button></td>
+            <td><button type="button" class="admin-btn remove-item" style="color: #f43f5e; border-color: transparent;" title="Remove this line">🗑</button></td>
         `;
         itemsBody.appendChild(tr);
         itemIdx++;
         bindRowEvents(tr);
         calculateTotals();
+        // Focus the new product search field
+        const newInput = tr.querySelector('.product-search');
+        if (newInput) newInput.focus();
     });
 
     function bindRowEvents(row) {
@@ -308,10 +575,14 @@ document.addEventListener('DOMContentLoaded', () => {
             e.target.closest('tr').remove();
             calculateTotals();
         });
+        // Init typeahead on product-search inputs
+        const searchInput = row.querySelector('.product-search');
+        if (searchInput) initProductSearch(searchInput);
     }
 
     document.querySelectorAll('.item-row').forEach(bindRowEvents);
     globalDiscount.addEventListener('input', calculateTotals);
+    document.getElementById('amount-paid').addEventListener('input', calculateTotals);
     calculateTotals();
 });
 </script>

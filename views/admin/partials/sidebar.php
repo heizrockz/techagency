@@ -4,11 +4,12 @@
 </button>
 
 <div class="admin-sidebar" id="adminSidebar">
-    <div class="admin-brand" style="display:flex; align-items:center;">
+    <div class="admin-brand" style="display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding: 1.5rem 1rem;">
         <?php $logo = getSetting('site_logo'); if(!empty($logo)): ?>
-            <img src="<?= baseUrl($logo) ?>" alt="<?= APP_NAME ?>" style="max-height: 40px;">
+            <img src="<?= baseUrl($logo) ?>" alt="<?= APP_NAME ?>" style="max-height: 48px; margin-bottom: 0.5rem; border-radius: 4px;">
+            <div style="font-size: 0.9rem; font-weight: 700; color: #fff; letter-spacing: 0.5px;"><?= APP_NAME ?></div>
         <?php else: ?>
-            <?= APP_NAME ?>
+            <div style="font-size: 1.25rem; font-weight: 800; color: var(--theme-gold);"><?= APP_NAME ?></div>
         <?php endif; ?>
     </div>
     <nav class="admin-nav">
@@ -17,13 +18,15 @@
         <a href="<?= baseUrl('admin/bookings') ?>" class="<?= $currentPage === 'bookings' ? 'active' : '' ?>">📋 <?= t('admin_bookings') ?></a>
 
         <!-- CRM Group -->
-        <?php $crmActive = in_array($currentPage, ['contacts', 'marketing', 'invoices']); ?>
+        <?php $crmActive = in_array($currentPage, ['contacts', 'marketing', 'invoices', 'crm_pipeline', 'crm_products']); ?>
         <div class="sidebar-group <?= $crmActive ? 'open' : '' ?>">
             <div class="sidebar-group-toggle" onclick="this.parentElement.classList.toggle('open')">
                 <span>💼 CRM</span>
                 <span class="sidebar-arrow">▸</span>
             </div>
             <div class="sidebar-group-items">
+                <a href="<?= baseUrl('admin/crm_pipeline') ?>" class="<?= $currentPage === 'crm_pipeline' ? 'active' : '' ?>">📈 Pipeline (Leads)</a>
+                <a href="<?= baseUrl('admin/crm_products') ?>" class="<?= $currentPage === 'crm_products' ? 'active' : '' ?>">📦 Products / Items</a>
                 <a href="<?= baseUrl('admin/contacts') ?>" class="<?= $currentPage === 'contacts' ? 'active' : '' ?>">📇 Contacts</a>
                 <a href="<?= baseUrl('admin/marketing') ?>" class="<?= $currentPage === 'marketing' ? 'active' : '' ?>">✉️ Email Marketing</a>
                 <a href="<?= baseUrl('admin/invoices') ?>" class="<?= $currentPage === 'invoices' ? 'active' : '' ?>">🧾 Invoices / Quotes</a>
