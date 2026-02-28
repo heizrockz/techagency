@@ -1,3 +1,5 @@
+SET FOREIGN_KEY_CHECKS = 0;
+
 -- Table structure for `crm_attachments`
 DROP TABLE IF EXISTS `crm_attachments`;
 CREATE TABLE `crm_attachments` (
@@ -96,3 +98,5 @@ CREATE TABLE `crm_stages` (
 -- ALTER statements for existing tables
 ALTER TABLE `admins` ADD COLUMN IF NOT EXISTS `avatar_emoji` VARCHAR(10) DEFAULT '👤';
 ALTER TABLE `invoices` ADD COLUMN IF NOT EXISTS `opportunity_id` INT DEFAULT NULL;
+
+SET FOREIGN_KEY_CHECKS = 1;

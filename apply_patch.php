@@ -19,8 +19,10 @@ try {
 
     $sql = file_get_contents($sqlFile);
     
-    // Execute the SQL patch
+    // Disable foreign key checks temporarily, then execute the patch, then re-enable
+    $db->exec("SET FOREIGN_KEY_CHECKS=0;");
     $db->exec($sql);
+    $db->exec("SET FOREIGN_KEY_CHECKS=1;");
     
     echo "<div style='font-family: sans-serif; padding: 20px;'>";
     echo "<h2 style='color: green;'>✅ Patch Applied Successfully</h2>";
