@@ -227,42 +227,6 @@ $action = $action ?? 'list';
     </div>
 </div>
 
-<!-- Delete Confirmation Modal -->
-<div id="deleteModal" style="display:none; position:fixed; inset:0; z-index:9999; background:rgba(0,0,0,0.7); backdrop-filter:blur(8px); align-items:center; justify-content:center;">
-    <div style="background:#1a2333; border:1px solid rgba(255,255,255,0.1); border-radius:1.5rem; padding:2rem; max-width:420px; width:90%; box-shadow:0 25px 50px rgba(0,0,0,0.5); animation:modalIn 0.2s ease-out;">
-        <div style="text-align:center; margin-bottom:1.5rem;">
-            <div style="width:64px; height:64px; border-radius:50%; background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.2); display:flex; align-items:center; justify-content:center; margin:0 auto 1rem;">
-                <i class="ph ph-warning" style="font-size:2rem; color:#f87171;"></i>
-            </div>
-            <h3 style="color:#fff; font-size:1.25rem; font-weight:700; margin-bottom:0.5rem;">Confirm Deletion</h3>
-            <p style="color:#94a3b8; font-size:0.875rem; line-height:1.6;">Are you sure you want to delete <strong id="deleteItemName" style="color:#f87171;"></strong>? This action cannot be undone.</p>
-        </div>
-        <div style="display:flex; gap:0.75rem; justify-content:center;">
-            <button onclick="closeDeleteModal()" style="padding:0.625rem 1.5rem; background:rgba(255,255,255,0.05); color:#94a3b8; font-weight:700; font-size:0.7rem; text-transform:uppercase; letter-spacing:0.1em; border-radius:0.75rem; border:1px solid rgba(255,255,255,0.1); cursor:pointer; transition:all 0.2s;">Cancel</button>
-            <a id="deleteConfirmBtn" href="#" style="padding:0.625rem 1.5rem; background:#ef4444; color:#fff; font-weight:700; font-size:0.7rem; text-transform:uppercase; letter-spacing:0.1em; border-radius:0.75rem; border:none; cursor:pointer; text-decoration:none; display:inline-flex; align-items:center; gap:0.5rem; transition:all 0.2s;">
-                <i class="ph ph-trash"></i> Delete
-            </a>
-        </div>
-    </div>
-</div>
-<style>
-@keyframes modalIn { from { opacity:0; transform:scale(0.95) translateY(10px); } to { opacity:1; transform:scale(1) translateY(0); } }
-#deleteModal button:hover { background:rgba(255,255,255,0.1) !important; color:#fff !important; }
-#deleteConfirmBtn:hover { background:#dc2626 !important; box-shadow:0 0 20px rgba(239,68,68,0.3); }
-</style>
-<script>
-function showDeleteModal(name, url) {
-    document.getElementById('deleteItemName').textContent = name;
-    document.getElementById('deleteConfirmBtn').href = url;
-    const modal = document.getElementById('deleteModal');
-    modal.style.display = 'flex';
-}
-function closeDeleteModal() {
-    document.getElementById('deleteModal').style.display = 'none';
-}
-document.getElementById('deleteModal').addEventListener('click', function(e) {
-    if (e.target === this) closeDeleteModal();
-});
-</script>
+<?php require __DIR__ . '/partials/_delete_modal.php'; ?>
 </body>
 </html>
