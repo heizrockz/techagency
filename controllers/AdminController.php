@@ -37,6 +37,33 @@ function adminDashboard(): void {
     require __DIR__ . '/../views/admin/dashboard.php';
 }
 
+/* ═══ Visitor Analytics ═══ */
+function adminVisitors(): void {
+    $db = getDB();
+    
+    // Summary logic
+    $totalVisits = $db->query("SELECT setting_value FROM site_settings WHERE setting_key = 'visit_count'")->fetchColumn() ?: 0;
+    $uniqueIps = $db->query("SELECT COUNT(DISTINCT ip_address) FROM site_visitors")->fetchColumn() ?: 0;
+    $todayVisits = $db->query("SELECT COUNT(*) FROM site_visitors WHERE DATE(visited_at) = CURDATE()")->fetchColumn() ?: 0;
+    $totalCountries = $db->query("SELECT COUNT(DISTINCT country_code) FROM site_visitors WHERE country_code != 'UNKNOWN' AND country_code != 'LOCAL'")->fetchColumn() ?: 0;
+
+    // Countries group by
+    $countriesData = $db->query("SELECT country, country_code, COUNT(*) as visit_count FROM site_visitors GROUP BY country, country_code HAVING visit_count > 0 ORDER BY visit_count DESC LIMIT 20")->fetchAll();
+
+    // Raw paginated visitor logs
+    $page = max(1, (int)($_GET['page'] ?? 1));
+    $limit = 50;
+    $offset = ($page - 1) * $limit;
+    $totalLogs = $db->query("SELECT COUNT(*) FROM site_visitors")->fetchColumn() ?: 0;
+    $totalPages = ceil($totalLogs / $limit);
+
+    $visitors = $db->prepare("SELECT * FROM site_visitors ORDER BY visited_at DESC LIMIT ? OFFSET ?");
+    $visitors->execute([$limit, $offset]);
+    $visitorLogs = $visitors->fetchAll();
+
+    require __DIR__ . '/../views/admin/visitors.php';
+}
+
 /* ═══ Bookings ═══ */
 function adminBookings(): void {
     $db = getDB();

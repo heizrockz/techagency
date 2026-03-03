@@ -5343,3 +5343,273 @@ body[dir="rtl"] .testimonial-card::before {
     -webkit-box-orient: vertical;
     overflow: hidden;
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   CRM Responsive & Mobile-Friendly Styles
+   ═══════════════════════════════════════════════════════════════ */
+
+/* CRM Main container */
+.crm-main {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    height: 100vh;
+}
+
+/* Sidebar collapse on mobile */
+@media (max-width: 768px) {
+    .admin-layout {
+        flex-direction: column !important;
+    }
+
+    .admin-layout>aside,
+    .admin-layout>.admin-sidebar {
+        width: 100% !important;
+        height: auto !important;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        z-index: 999;
+        display: flex;
+        flex-direction: row;
+        overflow-x: auto;
+        padding: 0.5rem;
+        gap: 0.25rem;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        background: #0f1115 !important;
+    }
+
+    .admin-layout>aside .admin-brand,
+    .admin-layout>.admin-sidebar .admin-brand {
+        display: none !important;
+    }
+
+    .admin-layout>aside a,
+    .admin-layout>.admin-sidebar a {
+        font-size: 0.65rem;
+        padding: 0.35rem 0.5rem;
+        white-space: nowrap;
+    }
+
+    .admin-layout>aside .sidebar-section-title {
+        display: none !important;
+    }
+
+    .crm-main {
+        height: calc(100vh - 60px);
+        padding-bottom: 60px;
+    }
+}
+
+/* ── Pipeline Page Mobile ────────────────────────────────── */
+@media (max-width: 768px) {
+
+    /* Pipeline header */
+    .crm-main>header {
+        padding: 1rem !important;
+        padding-bottom: 0.5rem !important;
+    }
+
+    .crm-main>header h1 {
+        font-size: 1.25rem !important;
+    }
+
+    /* Kanban columns on mobile */
+    .stage-column {
+        width: 220px !important;
+        min-width: 220px !important;
+    }
+
+    /* Pipeline main scroll area */
+    .crm-main-scroll {
+        padding: 0.75rem !important;
+    }
+
+    /* Flash messages */
+    .crm-main .m-6 {
+        margin: 0.75rem !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .stage-column {
+        width: 180px !important;
+        min-width: 180px !important;
+    }
+
+    .kanban-card {
+        padding: 0.5rem !important;
+    }
+
+    .kanban-card .text-xs {
+        font-size: 0.65rem !important;
+    }
+}
+
+/* ── Opportunity Page Mobile ─────────────────────────────── */
+
+/* Stage progress bar: scrollable on mobile */
+@media (max-width: 1024px) {
+    .crm-main>div:nth-child(2) {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .crm-main>div:nth-child(2)>.flex.items-center:last-child {
+        min-width: max-content;
+    }
+}
+
+@media (max-width: 768px) {
+
+    /* Action bar wraps on mobile */
+    .crm-main>div:nth-child(2) {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: 0.5rem !important;
+        padding: 0.75rem 1rem !important;
+    }
+
+    .crm-main>div:nth-child(2) .flex.items-center:first-child {
+        flex-wrap: wrap;
+        gap: 0.35rem !important;
+    }
+
+    /* Stage indicators scroll */
+    .crm-main>div:nth-child(2)>.flex.items-center:last-child {
+        overflow-x: auto;
+        width: 100%;
+        padding-bottom: 0.25rem;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    /* Split view stacks on mobile */
+    .crm-main>main {
+        flex-direction: column !important;
+    }
+
+    /* Left form panel */
+    .crm-main>main>div:first-child {
+        border-right: none !important;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        overflow-y: visible !important;
+        padding: 1rem !important;
+    }
+
+    /* Right chatter panel */
+    .crm-main>main>div:last-child {
+        width: 100% !important;
+        max-height: 50vh;
+        border-left: none !important;
+        border-top: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    /* Form fields */
+    .crm-main>main .grid-cols-2 {
+        grid-template-columns: 1fr !important;
+    }
+
+    .crm-main>main input[type="text"].text-3xl {
+        font-size: 1.5rem !important;
+    }
+
+    /* Breadcrumb header */
+    .crm-main>header {
+        padding: 0.75rem 1rem !important;
+    }
+
+    .crm-main>header .truncate.max-w-\[200px\] {
+        max-width: 120px !important;
+    }
+
+    /* Chatter header */
+    .crm-main>main>div:last-child>div:first-child {
+        flex-wrap: wrap;
+        gap: 0.5rem !important;
+    }
+
+    .crm-main>main>div:last-child>div:first-child input {
+        width: 100% !important;
+    }
+}
+
+/* ── Products Page Mobile ────────────────────────────────── */
+@media (max-width: 768px) {
+
+    /* Products header */
+    .crm-main>header.h-16 {
+        height: auto !important;
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: 0.5rem;
+        padding: 1rem !important;
+    }
+
+    /* Product table: hide some columns on mobile */
+    .crm-main table th:nth-child(2),
+    .crm-main table td:nth-child(2) {
+        display: none;
+    }
+
+    /* Table padding */
+    .crm-main table th,
+    .crm-main table td {
+        padding: 0.5rem 0.75rem !important;
+        font-size: 0.8rem !important;
+    }
+}
+
+@media (max-width: 480px) {
+
+    /* Products: simplify even more */
+    .crm-main table th:nth-child(4),
+    .crm-main table td:nth-child(4) {
+        display: none;
+    }
+}
+
+/* ── Modal Responsive ────────────────────────────────────── */
+@media (max-width: 640px) {
+
+    .fixed.inset-0 .max-w-md,
+    .fixed.inset-0 .max-w-sm,
+    .fixed.inset-0 .max-w-lg {
+        max-width: 100% !important;
+        margin: 0.5rem;
+        border-radius: 1rem !important;
+    }
+
+    .fixed.inset-0 .p-6 {
+        padding: 1rem !important;
+    }
+
+    .fixed.inset-0 .grid-cols-2 {
+        grid-template-columns: 1fr !important;
+    }
+}
+
+/* ── Touch-friendly tap targets ──────────────────────────── */
+@media (pointer: coarse) {
+    .kanban-card {
+        min-height: 60px;
+    }
+
+    .btn-primary,
+    .btn-secondary,
+    .btn-ghost {
+        min-height: 40px;
+        min-width: 40px;
+    }
+
+    /* Make dropdown items easier to tap */
+    [id^="stage-menu-"] button,
+    [id^="stage-menu-"] a,
+    [id^="card-menu-"] button,
+    [id^="card-menu-"] a {
+        min-height: 44px;
+        display: flex;
+        align-items: center;
+    }
+}

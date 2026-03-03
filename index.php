@@ -61,6 +61,8 @@ if ($path === '/' || $path === '/index.php' || $path === '') {
 
     if ($path === '/admin/dashboard' || $path === '/admin') {
         adminDashboard();
+    } elseif ($path === '/admin/visitors') {
+        adminVisitors();
     } elseif ($path === '/admin/inbox') {
         adminInbox();
     } elseif ($path === '/admin/marketing') {

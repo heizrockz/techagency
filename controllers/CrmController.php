@@ -66,9 +66,13 @@ function adminCrmPipeline(): void {
         if ($action === 'delete_stage') {
             $id = (int)($_POST['id'] ?? 0);
             if ($id) {
-                // Optional: What to do with opportunities ? 
-                // Currently they will remain but might not show up if the stage string doesn't match an active board column.
-                // Best practice is to block deletion if opps exist, or move them, but for this clone we'll just delete the stage.
+                // Get the stage name to update linked opportunities
+                $stageNameObj = $db->query("SELECT name FROM crm_stages WHERE id = $id")->fetch();
+                if ($stageNameObj) {
+                    $stmtUpdate = $db->prepare("UPDATE crm_opportunities SET stage = 'New Lead' WHERE stage = ?");
+                    $stmtUpdate->execute([$stageNameObj['name']]);
+                }
+                
                 $stmt = $db->prepare("DELETE FROM crm_stages WHERE id = ?");
                 $stmt->execute([$id]);
                 setFlash('Stage deleted.');
@@ -430,12 +434,14 @@ function adminCrmOpportunity($id = null): void {
         redirect('admin/crm_opportunity?id=' . $id);
     }
 
-    // Handle deleting log note
+    // Handle deleting log note (soft delete)
     if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'delete_log_note') {
         $noteId = (int)($_POST['note_id'] ?? 0);
         if ($noteId) {
+            // Remove attachments
             $db->prepare("DELETE FROM crm_attachments WHERE linked_type = 'log_note' AND linked_id = ?")->execute([$noteId]);
-            $db->prepare("DELETE FROM crm_log_notes WHERE id = ?")->execute([$noteId]);
+            // Soft delete: mark as deleted, clear content
+            $db->prepare("UPDATE crm_log_notes SET is_deleted = 1, content = '' WHERE id = ?")->execute([$noteId]);
             
             // If AJAX request, return JSON
             if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest') {

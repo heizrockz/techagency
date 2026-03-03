@@ -98,5 +98,9 @@ CREATE TABLE `crm_stages` (
 -- ALTER statements for existing tables
 ALTER TABLE `admins` ADD COLUMN IF NOT EXISTS `avatar_emoji` VARCHAR(10) DEFAULT NULL;
 ALTER TABLE `invoices` ADD COLUMN IF NOT EXISTS `opportunity_id` INT DEFAULT NULL;
+ALTER TABLE `crm_log_notes` ADD COLUMN IF NOT EXISTS `is_deleted` TINYINT(1) NOT NULL DEFAULT 0;
+
+-- Sanitize dangling opportunities (Fallback)
+UPDATE `crm_opportunities` SET `stage` = 'New Lead' WHERE `stage` NOT IN (SELECT `name` FROM `crm_stages`);
 
 SET FOREIGN_KEY_CHECKS = 1;

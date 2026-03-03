@@ -15,6 +15,7 @@
     <nav class="admin-nav">
         <a href="<?= baseUrl('admin/dashboard') ?>" class="<?= $currentPage === 'dashboard' ? 'active' : '' ?>">📊 <?= t('admin_dashboard') ?></a>
         <a href="<?= baseUrl('admin/inbox') ?>" class="<?= $currentPage === 'inbox' ? 'active' : '' ?>">📥 Inbox</a>
+        <a href="<?= baseUrl('admin/visitors') ?>" class="<?= $currentPage === 'visitors' ? 'active' : '' ?>">🌍 Visitors</a>
         <a href="<?= baseUrl('admin/bookings') ?>" class="<?= $currentPage === 'bookings' ? 'active' : '' ?>">📋 <?= t('admin_bookings') ?></a>
 
         <!-- CRM Group -->

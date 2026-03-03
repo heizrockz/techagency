@@ -325,7 +325,7 @@ $currentPage = 'crm_pipeline';
                         </div>
                     <?php endif; ?>
 
-                    <div id="log-note-<?= $note['id'] ?>" class="group relative flex gap-3 log-item" data-content="<?= htmlspecialchars(strtolower($note['content'])) ?>">
+                    <div id="log-note-<?= $note['id'] ?>" class="group relative flex gap-3 log-item <?= !empty($note['is_deleted']) ? 'opacity-50' : '' ?>" data-content="<?= htmlspecialchars(strtolower($note['content'])) ?>">
                         <div class="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center text-sm font-bold uppercase shrink-0">
                             <?= substr($note['username'], 0, 1) ?>
                         </div>
@@ -335,10 +335,17 @@ $currentPage = 'crm_pipeline';
                                     <span class="font-bold text-slate-200 text-sm"><?= htmlspecialchars($note['full_name'] ?: $note['username']) ?></span>
                                     <span class="text-[10px] text-slate-600 font-medium">- <?= date('H:i', strtotime($note['created_at'])) ?></span>
                                 </div>
-                                <button type="button" onclick="deleteLogNote(<?= $note['id'] ?>, <?= $opportunity['id'] ?>)" class="opacity-0 group-hover:opacity-100 transition-opacity text-slate-600 hover:text-red-400 p-1" title="Delete this log note">
+                                <?php if (empty($note['is_deleted'])): ?>
+                                <button type="button" onclick="deleteLogNote(<?= $note['id'] ?>, <?= $opportunity['id'] ?>)" class="transition-opacity text-slate-500 hover:text-red-400 p-1" title="Delete this log note">
                                     <i class="ph ph-trash"></i>
                                 </button>
+                                <?php endif; ?>
                             </div>
+                            <?php if (!empty($note['is_deleted'])): ?>
+                                <div class="text-sm italic text-slate-600 flex items-center gap-1.5">
+                                    <i class="ph ph-prohibit"></i> This note was deleted
+                                </div>
+                            <?php else: ?>
                             <div class="text-sm text-slate-400 chatter-content" data-content="<?= htmlspecialchars($note['content']) ?>">
                                 <?= parseLogContent($note['content']) ?>
                             </div>
@@ -369,6 +376,7 @@ $currentPage = 'crm_pipeline';
                                     </div>
                                 <?php endif; ?>
                             <?php endforeach; ?>
+                            <?php endif; ?>
                         </div>
                     </div>
                     <?php endforeach; ?>
@@ -556,20 +564,35 @@ function parseLogContent($content) {
             method: 'POST',
             body: formData,
             headers: { 'X-Requested-With': 'XMLHttpRequest' }
-        }).then(r => r.json()).then(data => {
+        })
+        .then(response => {
+            if (!response.ok) throw new Error('Network response was not ok');
+            return response.json();
+        })
+        .then(data => {
             if (data.success) {
-                // Remove note from DOM
+                // WhatsApp-style "deleted" placeholder
                 const noteBlock = document.getElementById('log-note-' + noteId);
                 if (noteBlock) {
-                    noteBlock.style.transition = 'opacity 0.3s, transform 0.3s';
-                    noteBlock.style.opacity = '0';
-                    noteBlock.style.transform = 'translateX(20px)';
-                    setTimeout(() => noteBlock.remove(), 300);
+                    noteBlock.style.transition = 'all 0.3s ease';
+                    noteBlock.style.opacity = '0.5';
+                    // Replace content area with deleted message
+                    const contentArea = noteBlock.querySelector('.chatter-content');
+                    if (contentArea) {
+                        contentArea.innerHTML = '<span class="italic text-slate-600 text-sm flex items-center gap-1.5"><i class="ph ph-prohibit"></i> This note was deleted</span>';
+                    }
+                    // Hide attachments
+                    noteBlock.querySelectorAll('.mt-3.inline-block').forEach(el => el.remove());
+                    // Hide delete button
+                    const delBtn = noteBlock.querySelector('button[title="Delete this log note"]');
+                    if (delBtn) delBtn.remove();
                 }
             } else {
                 alert('Failed to delete log note.');
             }
-        }).catch(() => {
+        }).catch((err) => {
+            console.error('Delete failed', err);
+            // Fallback: Reload the page if JSON parsing fails but request went through
             window.location.reload();
         });
     }

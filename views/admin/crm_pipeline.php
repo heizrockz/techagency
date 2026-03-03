@@ -192,13 +192,9 @@ $currentPage = 'crm_pipeline';
                                         <i class="ph ph-arrows-in-line-horizontal"></i> Fold
                                     </button>
                                     <hr class="border-white/5 my-1">
-                                    <form action="<?= htmlspecialchars(BASE_URL) ?>/admin/crm_pipeline" method="POST" onsubmit="return confirm('Delete this stage?');">
-                                        <input type="hidden" name="action" value="delete_stage">
-                                        <input type="hidden" name="id" value="<?= $info['id'] ?>">
-                                        <button type="submit" class="w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-red-400/10 flex items-center gap-2">
-                                            <i class="ph ph-trash"></i> Delete
-                                        </button>
-                                    </form>
+                                    <button type="button" onclick="deleteStage(<?= $info['id'] ?>)" class="w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-red-400/10 flex items-center gap-2">
+                                        <i class="ph ph-trash"></i> Delete
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -441,6 +437,31 @@ function openLeadModal(preselectStage = null) {
     }
 }
 
+function deleteStage(stageId) {
+    if (!confirm('Delete this stage? All opportunities in this stage will be moved to "New Lead".')) return;
+    
+    // Create a standalone form outside any dropdown to avoid DOM race conditions
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = '<?= htmlspecialchars(BASE_URL) ?>/admin/crm_pipeline';
+    form.style.display = 'none';
+    
+    const actionInput = document.createElement('input');
+    actionInput.type = 'hidden';
+    actionInput.name = 'action';
+    actionInput.value = 'delete_stage';
+    form.appendChild(actionInput);
+    
+    const idInput = document.createElement('input');
+    idInput.type = 'hidden';
+    idInput.name = 'id';
+    idInput.value = stageId;
+    form.appendChild(idInput);
+    
+    document.body.appendChild(form);
+    form.submit();
+}
+
 function toggleCollapse(id) {
     document.getElementById('collapseId').value = id;
     document.getElementById('collapseForm').submit();
@@ -458,7 +479,10 @@ function toggleDropdown(id, event) {
 
 // Close Dropdowns on outside click
 document.addEventListener('click', (e) => {
-    document.querySelectorAll('[id^=stage-menu-]').forEach(el => el.classList.add('hidden'));
+    // Only close if the click is outside any dropdown menu
+    if (!e.target.closest('[id^=stage-menu-]')) {
+        document.querySelectorAll('[id^=stage-menu-]').forEach(el => el.classList.add('hidden'));
+    }
 });
 // Kanban Drag and Drop Logic (Cards)
 document.addEventListener('DOMContentLoaded', () => {

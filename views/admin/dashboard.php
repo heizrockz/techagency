@@ -24,10 +24,18 @@
 
         <!-- Stats -->
         <div class="admin-stats">
-            <div class="admin-stat-card">
-                <div class="stat-value"><?= (int)$visitCount ?></div>
-                <div class="stat-title"><?= getCurrentLocale() === 'ar' ? 'إجمالي الزيارات' : 'Total Traffic' ?></div>
-            </div>
+            <a href="<?= baseUrl('/admin/visitors') ?>" class="admin-stat-card group relative overflow-hidden block transition-transform hover:-translate-y-1 hover:shadow-2xl">
+                <div class="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                <div class="flex justify-between items-start relative z-10">
+                    <div>
+                        <div class="stat-value"><?= (int)$visitCount ?></div>
+                        <div class="stat-title"><?= getCurrentLocale() === 'ar' ? 'إجمالي الزيارات' : 'Total Traffic' ?></div>
+                    </div>
+                    <div class="w-8 h-8 rounded bg-primary/10 text-primary flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all -translate-y-2 group-hover:translate-y-0">
+                        <i class="ph ph-arrow-up-right font-bold"></i>
+                    </div>
+                </div>
+            </a>
             <div class="admin-stat-card">
                 <div class="stat-value"><?= (int)$totalBookings ?></div>
                 <div class="stat-title"><?= t('admin_total_bookings') ?></div>
