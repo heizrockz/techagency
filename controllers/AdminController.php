@@ -40,6 +40,24 @@ function adminDashboard(): void {
 /* ═══ Visitor Analytics ═══ */
 function adminVisitors(): void {
     $db = getDB();
+    $action = $_GET['action'] ?? 'list';
+
+    // IP Detail View
+    if ($action === 'ip_detail' && isset($_GET['ip'])) {
+        $ip = $_GET['ip'];
+        $stmt = $db->prepare("SELECT * FROM site_visitors WHERE ip_address = ? ORDER BY visited_at DESC");
+        $stmt->execute([$ip]);
+        $ipVisits = $stmt->fetchAll();
+        
+        // Get summary info from first record
+        $ipInfo = !empty($ipVisits) ? $ipVisits[0] : null;
+        $ipIsBot = $ipInfo ? isBot($ipInfo['user_agent']) : false;
+        $ipPageCount = count($ipVisits);
+        $ipUniquePages = count(array_unique(array_column($ipVisits, 'page_url')));
+        
+        require __DIR__ . '/../views/admin/visitor_ip_detail.php';
+        return;
+    }
     
     // Summary logic
     $totalVisits = $db->query("SELECT setting_value FROM site_settings WHERE setting_key = 'visit_count'")->fetchColumn() ?: 0;
@@ -47,8 +65,20 @@ function adminVisitors(): void {
     $todayVisits = $db->query("SELECT COUNT(*) FROM site_visitors WHERE DATE(visited_at) = CURDATE()")->fetchColumn() ?: 0;
     $totalCountries = $db->query("SELECT COUNT(DISTINCT country_code) FROM site_visitors WHERE country_code != 'UNKNOWN' AND country_code != 'LOCAL'")->fetchColumn() ?: 0;
 
+    // Bot vs Human stats
+    $allUserAgents = $db->query("SELECT DISTINCT user_agent FROM site_visitors")->fetchAll(PDO::FETCH_COLUMN);
+    $botIpCount = 0;
+    $humanIpCount = 0;
+    foreach ($allUserAgents as $ua) {
+        if (isBot($ua)) $botIpCount++;
+        else $humanIpCount++;
+    }
+
     // Countries group by
     $countriesData = $db->query("SELECT country, country_code, COUNT(*) as visit_count FROM site_visitors GROUP BY country, country_code HAVING visit_count > 0 ORDER BY visit_count DESC LIMIT 20")->fetchAll();
+
+    // Filter mode
+    $filter = $_GET['filter'] ?? 'all';
 
     // Raw paginated visitor logs
     $page = max(1, (int)($_GET['page'] ?? 1));

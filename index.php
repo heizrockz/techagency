@@ -13,6 +13,9 @@ if (isset($_GET['lang'])) {
     appSetLocale($_GET['lang']);
 }
 
+// Track website visit & geodata
+trackVisit();
+
 // Parse request URI
 $requestUri = $_SERVER['REQUEST_URI'];
 $basePath   = BASE_URL;
@@ -96,6 +99,9 @@ if ($path === '/' || $path === '/index.php' || $path === '') {
     } elseif ($path === '/admin/crm_products') {
         require_once __DIR__ . '/controllers/CrmController.php';
         adminCrmProducts();
+    } elseif ($path === '/admin/crm_payments') {
+        require_once __DIR__ . '/controllers/CrmController.php';
+        adminCrmPayments();
     // Marketing/Content routes
     } elseif ($path === '/admin/testimonials') {
         adminTestimonials();

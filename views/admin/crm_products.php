@@ -15,10 +15,10 @@ $currentPage = 'crm_products';
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="<?= htmlspecialchars(BASE_URL) ?>/assets/css/style.css">
 </head>
-<body>
+<body class="bg-[#0b0e14]">
 <div class="admin-layout flex w-full">
     <?php require __DIR__ . '/partials/sidebar.php'; ?>
-    <div class="crm-main leading-relaxed text-slate-300">
+    <div class="crm-main leading-relaxed text-slate-500">
     <header class="h-16 flex items-center justify-between px-6 bg-[#1a2333] border-b border-white/5 shrink-0">
         <h1 class="text-xl font-semibold text-white tracking-tight flex items-center gap-2">
             <i class="ph ph-package text-primary"></i>
@@ -29,7 +29,7 @@ $currentPage = 'crm_products';
         </button>
     </header>
 
-    <div class="flex-1 overflow-y-auto p-6 bg-slate-900/50 w-full h-full">
+    <div class="flex-1 overflow-y-auto p-6 bg-[#0b0e14] w-full h-full crm-main-scroll">
         <?php if ($flash = getFlash()): ?>
             <div class="mb-6 p-4 rounded-xl border border-emerald-500/20 bg-emerald-500/10 text-emerald-400 text-sm flex items-center gap-2">
                 <i class="ph ph-check-circle text-lg"></i>
@@ -37,11 +37,11 @@ $currentPage = 'crm_products';
             </div>
         <?php endif; ?>
 
-        <div class="bg-[#1a2333] border border-white/5 rounded-2xl p-6 shadow-xl w-full">
+        <div class="bg-[#1a2333]/40 backdrop-blur-lg border border-white/5 rounded-3xl shadow-2xl overflow-hidden shadow-2xl w-full">
             <div class="w-full">
                 <table class="w-full text-left border-collapse">
                     <thead>
-                        <tr class="border-b border-white/10 text-slate-400 text-sm">
+                        <tr class="bg-black/40 text-slate-500 text-[10px] font-bold uppercase tracking-[0.2em]">
                             <th class="py-3 px-4 font-semibold">Product Name</th>
                             <th class="py-3 px-4 font-semibold">Category</th>
                             <th class="py-3 px-4 font-semibold text-right">Selling Price</th>

@@ -15,54 +15,53 @@ $currentPage = 'crm_pipeline';
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="<?= htmlspecialchars(BASE_URL) ?>/assets/css/style.css">
 </head>
-<body>
+<body class="bg-[#0b0e14]">
 <div class="admin-layout flex w-full">
     <?php require __DIR__ . '/partials/sidebar.php'; ?>
     <div class="crm-main leading-relaxed text-slate-300">
     <!-- Top Navigation / Breadcrumbs -->
-    <header class="bg-[#1a2333] border-b border-white/5 px-6 py-3 shrink-0">
-        <div class="flex items-center justify-between">
-            <div class="flex items-center gap-3 text-sm">
-                <a href="<?= htmlspecialchars(BASE_URL) ?>/admin/crm_pipeline" class="text-slate-400 hover:text-white transition-colors flex items-center gap-1">
-                    <i class="ph ph-kanban"></i> Pipeline
-                </a>
-                <span class="text-slate-600">/</span>
-                <span class="text-white font-medium truncate max-w-[200px]"><?= $opportunity ? htmlspecialchars($opportunity['title']) : 'New' ?></span>
-            </div>
-            <div class="flex items-center gap-3">
-                <button class="text-slate-400 hover:text-white p-1"><i class="ph ph-caret-left-bold"></i></button>
-                <button class="text-slate-400 hover:text-white p-1"><i class="ph ph-caret-right-bold"></i></button>
-            </div>
+    <header class="h-16 flex items-center justify-between px-6 bg-[#1a2333] border-b border-white/5 shrink-0">
+        <div class="flex items-center gap-4">
+            <a href="<?= htmlspecialchars(BASE_URL) ?>/admin/crm_pipeline" class="text-slate-400 hover:text-white transition-all flex items-center gap-2">
+                <i class="ph ph-kanban"></i>
+                <span class="text-sm font-semibold tracking-wide uppercase">Pipeline</span>
+            </a>
+            <i class="ph ph-caret-right text-slate-700 text-xs"></i>
+            <span class="text-white font-bold truncate max-w-[300px]"><?= $opportunity ? htmlspecialchars($opportunity['title']) : 'New Opportunity' ?></span>
+        </div>
+        <div class="flex items-center gap-3">
+            <button class="w-8 h-8 rounded-lg bg-white/5 text-slate-400 hover:text-white flex items-center justify-center transition-all"><i class="ph ph-caret-left-bold"></i></button>
+            <button class="w-8 h-8 rounded-lg bg-white/5 text-slate-400 hover:text-white flex items-center justify-center transition-all"><i class="ph ph-caret-right-bold"></i></button>
         </div>
     </header>
 
     <!-- Action Bar / Stages -->
-    <div class="bg-slate-800/30 border-b border-white/5 px-6 py-2 flex flex-wrap items-center justify-between gap-4 shrink-0">
-        <div class="flex items-center gap-2">
+    <div class="bg-[#0b0e14] border-b border-white/5 px-6 py-3 flex flex-wrap items-center justify-between gap-6 shrink-0">
+        <div class="flex items-center gap-3">
             <?php if ($opportunity): ?>
-                <button type="button" id="editBtn" onclick="toggleEditMode()" class="px-4 py-1.5 rounded bg-white/5 text-slate-300 hover:text-white text-xs font-bold uppercase transition-colors border border-white/10 flex items-center gap-2">
-                    <i class="ph ph-note-pencil"></i> Edit
+                <button type="button" id="editBtn" onclick="toggleEditMode()" class="px-4 py-2 rounded-xl bg-white/5 text-slate-300 hover:text-white text-[11px] font-bold uppercase tracking-widest transition-all border border-white/10 flex items-center gap-2">
+                    <i class="ph ph-pencil-simple-line text-lg"></i> Edit
                 </button>
-                <button type="submit" form="oppForm" id="saveBtn" class="hidden px-4 py-1.5 rounded bg-primary text-white text-xs font-bold uppercase transition-colors border border-primary/20 shadow-lg shadow-primary/10">Save</button>
-                <div class="h-6 w-px bg-white/5 mx-1"></div>
-                <button onclick="document.getElementById('createInvoiceModal').classList.remove('hidden')" class="btn-ghost py-1.5 px-3 text-xs uppercase tracking-wider font-bold">New Quotation</button>
+                <button type="submit" form="oppForm" id="saveBtn" class="hidden px-5 py-2 rounded-xl bg-primary text-white text-[11px] font-bold uppercase tracking-widest transition-all shadow-lg shadow-primary/20">Save changes</button>
+                <div class="h-8 w-px bg-white/5 mx-2"></div>
+                
                 <form action="<?= htmlspecialchars(BASE_URL) ?>/admin/crm_pipeline" method="POST" class="inline">
                     <input type="hidden" name="action" value="update_stage">
                     <input type="hidden" name="id" value="<?= $opportunity['id'] ?>">
                     <input type="hidden" name="stage" value="Won">
-                    <button type="submit" class="px-3 py-1.5 rounded bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 text-xs font-bold uppercase transition-colors border border-emerald-500/20">Won</button>
+                    <button type="submit" class="px-4 py-2 rounded-xl bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20 text-[11px] font-bold uppercase tracking-widest transition-all border border-emerald-500/20">Mark Won</button>
                 </form>
                 <form action="<?= htmlspecialchars(BASE_URL) ?>/admin/crm_pipeline" method="POST" class="inline">
                     <input type="hidden" name="action" value="update_stage">
                     <input type="hidden" name="id" value="<?= $opportunity['id'] ?>">
                     <input type="hidden" name="stage" value="Lost">
-                    <button type="submit" class="px-3 py-1.5 rounded bg-red-400/10 text-red-400 hover:bg-red-400/20 text-xs font-bold uppercase transition-colors border border-red-400/20">Lost</button>
+                    <button type="submit" class="px-4 py-2 rounded-xl bg-red-500/10 text-red-400 hover:bg-red-500/20 text-[11px] font-bold uppercase tracking-widest transition-all border border-red-500/20">Mark Lost</button>
                 </form>
             <?php endif; ?>
         </div>
         
-        <!-- Stage Progress Indicator (Odoo Style) -->
-        <div class="flex items-center">
+        <!-- Stage Progress Indicator -->
+        <div class="flex items-center bg-black/40 p-1 rounded-xl border border-white/5 overflow-x-auto crm-main-scroll max-w-full lg:max-w-none">
             <?php 
             $allStages = ['New Lead', 'Know Your Client', 'Post Casting', 'Quote & Proposal', 'LPO', 'Casting & Production', 'Won'];
             $currentStage = $opportunity ? $opportunity['stage'] : 'New Lead';
@@ -71,110 +70,124 @@ $currentPage = 'crm_pipeline';
             foreach ($allStages as $s): 
                 $isActive = ($currentStage === $s);
             ?>
-                <div class="flex items-center">
-                    <span class="px-3 py-1 text-[10px] uppercase font-bold tracking-tighter whitespace-nowrap <?= $isActive ? 'text-primary bg-primary/10 rounded-sm' : 'text-slate-500' ?>">
+                <div class="flex items-center shrink-0">
+                    <span class="px-4 py-1.5 text-[10px] uppercase font-black tracking-widest whitespace-nowrap transition-all <?= $isActive ? 'text-white bg-primary rounded-lg shadow-lg shadow-primary/20 scale-105 mx-1' : 'text-slate-500' ?>">
                         <?= htmlspecialchars($s) ?>
                     </span>
-                    <?php if ($s !== end($allStages)): ?>
-                        <i class="ph ph-caret-right text-slate-700 text-[10px] mx-1"></i>
+                    <?php if ($s !== end($allStages) && !$isActive): ?>
+                        <i class="ph ph-caret-right text-slate-800 text-[10px] mx-1"></i>
                     <?php endif; ?>
                 </div>
             <?php endforeach; ?>
         </div>
     </div>
 
-    <main class="flex-1 overflow-hidden flex flex-col lg:flex-row">
+    <main class="flex-1 overflow-hidden flex flex-col lg:flex-row bg-[#0b0e14]">
         <!-- Scrollable Form Container -->
-        <div class="flex-1 overflow-y-auto p-8 border-r border-white/5 bg-slate-900/20">
+        <div class="flex-1 overflow-y-auto p-8 border-r border-white/5 crm-main-scroll">
             <div class="max-w-4xl mx-auto">
                 <?php if ($flash = getFlash()): ?>
-                    <div class="mb-6 p-4 rounded-xl border border-emerald-500/20 bg-emerald-500/10 text-emerald-400 text-sm flex items-center gap-2">
-                        <i class="ph ph-check-circle text-lg"></i>
+                    <div class="mb-8 p-4 rounded-2xl border border-emerald-500/20 bg-emerald-500/10 text-emerald-400 text-sm flex items-center gap-3">
+                        <i class="ph ph-check-circle text-xl"></i>
                         <?= htmlspecialchars($flash) ?>
                     </div>
                 <?php endif; ?>
 
-                <form action="<?= htmlspecialchars(BASE_URL) ?>/admin/crm_opportunity<?= $opportunity ? '?id='.$opportunity['id'] : '' ?>" method="POST" id="oppForm" class="opp-read-only">
+                <form action="<?= htmlspecialchars(BASE_URL) ?>/admin/crm_opportunity<?= $opportunity ? '?id='.$opportunity['id'] : '' ?>" method="POST" id="oppForm" class="opp-read-only space-y-12">
                     <input type="hidden" name="action" value="save_opportunity">
                     
                     <!-- Opportunity Title Header -->
-                    <div class="mb-8">
+                    <div class="mb-4">
                         <input type="text" name="title" required 
                                value="<?= $opportunity ? htmlspecialchars($opportunity['title']) : '' ?>" 
                                placeholder="Opportunity Title..."
-                               class="w-full bg-transparent border-none text-3xl font-bold text-white placeholder:text-slate-700 focus:ring-0 p-0 mb-2">
-                        <div class="flex items-center gap-4">
-                             <div class="flex items-center gap-1">
+                               class="w-full bg-transparent border-none text-4xl font-black text-white placeholder:text-slate-800 focus:ring-0 p-0 mb-4 tracking-tight">
+                        <div class="flex items-center gap-6">
+                             <div class="flex items-center gap-1.5 bg-black/40 px-3 py-1.5 rounded-xl border border-white/5">
                                 <?php for($i=1; $i<=3; $i++): ?>
-                                    <i class="ph-fill ph-star <?= ($opportunity && $opportunity['priority'] >= $i) ? 'text-amber-400' : 'text-slate-800' ?> cursor-pointer hover:text-amber-300"></i>
+                                    <i class="ph-fill ph-star text-lg <?= ($opportunity && $opportunity['priority'] >= $i) ? 'text-amber-400' : 'text-slate-800' ?> cursor-pointer hover:text-amber-300 transition-colors"></i>
                                 <?php endfor; ?>
                              </div>
-                             <div class="h-4 w-px bg-white/10"></div>
-                             <div class="flex items-center gap-2">
+                             <div class="h-6 w-px bg-white/10"></div>
+                             <div class="flex items-center gap-3 bg-black/40 px-3 py-1.5 rounded-xl border border-white/5">
                                 <?php $colors = ['red', 'orange', 'yellow', 'green', 'blue', 'purple', 'teal', 'pink']; ?>
                                 <?php foreach($colors as $c): ?>
-                                    <label class="w-3 h-3 rounded-full bg-<?= $c ?>-500 cursor-pointer border border-white/10 ring-offset-2 ring-offset-slate-900 peer-checked:ring-2 block">
+                                    <label class="w-4 h-4 rounded-full bg-<?= $c ?>-500 cursor-pointer border border-white/20 transition-all hover:scale-125 block">
                                         <input type="radio" name="color_code" value="<?= $c ?>" class="hidden peer" <?= ($opportunity && $opportunity['color_code'] === $c) ? 'checked' : '' ?>>
+                                        <div class="w-full h-full rounded-full ring-primary ring-offset-2 ring-offset-[#0b0e14] peer-checked:ring-2"></div>
                                     </label>
                                 <?php endforeach; ?>
                              </div>
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-6 mb-10">
-                        <div class="space-y-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-x-16 gap-y-10">
+                        <div class="space-y-8">
                             <div>
-                                <label class="block text-xs font-semibold text-slate-500 uppercase mb-1 flex items-center gap-1">
-                                    Expected Revenue <i class="ph ph-question text-slate-600 cursor-help" title="Potential income from this deal"></i>
+                                <label class="block text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-3 flex items-center gap-2">
+                                    Expected Revenue 
+                                    <i class="ph ph-info text-slate-600 cursor-help" title="Potential income from this deal"></i>
                                 </label>
-                                <div class="flex items-center gap-2 group">
-                                    <span class="text-slate-400 font-medium">AED</span>
+                                <div class="flex items-end gap-3 group pb-2 border-b border-white/5 focus-within:border-primary transition-all">
+                                    <span class="text-slate-500 font-black text-sm pb-1">AED</span>
                                     <input type="number" step="0.01" name="expected_revenue" value="<?= $opportunity ? htmlspecialchars($opportunity['expected_revenue']) : '0.00' ?>" 
-                                           class="bg-transparent border-b border-white/5 focus:border-primary border-t-0 border-l-0 border-r-0 rounded-none w-full p-0 py-1 text-white font-semibold focus:ring-0 transition-colors">
+                                           class="bg-transparent border-none w-full p-0 text-2xl text-white font-bold focus:ring-0">
                                 </div>
                             </div>
                             
                             <div>
-                                <label class="block text-xs font-semibold text-slate-500 uppercase mb-1">Probability</label>
-                                <div class="flex items-center gap-2">
+                                <label class="block text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-3">Probability</label>
+                                <div class="flex items-end gap-3 group pb-2 border-b border-white/5 focus-within:border-primary transition-all">
                                     <input type="number" step="0.1" name="probability" value="<?= $opportunity ? htmlspecialchars($opportunity['probability']) : '0' ?>" 
-                                           class="bg-transparent border-b border-white/5 focus:border-primary border-t-0 border-l-0 border-r-0 rounded-none w-32 p-0 py-1 text-white font-semibold focus:ring-0 transition-colors">
-                                    <span class="text-slate-400">%</span>
+                                           class="bg-transparent border-none w-32 p-0 text-2xl text-white font-bold focus:ring-0 text-center">
+                                    <span class="text-slate-500 font-black text-sm pb-1">%</span>
                                 </div>
                             </div>
 
                             <div>
-                                <label class="block text-xs font-semibold text-slate-500 uppercase mb-1">Customer</label>
-                                <select name="contact_id" class="bg-transparent border-b border-white/5 focus:border-primary border-t-0 border-l-0 border-r-0 rounded-none w-full p-0 py-1 text-white font-medium focus:ring-0 transition-colors cursor-pointer appearance-none">
-                                    <option value="" class="bg-slate-900">-- Select Contact --</option>
-                                    <?php foreach ($contacts as $c): ?>
-                                        <option value="<?= $c['id'] ?>" <?= ($opportunity && $opportunity['contact_id'] == $c['id']) ? 'selected' : '' ?> class="bg-slate-900">
-                                            <?= htmlspecialchars($c['name']) ?>
-                                        </option>
-                                    <?php endforeach; ?>
-                                </select>
+                                <label class="block text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-3">Customer</label>
+                                <div class="relative group pb-2 border-b border-white/5 focus-within:border-primary transition-all">
+                                    <select name="contact_id" class="bg-transparent border-none w-full p-0 text-lg text-white font-bold focus:ring-0 appearance-none cursor-pointer">
+                                        <option value="" class="bg-[#1a2333]">-- Select Contact --</option>
+                                        <?php foreach ($contacts as $c): ?>
+                                            <option value="<?= $c['id'] ?>" <?= ($opportunity && $opportunity['contact_id'] == $c['id']) ? 'selected' : '' ?> class="bg-[#1a2333]">
+                                                <?= htmlspecialchars($c['name']) ?>
+                                            </option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                    <i class="ph ph-caret-down absolute right-0 bottom-3 text-slate-600"></i>
+                                </div>
                             </div>
                         </div>
 
-                        <div class="space-y-4">
+                        <div class="space-y-8">
                             <div>
-                                <label class="block text-xs font-semibold text-slate-500 uppercase mb-1">Salesperson</label>
-                                <div class="flex items-center gap-2 p-1 bg-white/5 rounded-lg border border-white/5">
-                                    <div class="w-6 h-6 rounded-full bg-primary flex items-center justify-center text-[10px] font-bold">AD</div>
-                                    <span class="text-sm text-slate-300">Administrator</span>
+                                <label class="block text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-3">Salesperson</label>
+                                <div class="flex items-center gap-4 p-3 bg-black/40 rounded-2xl border border-white/5 shadow-inner">
+                                    <div class="w-10 h-10 rounded-xl bg-primary/20 text-primary flex items-center justify-center text-sm font-black shadow-lg">AD</div>
+                                    <div>
+                                        <span class="text-white font-bold block">Administrator</span>
+                                        <span class="text-[10px] text-slate-500 uppercase font-black">Owner</span>
+                                    </div>
                                 </div>
                             </div>
 
                             <div>
-                                <label class="block text-xs font-semibold text-slate-500 uppercase mb-1">Email</label>
-                                <input type="email" name="email" value="<?= $opportunity ? htmlspecialchars($opportunity['email']) : '' ?>" 
-                                       class="bg-transparent border-b border-white/5 focus:border-primary border-t-0 border-l-0 border-r-0 rounded-none w-full p-0 py-1 text-white font-medium focus:ring-0 transition-colors" placeholder="email@example.com">
+                                <label class="block text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-3">Email Address</label>
+                                <div class="flex items-center gap-3 group pb-2 border-b border-white/5 focus-within:border-primary transition-all">
+                                    <i class="ph ph-envelope text-slate-600"></i>
+                                    <input type="email" name="email" value="<?= $opportunity ? htmlspecialchars($opportunity['email']) : '' ?>" 
+                                           class="bg-transparent border-none w-full p-0 text-lg text-white font-medium focus:ring-0" placeholder="email@example.com">
+                                </div>
                             </div>
-                            <div class="h-4 w-px bg-white/10"></div>
-                            <div class="flex items-center gap-2">
-                                <label class="block text-xs font-semibold text-slate-500 uppercase">Phone</label>
-                                <input type="text" name="phone" value="<?= $opportunity ? htmlspecialchars($opportunity['phone']) : '' ?>" 
-                                       class="bg-transparent border-b border-white/5 focus:border-primary border-t-0 border-l-0 border-r-0 rounded-none w-full p-0 py-1 text-white font-medium focus:ring-0 transition-colors" placeholder="+971 ...">
+                            
+                            <div>
+                                <label class="block text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-3">Phone Number</label>
+                                <div class="flex items-center gap-3 group pb-2 border-b border-white/5 focus-within:border-primary transition-all">
+                                    <i class="ph ph-phone text-slate-600"></i>
+                                    <input type="text" name="phone" value="<?= $opportunity ? htmlspecialchars($opportunity['phone']) : '' ?>" 
+                                           class="bg-transparent border-none w-full p-0 text-lg text-white font-medium focus:ring-0" placeholder="+971 ...">
+                                </div>
                             </div>
                         </div>
                     </div>

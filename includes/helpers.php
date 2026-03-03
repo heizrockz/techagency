@@ -532,3 +532,138 @@ function getTestimonials(): array {
         return [];
     }
 }
+
+/**
+ * Detect if a user agent string belongs to a bot/crawler
+ */
+function isBot(string $userAgent): bool {
+    if (empty($userAgent)) return true;
+    
+    $botPatterns = [
+        // Search engine crawlers
+        'Googlebot', 'bingbot', 'Baiduspider', 'YandexBot', 'DuckDuckBot',
+        'Sogou', 'Exabot', 'facebot', 'ia_archiver', 'Slurp',
+        // SEO / analytics bots
+        'AhrefsBot', 'SemrushBot', 'DotBot', 'MJ12bot', 'SEOkicks',
+        'BLEXBot', 'linkdexbot', 'MegaIndex', 'Majestic', 'Screaming Frog',
+        // Social media bots
+        'Twitterbot', 'LinkedInBot', 'WhatsApp', 'TelegramBot', 'Discordbot',
+        'Slackbot', 'PinterestBot',
+        // Monitoring / uptime bots
+        'UptimeRobot', 'pingdom', 'StatusCake', 'Site24x7', 'Datadog',
+        'NewRelicPinger', 'Zabbix',
+        // Generic bot identifiers
+        'bot', 'Bot', 'crawler', 'Crawler', 'spider', 'Spider',
+        'scraper', 'Scraper', 'headless', 'HeadlessChrome',
+        'python-requests', 'curl', 'wget', 'Go-http-client',
+        'Java/', 'libwww', 'httpunit', 'nutch', 'Apache-HttpClient',
+        'PHP/', 'okhttp', 'node-fetch', 'axios',
+        // Security scanners
+        'Nmap', 'nikto', 'Nessus', 'sqlmap',
+    ];
+    
+    foreach ($botPatterns as $pattern) {
+        if (stripos($userAgent, $pattern) !== false) {
+            return true;
+        }
+    }
+    return false;
+}
+
+/**
+ * Centralized Visitor Tracking
+ * Tracks every page view with geo data cached per session.
+ */
+function trackVisit(): void {
+    // Skip tracking for admin and API requests
+    $requestUri = $_SERVER['REQUEST_URI'] ?? '';
+    $baseUrl = defined('BASE_URL') ? BASE_URL : '';
+    
+    // Normalize path
+    $path = parse_url($requestUri, PHP_URL_PATH);
+    if ($baseUrl && strpos($path, $baseUrl) === 0) {
+        $path = substr($path, strlen($baseUrl));
+    }
+    if (empty($path) || $path[0] !== '/') $path = '/' . $path;
+
+    // Do not track admin-only paths or specific exclusions
+    if (strpos($path, '/admin') === 0 || strpos($path, '/api') === 0) {
+        return;
+    }
+
+    try {
+        $db = getDB();
+        
+        // Fast overall counter
+        $db->exec("INSERT INTO site_settings (setting_key, setting_value) VALUES ('visit_count', '1') ON DUPLICATE KEY UPDATE setting_value = setting_value + 1");
+
+        // Detailed per-visitor tracking
+        $ip = $_SERVER['HTTP_CLIENT_IP'] ?? $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'] ?? '';
+        $ip = trim(explode(',', $ip)[0]);
+        
+        $country = 'Unknown';
+        $countryCode = 'UNKNOWN';
+        $city = 'Unknown';
+        $region = 'Unknown';
+        $isp = 'Unknown';
+
+        if (session_status() === PHP_SESSION_NONE) session_start();
+        
+        // Cache geo data in session to avoid excessive API calls
+        if (isset($_SESSION['geo_data'])) {
+            // Reuse cached geo data
+            $geo = $_SESSION['geo_data'];
+            $country = $geo['country'];
+            $countryCode = $geo['countryCode'];
+            $city = $geo['city'];
+            $region = $geo['region'];
+            $isp = $geo['isp'];
+        } else {
+            // First visit in this session — look up geo data
+            if ($ip !== '127.0.0.1' && $ip !== '::1' && filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE)) {
+                $geoUrl = "http://ip-api.com/json/{$ip}?fields=status,country,countryCode,regionName,city,isp";
+                $ch = curl_init();
+                curl_setopt($ch, CURLOPT_URL, $geoUrl);
+                curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+                curl_setopt($ch, CURLOPT_TIMEOUT, 2);
+                $geoDataRaw = curl_exec($ch);
+                curl_close($ch);
+
+                if ($geoDataRaw) {
+                    $geoInfo = json_decode($geoDataRaw, true);
+                    if ($geoInfo && isset($geoInfo['status']) && $geoInfo['status'] === 'success') {
+                        $country = $geoInfo['country'] ?? 'Unknown';
+                        $countryCode = $geoInfo['countryCode'] ?? 'UNKNOWN';
+                        $city = $geoInfo['city'] ?? 'Unknown';
+                        $region = $geoInfo['regionName'] ?? 'Unknown';
+                        $isp = $geoInfo['isp'] ?? 'Unknown';
+                    }
+                }
+            } else {
+                 $country = 'Local Dev';
+                 $countryCode = 'LOCAL';
+                 $city = 'Localhost';
+            }
+
+            // Cache for subsequent page loads in same session
+            $_SESSION['geo_data'] = [
+                'country' => $country,
+                'countryCode' => $countryCode,
+                'city' => $city,
+                'region' => $region,
+                'isp' => $isp,
+            ];
+        }
+
+        $userAgent = $_SERVER['HTTP_USER_AGENT'] ?? '';
+        $pageUrl = $path;
+
+        // Log every page view
+        $stmt = $db->prepare('INSERT INTO site_visitors (ip_address, country, country_code, city, region, isp, user_agent, page_url) VALUES (?, ?, ?, ?, ?, ?, ?, ?)');
+        $stmt->execute([$ip, $country, $countryCode, $city, $region, $isp, $userAgent, $pageUrl]);
+
+    } catch (\Throwable $e) {
+        // Silently fail to not break the site
+    }
+}
+

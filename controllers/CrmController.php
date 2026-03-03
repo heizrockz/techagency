@@ -461,6 +461,216 @@ function adminCrmOpportunity($id = null): void {
     require __DIR__ . '/../views/admin/crm_opportunity.php';
 }
 
+
+function adminCrmPayments(): void {
+    requireAdmin();
+    $db = getDB();
+
+    // Integrated Migration (ensure table exists)
+    $db->exec("
+        CREATE TABLE IF NOT EXISTS `crm_payments` (
+            `id` int(11) NOT NULL AUTO_INCREMENT,
+            `title` varchar(255) NOT NULL,
+            `category` varchar(100) DEFAULT 'Expenditure',
+            `amount` decimal(15,2) NOT NULL DEFAULT 0.00,
+            `payment_date` date NOT NULL,
+            `opportunity_id` int(11) DEFAULT NULL,
+            `admin_id` int(11) NOT NULL,
+            `notes` text DEFAULT NULL,
+            `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+            `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+            PRIMARY KEY (`id`),
+            FOREIGN KEY (`opportunity_id`) REFERENCES `crm_opportunities` (`id`) ON DELETE SET NULL,
+            FOREIGN KEY (`admin_id`) REFERENCES `admins` (`id`) ON DELETE CASCADE
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    ");
+
+    // Handle Actions
+    if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
+        $action = $_POST['action'];
+
+        if ($action === 'add_payment') {
+            $title = trim($_POST['title'] ?? '');
+            $amount = (float)($_POST['amount'] ?? 0);
+            $category = trim($_POST['category'] ?? 'Expenditure');
+            $payment_date = $_POST['payment_date'] ?: date('Y-m-d');
+            $opp_id = !empty($_POST['opportunity_id']) ? (int)$_POST['opportunity_id'] : null;
+            $notes = trim($_POST['notes'] ?? '');
+
+            if ($title && $amount > 0) {
+                $db->beginTransaction();
+                try {
+                    $stmt = $db->prepare("
+                        INSERT INTO crm_payments (title, amount, category, payment_date, opportunity_id, admin_id, notes) 
+                        VALUES (?, ?, ?, ?, ?, ?, ?)
+                    ");
+                    $stmt->execute([$title, $amount, $category, $payment_date, $opp_id, $_SESSION['admin_id'], $notes]);
+                    $paymentId = $db->lastInsertId();
+
+                    // Handle Multiple Attachments
+                    if (!empty($_FILES['attachments']['name'][0])) {
+                        $uploadDir = __DIR__ . '/../assets/uploads/crm/';
+                        if (!is_dir($uploadDir)) mkdir($uploadDir, 0777, true);
+
+                        foreach ($_FILES['attachments']['name'] as $key => $name) {
+                            if ($_FILES['attachments']['error'][$key] === UPLOAD_ERR_OK) {
+                                $tmpName = $_FILES['attachments']['tmp_name'][$key];
+                                $fileExt = pathinfo($name, PATHINFO_EXTENSION);
+                                $newName = 'pay_' . $paymentId . '_' . uniqid() . '.' . $fileExt;
+                                $target = $uploadDir . $newName;
+
+                                if (move_uploaded_file($tmpName, $target)) {
+                                    $stmtAtt = $db->prepare("
+                                        INSERT INTO crm_attachments (linked_id, linked_type, file_name, file_path, file_type, file_size) 
+                                        VALUES (?, 'payment', ?, ?, ?, ?)
+                                    ");
+                                    $stmtAtt->execute([
+                                        $paymentId, 
+                                        $name, 
+                                        '/assets/uploads/crm/' . $newName, 
+                                        $_FILES['attachments']['type'][$key], 
+                                        $_FILES['attachments']['size'][$key]
+                                    ]);
+                                }
+                            }
+                        }
+                    }
+                    $db->commit();
+                    setFlash('Payment record and attachments saved.');
+                } catch (Exception $e) {
+                    $db->rollBack();
+                    setFlash('Error saving record: ' . $e->getMessage(), 'error');
+                }
+            } else {
+                setFlash('Please provide a title and a valid amount.', 'error');
+            }
+            redirect('admin/crm_payments');
+        }
+
+        if ($action === 'delete_payment') {
+            $id = (int)($_POST['id'] ?? 0);
+            if ($id) {
+                // Delete file attachments from disk
+                $atts = $db->query("SELECT file_path FROM crm_attachments WHERE linked_id = $id AND linked_type = 'payment'")->fetchAll();
+                foreach($atts as $at) {
+                    $path = __DIR__ . '/..' . $at['file_path'];
+                    if (file_exists($path)) @unlink($path);
+                }
+                $db->prepare("DELETE FROM crm_attachments WHERE linked_id = ? AND linked_type = 'payment'")->execute([$id]);
+                $db->prepare("DELETE FROM crm_payments WHERE id = ?")->execute([$id]);
+                setFlash('Payment record deleted.');
+            }
+            redirect('admin/crm_payments');
+            exit;
+        }
+
+        if ($action === 'edit_payment') {
+            $id = (int)($_POST['id'] ?? 0);
+            $title = trim($_POST['title'] ?? '');
+            $amount = (float)($_POST['amount'] ?? 0);
+            $category = trim($_POST['category'] ?? 'Expenditure');
+            $payment_date = $_POST['payment_date'] ?: date('Y-m-d');
+            $opp_id = !empty($_POST['opportunity_id']) ? (int)$_POST['opportunity_id'] : null;
+            $notes = trim($_POST['notes'] ?? '');
+
+            if ($id && $title && $amount > 0) {
+                $db->beginTransaction();
+                try {
+                    $stmt = $db->prepare("
+                        UPDATE crm_payments 
+                        SET title = ?, amount = ?, category = ?, payment_date = ?, opportunity_id = ?, notes = ? 
+                        WHERE id = ?
+                    ");
+                    $stmt->execute([$title, $amount, $category, $payment_date, $opp_id, $notes, $id]);
+
+                    // Handle Additional Attachments
+                    if (!empty($_FILES['attachments']['name'][0])) {
+                        $uploadDir = __DIR__ . '/../assets/uploads/crm/';
+                        if (!is_dir($uploadDir)) mkdir($uploadDir, 0777, true);
+
+                        foreach ($_FILES['attachments']['name'] as $key => $name) {
+                            if ($_FILES['attachments']['error'][$key] === UPLOAD_ERR_OK) {
+                                $tmpName = $_FILES['attachments']['tmp_name'][$key];
+                                $fileExt = pathinfo($name, PATHINFO_EXTENSION);
+                                $newName = 'pay_' . $id . '_' . uniqid() . '.' . $fileExt;
+                                $target = $uploadDir . $newName;
+
+                                if (move_uploaded_file($tmpName, $target)) {
+                                    $stmtAtt = $db->prepare("
+                                        INSERT INTO crm_attachments (linked_id, linked_type, file_name, file_path, file_type, file_size) 
+                                        VALUES (?, 'payment', ?, ?, ?, ?)
+                                    ");
+                                    $stmtAtt->execute([
+                                        $id, 
+                                        $name, 
+                                        '/assets/uploads/crm/' . $newName, 
+                                        $_FILES['attachments']['type'][$key], 
+                                        $_FILES['attachments']['size'][$key]
+                                    ]);
+                                }
+                            }
+                        }
+                    }
+                    $db->commit();
+                    setFlash('Payment record updated.');
+                } catch (Exception $e) {
+                    $db->rollBack();
+                    setFlash('Error updating record: ' . $e->getMessage(), 'error');
+                }
+            }
+            redirect('admin/crm_payments');
+            exit;
+        }
+    }
+
+    // Fetch data for view
+    $search = trim($_GET['search'] ?? '');
+    $categoryFilter = trim($_GET['category'] ?? '');
+    
+    $sql = "SELECT p.*, o.title as project_name, a.username as admin_name 
+            FROM crm_payments p 
+            LEFT JOIN crm_opportunities o ON p.opportunity_id = o.id 
+            LEFT JOIN admins a ON p.admin_id = a.id";
+    $params = [];
+    $where = [];
+
+    if ($search) {
+        $where[] = "(p.title LIKE ? OR p.notes LIKE ?)";
+        $params[] = "%$search%";
+        $params[] = "%$search%";
+    }
+    if ($categoryFilter) {
+        $where[] = "p.category = ?";
+        $params[] = $categoryFilter;
+    }
+
+    if ($where) {
+        $sql .= " WHERE " . implode(" AND ", $where);
+    }
+    $sql .= " ORDER BY p.payment_date DESC, p.created_at DESC";
+
+    $stmt = $db->prepare($sql);
+    $stmt->execute($params);
+    $payments = $stmt->fetchAll();
+
+    // Fetch attachments for each payment
+    foreach ($payments as &$p) {
+        $p['attachments'] = $db->query("SELECT * FROM crm_attachments WHERE linked_id = {$p['id']} AND linked_type = 'payment'")->fetchAll();
+    }
+
+    // Stats calculations
+    $totalSpend = $db->query("SELECT SUM(amount) FROM crm_payments")->fetchColumn() ?: 0;
+    $monthlySpend = $db->query("SELECT SUM(amount) FROM crm_payments WHERE MONTH(payment_date) = MONTH(CURRENT_DATE) AND YEAR(payment_date) = YEAR(CURRENT_DATE)")->fetchColumn() ?: 0;
+    
+    // Categories for dropdown
+    $categories = ['Expenditure', 'Salary', 'Office', 'Marketing', 'Software', 'Others'];
+    
+    // Opportunities for the 'Link to Project' dropdown
+    $opportunities = $db->query("SELECT id, title FROM crm_opportunities ORDER BY title ASC")->fetchAll();
+
+    require __DIR__ . '/../views/admin/crm_payments.php';
+}
+
 function adminCrmProducts(): void {
     requireAdmin();
     $db = getDB();

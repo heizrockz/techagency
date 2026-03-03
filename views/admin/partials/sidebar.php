@@ -36,7 +36,7 @@
 
         <!-- CRM Group -->
         <div class="sidebar-section-label">CRM</div>
-        <?php $crmActive = in_array($currentPage, ['contacts', 'marketing', 'invoices', 'crm_pipeline', 'crm_products']); ?>
+        <?php $crmActive = in_array($currentPage, ['contacts', 'marketing', 'invoices', 'crm_pipeline', 'crm_products', 'crm_payments']); ?>
         <div class="sidebar-group <?= $crmActive ? 'open' : '' ?>">
             <div class="sidebar-group-toggle" onclick="this.parentElement.classList.toggle('open')">
                 <div class="sidebar-group-toggle-left">
@@ -53,6 +53,10 @@
                 <a href="<?= baseUrl('admin/crm_products') ?>" class="<?= $currentPage === 'crm_products' ? 'active' : '' ?>">
                     <span class="nav-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg></span>
                     <span>Products</span>
+                </a>
+                <a href="<?= baseUrl('admin/crm_payments') ?>" class="<?= $currentPage === 'crm_payments' ? 'active' : '' ?>">
+                    <span class="nav-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></span>
+                    <span>Payments</span>
                 </a>
                 <a href="<?= baseUrl('admin/contacts') ?>" class="<?= $currentPage === 'contacts' ? 'active' : '' ?>">
                     <span class="nav-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>

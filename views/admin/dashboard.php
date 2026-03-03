@@ -24,15 +24,25 @@
 
         <!-- Stats -->
         <div class="admin-stats">
-            <a href="<?= baseUrl('/admin/visitors') ?>" class="admin-stat-card group relative overflow-hidden block transition-transform hover:-translate-y-1 hover:shadow-2xl">
-                <div class="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                <div class="flex justify-between items-start relative z-10">
+            <a href="<?= baseUrl('/admin/visitors') ?>" class="admin-stat-card group relative overflow-hidden block transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_20px_50px_rgba(59,130,246,0.15)] border-white/5 hover:border-primary/20 bg-[#1a2333]">
+                <!-- Premium Background Effect -->
+                <div class="absolute -right-4 -top-4 w-24 h-24 bg-primary/10 rounded-full blur-2xl group-hover:bg-primary/20 transition-all duration-500"></div>
+                
+                <div class="flex justify-between items-end relative z-10">
                     <div>
-                        <div class="stat-value"><?= (int)$visitCount ?></div>
-                        <div class="stat-title"><?= getCurrentLocale() === 'ar' ? 'إجمالي الزيارات' : 'Total Traffic' ?></div>
+                        <div class="stat-title text-slate-400 text-sm font-medium mb-1 flex items-center gap-2">
+                            <i class="ph ph-chart-line-up text-primary animate-pulse"></i>
+                            <?= getCurrentLocale() === 'ar' ? 'إجمالي الزيارات' : 'Total Traffic' ?>
+                        </div>
+                        <div class="stat-value text-3xl font-bold text-white tracking-tight leading-none"><?= number_format((int)$visitCount) ?></div>
                     </div>
-                    <div class="w-8 h-8 rounded bg-primary/10 text-primary flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all -translate-y-2 group-hover:translate-y-0">
-                        <i class="ph ph-arrow-up-right font-bold"></i>
+                    <div class="flex flex-col items-end gap-2">
+                        <div class="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center transition-all duration-300 group-hover:scale-110 group-hover:bg-primary group-hover:text-white shadow-lg shadow-primary/10">
+                            <i class="ph ph-users text-xl"></i>
+                        </div>
+                        <span class="text-[10px] font-bold uppercase tracking-widest text-primary opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-2 group-hover:translate-y-0">
+                            <?= getCurrentLocale() === 'ar' ? 'عرض التفاصيل' : 'View Details' ?>
+                        </span>
                     </div>
                 </div>
             </a>

@@ -11,92 +11,100 @@ $action = $action ?? 'list';
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Contacts — <?= APP_NAME ?></title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="<?= baseUrl('assets/css/style.css') ?>">
 </head>
-<body dir="<?= isRTL() ? 'rtl' : 'ltr' ?>">
-<div class="admin-layout">
+<body class="bg-[#0b0e14]" dir="<?= isRTL() ? 'rtl' : 'ltr' ?>">
+<div class="admin-layout flex w-full">
     <?php require __DIR__ . '/partials/sidebar.php'; ?>
     
-    <div class="admin-main">
-        <div class="admin-header">
-            <div>
-                <h1 style="color: var(--neon-cyan); margin:0;">📇 <?= ($action === 'edit' || $action === 'new') ? ($isNew ? 'New Contact' : 'Edit Contact') : 'Contacts (CRM)' ?></h1>
-                <p style="color: var(--text-muted); font-size: 0.9rem;">Manage your clients and leads</p>
-            </div>
+    <div class="crm-main leading-relaxed text-slate-300">
+        <header class="h-16 flex items-center justify-between px-6 bg-[#1a2333] border-b border-white/5 shrink-0">
+            <h1 class="text-xl font-semibold text-white tracking-tight flex items-center gap-2">
+                <i class="ph ph-users-three text-primary"></i>
+                <?= ($action === 'edit' || $action === 'new') ? ($isNew ? 'New Contact' : 'Edit Contact') : 'Contacts' ?>
+            </h1>
             <div>
                 <?php if ($action === 'list'): ?>
-                    <a href="<?= baseUrl('admin/contacts?action=new') ?>" class="btn-primary" style="padding: 8px 16px; font-size: 0.9rem;">+ New Contact</a>
+                    <a href="<?= baseUrl('admin/contacts?action=new') ?>" class="btn-primary flex items-center gap-2">
+                        <i class="ph ph-plus"></i> New Contact
+                    </a>
                 <?php else: ?>
-                    <a href="<?= baseUrl('admin/contacts') ?>" class="btn-ghost">← Back to List</a>
+                    <a href="<?= baseUrl('admin/contacts') ?>" class="btn-secondary flex items-center gap-2">
+                        <i class="ph ph-arrow-left"></i> Back to List
+                    </a>
                 <?php endif; ?>
             </div>
-        </div>
+        </header>
 
-        <?php if(isset($_GET['saved'])): ?>
-            <div style="background: rgba(16, 185, 129, 0.1); border: 1px solid var(--theme-primary); color: var(--theme-primary); padding: 15px; border-radius: 8px; margin-bottom: 20px;">
-                ✅ Contact saved successfully!
-            </div>
-        <?php endif; ?>
+        <main class="flex-1 overflow-y-auto p-6 bg-[#0b0e14] w-full h-full crm-main-scroll">
+            <?php if(isset($_GET['saved']) || ($flash = getFlash())): ?>
+                <div class="mb-6 p-4 rounded-xl border border-emerald-500/20 bg-emerald-500/10 text-emerald-400 text-sm flex items-center gap-2">
+                    <i class="ph ph-check-circle text-lg"></i>
+                    <?= htmlspecialchars($flash ?? 'Contact saved successfully!') ?>
+                </div>
+            <?php endif; ?>
 
         <?php if ($action === 'edit' || $action === 'new'): ?>
-            <form method="POST" action="<?= baseUrl('admin/contacts') ?>" class="admin-card">
+            <form method="POST" action="<?= baseUrl('admin/contacts') ?>" class="bg-[#1a2333]/40 backdrop-blur-lg border border-white/5 rounded-3xl p-8 shadow-2xl space-y-6">
                 <input type="hidden" name="id" value="<?= $contact['id'] ?? 0 ?>">
                 
-                <div class="admin-grid-2" style="margin-bottom: 25px;">
-                    <div class="form-group">
-                        <label>Contact Name *</label>
-                        <input type="text" name="name" value="<?= e($contact['name'] ?? '') ?>" class="form-input" required placeholder="Company or Individual Name">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="space-y-2">
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest">Contact Name *</label>
+                        <input type="text" name="name" value="<?= e($contact['name'] ?? '') ?>" class="w-full bg-black/40 border border-white/10 rounded-xl py-3 px-4 text-white focus:border-primary outline-none transition-all" required placeholder="Company or Individual Name">
                     </div>
-                    <div class="form-group">
-                        <label>Type</label>
-                        <select name="type" class="form-input">
+                    <div class="space-y-2">
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest">Type</label>
+                        <select name="type" class="w-full bg-black/40 border border-white/10 rounded-xl py-3 px-4 text-white focus:border-primary outline-none transition-all appearance-none">
                             <option value="company" <?= ($contact['type'] ?? 'company') === 'company' ? 'selected' : '' ?>>🏢 Company</option>
                             <option value="individual" <?= ($contact['type'] ?? '') === 'individual' ? 'selected' : '' ?>>👤 Individual</option>
                         </select>
                     </div>
                 </div>
 
-                <div class="admin-grid-2" style="margin-bottom: 25px;">
-                    <div class="form-group">
-                        <label>Phone Number</label>
-                        <input type="text" name="phone" value="<?= e($contact['phone'] ?? '') ?>" class="form-input" placeholder="+971 50 123 4567">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="space-y-2">
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest">Phone Number</label>
+                        <input type="text" name="phone" value="<?= e($contact['phone'] ?? '') ?>" class="w-full bg-black/40 border border-white/10 rounded-xl py-3 px-4 text-white focus:border-primary outline-none transition-all" placeholder="+971 50 123 4567">
                     </div>
-                    <div class="form-group">
-                        <label>Email</label>
-                        <input type="email" name="email" value="<?= e($contact['email'] ?? '') ?>" class="form-input" placeholder="info@example.com">
-                    </div>
-                </div>
-
-                <div class="admin-grid-2" style="margin-bottom: 25px;">
-                    <div class="form-group">
-                        <label>TRN / VAT Number</label>
-                        <input type="text" name="vat_number" value="<?= e($contact['vat_number'] ?? '') ?>" class="form-input" placeholder="Tax Registration Number">
-                    </div>
-                    <div class="form-group">
-                        <label>Website</label>
-                        <input type="url" name="website" value="<?= e($contact['website'] ?? '') ?>" class="form-input" placeholder="https://example.com">
+                    <div class="space-y-2">
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest">Email</label>
+                        <input type="email" name="email" value="<?= e($contact['email'] ?? '') ?>" class="w-full bg-black/40 border border-white/10 rounded-xl py-3 px-4 text-white focus:border-primary outline-none transition-all" placeholder="info@example.com">
                     </div>
                 </div>
 
-                <div class="admin-grid-2" style="margin-bottom: 25px;">
-                    <div class="form-group">
-                        <label>Location / Address</label>
-                        <input type="text" name="location" value="<?= e($contact['location'] ?? '') ?>" class="form-input" placeholder="City, Street">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="space-y-2">
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest">TRN / VAT Number</label>
+                        <input type="text" name="vat_number" value="<?= e($contact['vat_number'] ?? '') ?>" class="w-full bg-black/40 border border-white/10 rounded-xl py-3 px-4 text-white focus:border-primary outline-none transition-all" placeholder="Tax Registration Number">
                     </div>
-                    <div class="form-group">
-                        <label>Country</label>
-                        <input type="text" name="country" value="<?= e($contact['country'] ?? '') ?>" class="form-input" placeholder="United Arab Emirates">
+                    <div class="space-y-2">
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest">Website</label>
+                        <input type="url" name="website" value="<?= e($contact['website'] ?? '') ?>" class="w-full bg-black/40 border border-white/10 rounded-xl py-3 px-4 text-white focus:border-primary outline-none transition-all" placeholder="https://example.com">
                     </div>
                 </div>
 
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 25px;">
-                    <div class="form-group">
-                        <label>POC Details (Point of Contact)</label>
-                        <textarea name="poc_details" class="form-input" style="min-height: 80px;" placeholder="Name, Role, Direct Phone, Direct Email..."><?= e($contact['poc_details'] ?? '') ?></textarea>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="space-y-2">
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest">Location / Address</label>
+                        <input type="text" name="location" value="<?= e($contact['location'] ?? '') ?>" class="w-full bg-black/40 border border-white/10 rounded-xl py-3 px-4 text-white focus:border-primary outline-none transition-all" placeholder="City, Street">
                     </div>
-                    <div class="form-group">
-                        <label>Connected Source</label>
-                        <select name="source" class="form-input">
+                    <div class="space-y-2">
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest">Country</label>
+                        <input type="text" name="country" value="<?= e($contact['country'] ?? '') ?>" class="w-full bg-black/40 border border-white/10 rounded-xl py-3 px-4 text-white focus:border-primary outline-none transition-all" placeholder="United Arab Emirates">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="space-y-2">
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest">POC Details (Point of Contact)</label>
+                        <textarea name="poc_details" class="w-full bg-black/40 border border-white/10 rounded-xl py-3 px-4 text-white focus:border-primary outline-none transition-all min-h-[100px]" placeholder="Name, Role, Direct Phone, Direct Email..."><?= e($contact['poc_details'] ?? '') ?></textarea>
+                    </div>
+                    <div class="space-y-2">
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest">Connected Source</label>
+                        <select name="source" class="w-full bg-black/40 border border-white/10 rounded-xl py-3 px-4 text-white focus:border-primary outline-none transition-all appearance-none">
                             <?php $src = $contact['source'] ?? ''; ?>
                             <option value="" <?= empty($src) ? 'selected' : '' ?>>— Select —</option>
                             <option value="direct_enquiry" <?= $src === 'direct_enquiry' ? 'selected' : '' ?>>Direct Enquiry</option>
@@ -104,62 +112,104 @@ $action = $action ?? 'list';
                             <option value="referral" <?= $src === 'referral' ? 'selected' : '' ?>>Referral</option>
                             <option value="social_media" <?= $src === 'social_media' ? 'selected' : '' ?>>Social Media</option>
                             <option value="cold_call" <?= $src === 'cold_call' ? 'selected' : '' ?>>Cold Call</option>
-                            <option value="exhibition" <?= $src === 'exhibition' ? 'selected' : '' ?>>Exhibition / Event</option>
+                            <option value="exhibition" <?= $src === 'exhibition' ? 'selected' : '' ?>>Exhibitone / Event</option>
                             <option value="linkedin" <?= $src === 'linkedin' ? 'selected' : '' ?>>LinkedIn</option>
                             <option value="other" <?= $src === 'other' ? 'selected' : '' ?>>Other</option>
                         </select>
                     </div>
                 </div>
 
-                <div style="text-align: right; margin-top: 25px; border-top: 1px solid var(--glass-border); padding-top: 20px;">
-                    <button type="submit" class="btn-primary">💾 Save Contact</button>
+                <div class="pt-6 flex justify-end gap-4 border-t border-white/5">
+                    <a href="<?= baseUrl('admin/contacts') ?>" class="px-6 py-3 bg-white/5 text-slate-400 font-bold uppercase tracking-widest text-[11px] rounded-xl hover:bg-white/10 transition-all">Cancel</a>
+                    <button type="submit" class="px-8 py-3 bg-primary text-white font-bold uppercase tracking-widest text-xs rounded-xl hover:shadow-[0_0_20px_rgba(var(--primary-rgb),0.3)] transition-all min-w-[140px]">💾 Save Contact</button>
                 </div>
             </form>
 
         <?php else: ?>
             <!-- Contact List -->
-            <div class="admin-card">
-                <?php if (empty($contacts)): ?>
-                    <p style="color: var(--text-muted); text-align: center; padding: 40px;">No contacts yet. Create your first contact to get started.</p>
-                <?php else: ?>
-                    <div style="display: flex; justify-content: flex-end; margin-bottom: 15px;">
-                        <input type="text" id="contactSearch" class="form-input" placeholder="Search contacts..." style="max-width: 300px;">
+            <div class="bg-[#1a2333]/40 backdrop-blur-lg border border-white/5 rounded-3xl shadow-2xl overflow-hidden flex flex-col">
+                <div class="p-6 border-b border-white/5 flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <div class="relative w-full sm:w-80">
+                        <i class="ph ph-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-500"></i>
+                        <input type="text" id="contactSearch" placeholder="Search contacts..." class="w-full bg-black/40 border border-white/10 rounded-xl py-2 pl-10 pr-4 text-sm text-white focus:border-primary outline-none transition-all">
                     </div>
-                    <div style="overflow-x: auto;">
-                        <table class="admin-table" id="contactsTable">
+                    <?php if (!empty($contacts)): ?>
+                    <div class="text-[10px] font-bold uppercase tracking-widest text-slate-500">
+                        Showing <?= count($contacts) ?> Contacts
+                    </div>
+                    <?php endif; ?>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <?php if (empty($contacts)): ?>
+                        <div class="py-20 text-center text-slate-500 italic">No contacts yet. Create your first contact to get started.</div>
+                    <?php else: ?>
+                        <table class="w-full text-left border-collapse min-w-[900px]" id="contactsTable">
                             <thead>
-                                <tr>
-                                    <th>#</th>
-                                    <th>Name</th>
-                                    <th>Type</th>
-                                    <th>Phone</th>
-                                    <th>Email</th>
-                                    <th>Country</th>
-                                    <th>Source</th>
-                                    <th>Created</th>
-                                    <th>Actions</th>
+                                <tr class="bg-black/40 text-slate-500 text-[10px] font-bold uppercase tracking-[0.2em]">
+                                    <th class="py-5 px-8">Client Info</th>
+                                    <th class="py-5 px-4">Type</th>
+                                    <th class="py-5 px-4 text-center">Contact</th>
+                                    <th class="py-5 px-4 text-center">Location</th>
+                                    <th class="py-5 px-8 text-right">Actions</th>
                                 </tr>
                             </thead>
-                            <tbody>
+                            <tbody class="divide-y divide-white/[0.03] text-sm">
                                 <?php foreach ($contacts as $c): ?>
-                                <tr>
-                                    <td><?= (int)$c['id'] ?></td>
-                                    <td><strong><?= e($c['name']) ?></strong></td>
-                                    <td><span style="padding:3px 8px;border-radius:4px;background:<?= $c['type']==='company'?'rgba(16,185,129,0.1)':'rgba(139,92,246,0.1)' ?>;font-size:0.8rem;"><?= $c['type'] === 'company' ? '🏢 Company' : '👤 Individual' ?></span></td>
-                                    <td><?= e($c['phone'] ?? '—') ?></td>
-                                    <td><?= e($c['email'] ?? '—') ?></td>
-                                    <td><?= e($c['country'] ?? '—') ?></td>
-                                    <td><span style="font-size:0.8rem;color:var(--text-muted);"><?= e(str_replace('_',' ',ucfirst($c['source'] ?? '—'))) ?></span></td>
-                                    <td style="font-size: 0.85rem; color: var(--text-muted);"><?= date('M d, Y', strtotime($c['created_at'])) ?></td>
-                                    <td>
-                                        <a href="<?= baseUrl('admin/contacts?action=edit&id='.$c['id']) ?>" style="color: var(--neon-cyan); margin-right: 10px;">Edit</a>
-                                        <a href="<?= baseUrl('admin/contacts?action=delete&id='.$c['id']) ?>" style="color: var(--neon-pink);" onclick="return confirm('Delete this contact? This cannot be undone.');">Delete</a>
+                                <tr class="hover:bg-white/[0.01] transition-colors group">
+                                    <td class="py-5 px-8">
+                                        <div class="flex items-center gap-4">
+                                            <div class="w-10 h-10 rounded-xl bg-black/40 border border-white/5 flex items-center justify-center text-lg shadow-inner">
+                                                <i class="<?= $c['type']==='company'?'ph ph-buildings':'ph ph-user' ?> text-primary"></i>
+                                            </div>
+                                            <div>
+                                                <span class="text-white font-bold block mb-0.5"><?= e($c['name']) ?></span>
+                                                <span class="text-[10px] text-slate-500 uppercase tracking-widest font-bold font-mono">Added <?= date('M d, Y', strtotime($c['created_at'])) ?></span>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="py-5 px-4">
+                                        <span class="px-3 py-1 rounded-lg bg-white/5 border border-white/5 text-[11px] text-slate-400 font-bold uppercase tracking-tight">
+                                            <?= $c['type'] === 'company' ? 'Company' : 'Individual' ?>
+                                        </span>
+                                    </td>
+                                    <td class="py-5 px-4 text-center space-y-1">
+                                        <?php if ($c['phone']): ?>
+                                            <div class="flex items-center justify-center gap-2 text-slate-400 hover:text-white transition-colors">
+                                                <i class="ph ph-phone text-primary"></i>
+                                                <span class="text-xs"><?= e($c['phone']) ?></span>
+                                            </div>
+                                        <?php endif; ?>
+                                        <?php if ($c['email']): ?>
+                                            <div class="flex items-center justify-center gap-2 text-slate-400 hover:text-white transition-colors">
+                                                <i class="ph ph-envelope text-primary"></i>
+                                                <span class="text-xs"><?= e($c['email']) ?></span>
+                                            </div>
+                                        <?php endif; ?>
+                                    </td>
+                                    <td class="py-5 px-4 text-center">
+                                        <div class="flex flex-col items-center">
+                                            <span class="text-white font-medium block"><?= e($c['country'] ?? '—') ?></span>
+                                            <span class="text-[10px] text-slate-500"><?= e($c['location'] ?? '') ?></span>
+                                        </div>
+                                    </td>
+                                    <td class="py-5 px-8 text-right">
+                                        <div class="flex justify-end gap-2">
+                                            <a href="<?= baseUrl('admin/contacts?action=edit&id='.$c['id']) ?>" class="w-8 h-8 rounded-lg bg-primary/10 text-primary hover:bg-primary hover:text-white transition-all flex items-center justify-center" title="Edit">
+                                                <i class="ph ph-pencil-simple"></i>
+                                            </a>
+                                            <button type="button" onclick="showDeleteModal('<?= e($c['name']) ?>', '<?= baseUrl('admin/contacts?action=delete&id='.$c['id']) ?>')" class="w-8 h-8 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white transition-all flex items-center justify-center" title="Delete">
+                                                <i class="ph ph-trash"></i>
+                                            </button>
+                                        </div>
                                     </td>
                                 </tr>
                                 <?php endforeach; ?>
                             </tbody>
                         </table>
-                    </div>
+                    <?php endif; ?>
+                </div>
+            </div>
                     
                     <script>
                     document.getElementById('contactSearch').addEventListener('input', function() {
@@ -173,9 +223,46 @@ $action = $action ?? 'list';
                     });
                     </script>
                 <?php endif; ?>
-            </div>
-        <?php endif; ?>
+            </main>
     </div>
 </div>
+
+<!-- Delete Confirmation Modal -->
+<div id="deleteModal" style="display:none; position:fixed; inset:0; z-index:9999; background:rgba(0,0,0,0.7); backdrop-filter:blur(8px); align-items:center; justify-content:center;">
+    <div style="background:#1a2333; border:1px solid rgba(255,255,255,0.1); border-radius:1.5rem; padding:2rem; max-width:420px; width:90%; box-shadow:0 25px 50px rgba(0,0,0,0.5); animation:modalIn 0.2s ease-out;">
+        <div style="text-align:center; margin-bottom:1.5rem;">
+            <div style="width:64px; height:64px; border-radius:50%; background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.2); display:flex; align-items:center; justify-content:center; margin:0 auto 1rem;">
+                <i class="ph ph-warning" style="font-size:2rem; color:#f87171;"></i>
+            </div>
+            <h3 style="color:#fff; font-size:1.25rem; font-weight:700; margin-bottom:0.5rem;">Confirm Deletion</h3>
+            <p style="color:#94a3b8; font-size:0.875rem; line-height:1.6;">Are you sure you want to delete <strong id="deleteItemName" style="color:#f87171;"></strong>? This action cannot be undone.</p>
+        </div>
+        <div style="display:flex; gap:0.75rem; justify-content:center;">
+            <button onclick="closeDeleteModal()" style="padding:0.625rem 1.5rem; background:rgba(255,255,255,0.05); color:#94a3b8; font-weight:700; font-size:0.7rem; text-transform:uppercase; letter-spacing:0.1em; border-radius:0.75rem; border:1px solid rgba(255,255,255,0.1); cursor:pointer; transition:all 0.2s;">Cancel</button>
+            <a id="deleteConfirmBtn" href="#" style="padding:0.625rem 1.5rem; background:#ef4444; color:#fff; font-weight:700; font-size:0.7rem; text-transform:uppercase; letter-spacing:0.1em; border-radius:0.75rem; border:none; cursor:pointer; text-decoration:none; display:inline-flex; align-items:center; gap:0.5rem; transition:all 0.2s;">
+                <i class="ph ph-trash"></i> Delete
+            </a>
+        </div>
+    </div>
+</div>
+<style>
+@keyframes modalIn { from { opacity:0; transform:scale(0.95) translateY(10px); } to { opacity:1; transform:scale(1) translateY(0); } }
+#deleteModal button:hover { background:rgba(255,255,255,0.1) !important; color:#fff !important; }
+#deleteConfirmBtn:hover { background:#dc2626 !important; box-shadow:0 0 20px rgba(239,68,68,0.3); }
+</style>
+<script>
+function showDeleteModal(name, url) {
+    document.getElementById('deleteItemName').textContent = name;
+    document.getElementById('deleteConfirmBtn').href = url;
+    const modal = document.getElementById('deleteModal');
+    modal.style.display = 'flex';
+}
+function closeDeleteModal() {
+    document.getElementById('deleteModal').style.display = 'none';
+}
+document.getElementById('deleteModal').addEventListener('click', function(e) {
+    if (e.target === this) closeDeleteModal();
+});
+</script>
 </body>
 </html>

@@ -16,52 +16,52 @@ $currentPage = 'crm_pipeline';
     <link rel="stylesheet" href="<?= htmlspecialchars(BASE_URL) ?>/assets/css/style.css">
     <style> .kanban-column { min-height: 200px; } </style>
 </head>
-<body>
+<body class="bg-[#0b0e14]">
 <div class="admin-layout flex w-full">
     <?php require __DIR__ . '/partials/sidebar.php'; ?>
     <div class="crm-main leading-relaxed text-slate-300">
     <!-- Topbar -->
-    <header class="p-6 pb-2 shrink-0">
-        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
-            <h1 class="text-2xl font-bold text-white flex items-center gap-3">
-                <i class="ph ph-kanban text-primary"></i>
-                Pipeline
-            </h1>
-            <div class="flex items-center gap-3">
-                <!-- View Switcher -->
-                <div class="flex bg-slate-800 rounded-lg p-1 border border-white/10">
-                    <a href="?view=kanban&search=<?= urlencode($search) ?>" class="p-2 rounded-md transition-colors <?= $view === 'kanban' ? 'bg-primary text-white' : 'text-slate-400 hover:text-white' ?>" title="Kanban View">
-                        <i class="ph ph-layout text-lg"></i>
-                    </a>
-                    <a href="?view=list&search=<?= urlencode($search) ?>" class="p-2 rounded-md transition-colors <?= $view === 'list' ? 'bg-primary text-white' : 'text-slate-400 hover:text-white' ?>" title="List View">
-                        <i class="ph ph-list text-lg"></i>
-                    </a>
-                </div>
-                <button onclick="document.getElementById('addLeadModal').classList.remove('hidden')" class="btn-primary">
-                    <i class="ph ph-plus mr-2"></i> New Lead
-                </button>
+    <header class="h-16 flex items-center justify-between px-6 bg-[#1a2333] border-b border-white/5 shrink-0">
+        <h1 class="text-xl font-semibold text-white tracking-tight flex items-center gap-2">
+            <i class="ph ph-kanban text-primary"></i>
+            Pipeline
+        </h1>
+        <div class="flex items-center gap-3">
+            <!-- View Switcher -->
+            <div class="flex bg-black/40 rounded-xl p-1 border border-white/10">
+                <a href="?view=kanban&search=<?= urlencode($search) ?>" class="p-2 rounded-lg transition-all <?= $view === 'kanban' ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'text-slate-500 hover:text-white' ?>" title="Kanban View">
+                    <i class="ph ph-layout text-lg"></i>
+                </a>
+                <a href="?view=list&search=<?= urlencode($search) ?>" class="p-2 rounded-lg transition-all <?= $view === 'list' ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'text-slate-500 hover:text-white' ?>" title="List View">
+                    <i class="ph ph-list text-lg"></i>
+                </a>
             </div>
+            <button onclick="document.getElementById('addLeadModal').classList.remove('hidden')" class="btn-primary">
+                <i class="ph ph-plus mr-2"></i> New Lead
+            </button>
         </div>
+    </header>
 
-        <div class="flex items-center gap-4 bg-slate-800/30 p-2 rounded-xl border border-white/5">
+    <div class="p-6 pb-2 bg-[#0b0e14]">
+        <div class="flex items-center gap-4 bg-[#1a2333]/40 backdrop-blur-md p-2 rounded-2xl border border-white/5 shadow-xl">
             <div class="flex-1 relative">
-                <i class="ph ph-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                <i class="ph ph-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-500"></i>
                 <form action="" method="GET" class="w-full">
                     <input type="hidden" name="view" value="<?= htmlspecialchars($view) ?>">
                     <input type="text" name="search" value="<?= htmlspecialchars($search) ?>" 
                            placeholder="Search leads, email, or phone..." 
-                           class="w-full bg-slate-900/40 border-none focus:ring-1 focus:ring-primary rounded-lg pl-10 pr-4 py-2 text-sm text-white transition-all">
+                           class="w-full bg-black/40 border border-white/10 focus:border-primary/50 rounded-xl pl-10 pr-4 py-2 text-sm text-white transition-all outline-none">
                 </form>
             </div>
             <div class="hidden md:flex items-center gap-2">
                 <div class="relative">
-                    <button onclick="toggleDropdown('filter-menu', event)" class="px-3 py-2 text-sm text-slate-300 hover:text-white hover:bg-white/5 rounded-lg flex items-center gap-2 transition-colors">
+                    <button onclick="toggleDropdown('filter-menu', event)" class="px-3 py-2 text-xs font-bold uppercase tracking-widest text-slate-400 hover:text-white hover:bg-white/5 rounded-xl flex items-center gap-2 transition-all">
                         <i class="ph ph-funnel"></i> Filters
                     </button>
-                    <div id="filter-menu" class="hidden absolute right-0 top-10 w-48 bg-slate-800 border border-white/10 rounded-lg shadow-xl py-1 z-[100]">
-                        <a href="?search=Won" class="block px-4 py-2 text-sm text-slate-300 hover:bg-white/5 hover:text-white">Won Deals</a>
-                        <a href="?search=Lost" class="block px-4 py-2 text-sm text-slate-300 hover:bg-white/5 hover:text-white">Lost Deals</a>
-                        <a href="?search=New" class="block px-4 py-2 text-sm text-slate-300 hover:bg-white/5 hover:text-white">New Leads</a>
+                    <div id="filter-menu" class="hidden absolute right-0 top-11 w-48 bg-[#1a2333] border border-white/10 rounded-2xl shadow-2xl py-2 z-[100] backdrop-blur-xl">
+                        <a href="?search=Won" class="block px-4 py-2 text-xs text-slate-400 hover:bg-white/5 hover:text-primary transition-colors uppercase tracking-widest font-bold">Won Deals</a>
+                        <a href="?search=Lost" class="block px-4 py-2 text-xs text-slate-400 hover:bg-white/5 hover:text-primary transition-colors uppercase tracking-widest font-bold">Lost Deals</a>
+                        <a href="?search=New" class="block px-4 py-2 text-xs text-slate-400 hover:bg-white/5 hover:text-primary transition-colors uppercase tracking-widest font-bold">New Leads</a>
                     </div>
                 </div>
                 <div class="relative">
