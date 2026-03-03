@@ -3064,37 +3064,36 @@ body[dir="rtl"] .sidebar-group-items a {
     display: flex;
     flex-direction: column;
     height: 100vh;
-    background-color: #0f172a;
-    /* Deep charcoal/blue background */
+    background-color: var(--bg-primary);
     overflow: hidden;
 }
 
 /* CRM Pipeline & Drag/Drop Enhancements */
 .kanban-column {
     background-color: transparent !important;
-    /* Blending with background */
     border: none !important;
 }
 
 .kanban-column-body {
-    background-color: rgba(255, 255, 255, 0.02) !important;
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    border-radius: 12px;
-    transition: background-color 0.2s;
+    background-color: rgba(255, 255, 255, 0.015) !important;
+    border: 1px solid rgba(255, 255, 255, 0.04);
+    border-radius: 10px;
+    transition: background-color 0.25s;
 }
 
 .kanban-column-body.drag-over {
-    background-color: rgba(255, 255, 255, 0.05) !important;
+    background-color: rgba(16, 185, 129, 0.04) !important;
+    border-color: rgba(16, 185, 129, 0.15);
 }
 
 .kanban-card {
-    transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
-    border-left: 4px solid transparent;
+    transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s, border-color 0.2s;
+    border-left: 3px solid transparent;
 }
 
 .kanban-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 12px -3px rgba(0, 0, 0, 0.25);
 }
 
 .kanban-card.dragging {
@@ -3211,6 +3210,31 @@ body[dir="rtl"] .crm-main {
     padding: 24px;
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
+    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.25s, border-color 0.25s;
+    position: relative;
+    overflow: hidden;
+}
+
+.admin-stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    border-color: rgba(16, 185, 129, 0.12);
+}
+
+.admin-stat-card::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--theme-primary), var(--theme-gold));
+    opacity: 0;
+    transition: opacity 0.25s;
+}
+
+.admin-stat-card:hover::after {
+    opacity: 1;
 }
 
 .admin-stat-card .stat-value {
@@ -3223,9 +3247,10 @@ body[dir="rtl"] .crm-main {
 }
 
 .admin-stat-card .stat-title {
-    font-size: 0.85rem;
+    font-size: 0.82rem;
     color: var(--text-muted);
     margin-top: 4px;
+    letter-spacing: 0.02em;
 }
 
 /* Admin Table */
@@ -3264,16 +3289,28 @@ body[dir="rtl"] .crm-main {
 }
 
 .admin-table tr:hover td {
-    background: rgba(255, 255, 255, 0.02);
+    background: rgba(255, 255, 255, 0.025);
 }
 
+.admin-table tbody tr:nth-child(even) td {
+    background: rgba(255, 255, 255, 0.008);
+}
+
+.admin-table tbody tr {
+    transition: background 0.15s;
+}
+
+/* Status Badges */
 .status-badge {
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
     padding: 4px 12px;
     border-radius: 999px;
-    font-size: 0.75rem;
+    font-size: 0.72rem;
     font-weight: 600;
     text-transform: capitalize;
+    letter-spacing: 0.02em;
 }
 
 .status-new {
@@ -3318,22 +3355,29 @@ body[dir="rtl"] .crm-main {
 .admin-form-group textarea,
 .admin-form-group select {
     width: 100%;
-    padding: 12px 16px;
+    padding: 11px 14px;
     border-radius: var(--radius-sm);
     border: 1px solid var(--glass-border);
     background: rgba(255, 255, 255, 0.03);
     color: var(--text-primary);
-    font-size: 0.9rem;
+    font-size: 0.88rem;
     font-family: inherit;
     outline: none;
-    transition: var(--transition-smooth);
+    transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+}
+
+.admin-form-group input:hover,
+.admin-form-group textarea:hover,
+.admin-form-group select:hover {
+    border-color: rgba(255, 255, 255, 0.12);
 }
 
 .admin-form-group input:focus,
-.admin-form-group textarea:focus {
+.admin-form-group textarea:focus,
+.admin-form-group select:focus {
     border-color: var(--theme-primary);
-    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
-    /* Emerald focus */
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.08);
+    background: rgba(255, 255, 255, 0.04);
 }
 
 .admin-form-group textarea {
@@ -3341,22 +3385,210 @@ body[dir="rtl"] .crm-main {
     resize: vertical;
 }
 
-.btn-admin-save {
-    padding: 12px 28px;
-    border-radius: var(--radius-sm);
-    background: linear-gradient(135deg, var(--theme-primary), var(--theme-gold));
-    color: white;
-    font-weight: 600;
-    font-size: 0.9rem;
-    border: none;
-    cursor: pointer;
-    transition: var(--transition-smooth);
+/* Form Input (standalone class used across pages) */
+.form-input {
+    width: 100%;
+    padding: 10px 14px;
+    border-radius: 8px;
+    border: 1px solid var(--glass-border);
+    background: rgba(255, 255, 255, 0.03);
+    color: var(--text-primary);
+    font-size: 0.88rem;
+    font-family: inherit;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
 }
 
-.btn-admin-save:hover {
-    box-shadow: 0 4px 20px rgba(16, 185, 129, 0.3);
-    /* Emerald shadow */
+.form-input:hover {
+    border-color: rgba(255, 255, 255, 0.12);
+}
+
+.form-input:focus {
+    border-color: var(--theme-primary);
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.08);
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.form-group {
+    margin-bottom: 0;
+}
+
+.form-group label {
+    display: block;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-bottom: 6px;
+}
+
+/* Inline select for tables */
+.inline-select {
+    padding: 4px 8px;
+    border-radius: 6px;
+    border: 1px solid var(--glass-border);
+    background: rgba(255, 255, 255, 0.03);
+    color: var(--text-primary);
+    font-size: 0.78rem;
+    font-family: inherit;
+    outline: none;
+    cursor: pointer;
+    transition: border-color 0.2s;
+}
+
+.inline-select:focus {
+    border-color: var(--theme-primary);
+}
+
+/* ── Button System ──────────────────────────────── */
+.btn-admin-save,
+.btn-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 10px 22px;
+    border-radius: 8px;
+    background: linear-gradient(135deg, var(--theme-primary), var(--neon-cyan));
+    color: white;
+    font-weight: 600;
+    font-size: 0.85rem;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    text-decoration: none;
+    white-space: nowrap;
+    letter-spacing: 0.01em;
+}
+
+.btn-admin-save:hover,
+.btn-primary:hover {
+    box-shadow: 0 4px 16px rgba(16, 185, 129, 0.25);
     transform: translateY(-1px);
+    filter: brightness(1.05);
+}
+
+.btn-primary:active {
+    transform: translateY(0);
+    box-shadow: none;
+}
+
+.btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 10px 22px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--glass-border);
+    color: var(--text-secondary);
+    font-weight: 500;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--text-primary);
+    border-color: rgba(255, 255, 255, 0.12);
+}
+
+.btn-ghost {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 10px 22px;
+    border-radius: 8px;
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    font-weight: 500;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.btn-ghost:hover {
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--text-primary);
+}
+
+.btn-sm {
+    padding: 6px 14px;
+    font-size: 0.78rem;
+}
+
+.btn-danger {
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.2);
+    color: #ef4444;
+}
+
+.btn-danger:hover {
+    background: rgba(239, 68, 68, 0.15);
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.15);
+}
+
+/* ── Admin Card Hover ───────────────────────────── */
+.admin-card {
+    transition: border-color 0.2s;
+}
+
+.admin-card:hover {
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+/* ── Toast / Alert Messages ─────────────────────── */
+.admin-alert {
+    padding: 14px 18px;
+    border-radius: 10px;
+    font-size: 0.85rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+    border: 1px solid;
+}
+
+.admin-alert-success {
+    background: rgba(16, 185, 129, 0.08);
+    border-color: rgba(16, 185, 129, 0.2);
+    color: var(--theme-primary);
+}
+
+.admin-alert-error {
+    background: rgba(239, 68, 68, 0.08);
+    border-color: rgba(239, 68, 68, 0.2);
+    color: #ef4444;
+}
+
+.admin-alert-info {
+    background: rgba(59, 130, 246, 0.08);
+    border-color: rgba(59, 130, 246, 0.2);
+    color: var(--neon-cobalt);
+}
+
+/* ── Empty State ────────────────────────────────── */
+.admin-empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--text-muted);
+}
+
+.admin-empty-state .empty-icon {
+    font-size: 3rem;
+    margin-bottom: 16px;
+    opacity: 0.4;
+}
+
+.admin-empty-state p {
+    font-size: 0.9rem;
 }
 
 /* Admin Login */

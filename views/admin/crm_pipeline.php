@@ -171,7 +171,7 @@ $currentPage = 'crm_pipeline';
                     </div>
                 <?php else: ?>
                     <!-- Expanded Column -->
-                    <div class="w-[260px] flex flex-col h-full shrink-0 stage-column" data-stage-id="<?= $info['id'] ?>" data-stage-name="<?= htmlspecialchars($stageName) ?>">
+                    <div class="w-[224px] flex flex-col h-full shrink-0 stage-column" data-stage-id="<?= $info['id'] ?>" data-stage-name="<?= htmlspecialchars($stageName) ?>">
                         <!-- Column Header -->
                         <div class="flex items-center justify-between mb-2 px-1 group relative">
                             <div class="opacity-0 group-hover:opacity-100 cursor-grab text-slate-500 hover:text-white transition-all mr-2 stage-drag-handle">
