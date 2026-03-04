@@ -14,7 +14,9 @@ function adminLogin(): void {
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $username = trim($_POST['username'] ?? '');
         $password = trim($_POST['password'] ?? '');
-        if (attemptLogin($username, $password)) {
+        $remember = isset($_POST['remember']) && $_POST['remember'] === '1';
+        
+        if (attemptLogin($username, $password, $remember)) {
             header('Location: ' . baseUrl('/admin/dashboard'));
             exit;
         }

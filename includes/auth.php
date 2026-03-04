@@ -12,7 +12,34 @@ function startSecureSession(): void {
 
 function isAdminLoggedIn(): bool {
     startSecureSession();
-    return isset($_SESSION['admin_id']) && !empty($_SESSION['admin_id']);
+    if (isset($_SESSION['admin_id']) && !empty($_SESSION['admin_id'])) {
+        return true;
+    }
+
+    // Check Remember Me cookie
+    if (isset($_COOKIE['admin_remember'])) {
+        $parts = explode(':', $_COOKIE['admin_remember']);
+        if (count($parts) === 2) {
+            $adminId = (int)$parts[0];
+            $token = $parts[1];
+            $db = getDB();
+            
+            // Failsafe migration for remember_token if not exists
+            try { $db->exec("ALTER TABLE admins ADD COLUMN remember_token VARCHAR(255) NULL AFTER password"); } catch(Exception $e) {}
+
+            $stmt = $db->prepare("SELECT id, username, recovery_email, role FROM admins WHERE id = ? AND remember_token = ? LIMIT 1");
+            $stmt->execute([$adminId, $token]);
+            $admin = $stmt->fetch();
+            if ($admin) {
+                $_SESSION['admin_id'] = $admin['id'];
+                $_SESSION['admin_user'] = $admin['username'];
+                $_SESSION['admin_email'] = $admin['recovery_email'] ?? '';
+                $_SESSION['admin_role'] = $admin['role'] ?? 'standard';
+                return true;
+            }
+        }
+    }
+    return false;
 }
 
 function isSuperAdmin(): bool {
@@ -101,7 +128,7 @@ function checkIpWhitelist(int $adminId): bool {
     return (bool)$stmt->fetch();
 }
 
-function attemptLogin(string $username, string $password): bool {
+function attemptLogin(string $username, string $password, bool $remember = false): bool {
     $db = getDB();
 
     // Failsafe auto-migrate ip_filter_enabled column if missing
@@ -131,6 +158,24 @@ function attemptLogin(string $username, string $password): bool {
         logAdminActivity('login', "Admin '{$username}' logged in successfully.");
         addNotification('login', 'New Admin Login', "Admin '{$username}' has logged into the system.", baseUrl('admin/activity_logs'));
         
+        if ($remember) {
+            $token = bin2hex(random_bytes(32));
+            $expiry = time() + (30 * 24 * 60 * 60); // 30 days
+
+            // Failsafe migration for remember_token if not exists
+            try { $db->exec("ALTER TABLE admins ADD COLUMN remember_token VARCHAR(255) NULL AFTER password"); } catch(Exception $e) {}
+
+            $stmt = $db->prepare("UPDATE admins SET remember_token = ? WHERE id = ?");
+            $stmt->execute([$token, $admin['id']]);
+            
+            setcookie('admin_remember', $admin['id'] . ':' . $token, [
+                'expires' => $expiry,
+                'path' => '/',
+                'httponly' => true,
+                'samesite' => 'Lax'
+            ]);
+        }
+        
         return true;
     }
     return false;
@@ -138,7 +183,16 @@ function attemptLogin(string $username, string $password): bool {
 
 function adminLogout(): void {
     startSecureSession();
+    if (isset($_SESSION['admin_id'])) {
+        $db = getDB();
+        // Failsafe migration for remember_token if not exists
+        try { $db->exec("ALTER TABLE admins ADD COLUMN remember_token VARCHAR(255) NULL AFTER password"); } catch(Exception $e) {}
+        
+        $stmt = $db->prepare("UPDATE admins SET remember_token = NULL WHERE id = ?");
+        $stmt->execute([$_SESSION['admin_id']]);
+    }
     session_destroy();
+    setcookie('admin_remember', '', time() - 3600, '/');
     header('Location: ' . BASE_URL . '/admin/login');
     exit;
 }

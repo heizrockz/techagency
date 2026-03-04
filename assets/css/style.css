@@ -26,6 +26,7 @@
 
     --theme-primary: var(--neon-emerald);
     --theme-accent: var(--neon-cyan);
+    --theme-gold: var(--neon-amber);
 
     /* Functional Colors */
     --text-primary: #f8fafc;
@@ -2786,16 +2787,16 @@ body[dir="rtl"] .admin-sidebar {
 }
 
 .admin-brand-name {
-    font-size: 1.05rem;
-    font-weight: 800;
-    letter-spacing: -0.3px;
-    background: linear-gradient(135deg, var(--theme-primary), var(--theme-gold));
+    font-size: 1.15rem;
+    font-weight: 900;
+    letter-spacing: -0.5px;
+    background: linear-gradient(135deg, #fff 0%, var(--theme-primary) 50%, var(--theme-gold) 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
     white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    overflow: visible;
+    filter: drop-shadow(0 0 10px rgba(16, 185, 129, 0.2));
 }
 
 /* ── Sidebar Navigation ────────────────────────── */
