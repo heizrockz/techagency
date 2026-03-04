@@ -1,24 +1,26 @@
 <!DOCTYPE html>
 <html lang="<?= e(getCurrentLocale()) ?>" dir="<?= isRTL() ? 'rtl' : 'ltr' ?>">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= t('admin_content') ?> — <?= APP_NAME ?></title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="<?= baseUrl('assets/css/style.css') ?>">
+    <?php require __DIR__ . '/partials/_head_assets.php'; ?>
 </head>
 <body dir="<?= isRTL() ? 'rtl' : 'ltr' ?>">
 
-<div class="admin-layout">
+<div class="admin-layout flex w-full h-screen overflow-hidden">
     <?php $currentPage = 'content'; require __DIR__ . '/partials/sidebar.php'; ?>
 
-    <div class="admin-main">
-        <div class="admin-header">
-            <h1>✏️ <?= t('admin_content') ?></h1>
-        </div>
+    <div class="flex-1 flex flex-col min-w-0 bg-[#0b0e14]">
+        <header class="h-20 flex items-center justify-between px-8 bg-glass-bg border-b border-white/5 shrink-0 backdrop-blur-xl sticky top-0 z-[100]">
+            <div class="flex flex-col">
+                <div class="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em] mb-1 hidden sm:block">Content Architecture</div>
+                <h1 class="text-xl font-black text-white tracking-tight flex items-center gap-3 group">
+                    <span class="text-neon-cyan drop-shadow-[0_0_8px_rgba(6,182,212,0.4)]"><?= t('admin_content') ?></span>
+                    <span class="opacity-20 translate-y-px hidden sm:inline">/</span>
+                    <span class="text-sm tracking-widest text-slate-400 uppercase font-black hidden sm:inline">Matrix Nodes</span>
+                </h1>
+            </div>
+            <?php require __DIR__ . '/partials/_topbar.php'; ?>
+        </header>
 
         <?php if ($saved): ?>
             <div class="alert alert-success"><?= t('admin_saved') ?></div>
@@ -54,5 +56,66 @@
     </div>
 </div>
 
+<style>
+    .content-locale-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    .content-section {
+        background: rgba(255,255,255,0.02);
+        border: 1px solid rgba(255,255,255,0.05);
+        border-radius: 1rem;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    .content-section h3 {
+        color: #06b6d4;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+    .admin-form-group label {
+        display: block;
+        font-size: 0.7rem;
+        color: rgba(255,255,255,0.4);
+        margin-bottom: 0.5rem;
+    }
+    .admin-form-group input, .admin-form-group textarea {
+        width: 100%;
+        background: rgba(0,0,0,0.2);
+        border: 1px solid rgba(255,255,255,0.1);
+        border-radius: 0.75rem;
+        padding: 0.75rem 1rem;
+        color: white;
+        font-size: 0.85rem;
+        transition: all 0.3s;
+    }
+    .admin-form-group input:focus, .admin-form-group textarea:focus {
+        border-color: #06b6d4;
+        box-shadow: 0 0 0 1px rgba(6,182,212,0.2);
+        outline: none;
+    }
+    .btn-admin-save {
+        background: #06b6d4;
+        color: black;
+        font-weight: 700;
+        padding: 0.75rem 2rem;
+        border-radius: 0.75rem;
+        margin: 2rem;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+    .btn-admin-save:hover { background: #22d3ee; transform: translateY(-1px); }
+
+    @media screen and (max-width: 1024px) {
+        .content-locale-grid { grid-template-columns: 1fr; }
+        header { padding: 0 1.5rem !important; }
+        form { padding: 1.5rem !important; }
+    }
+</style>
 </body>
 </html>

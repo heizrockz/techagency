@@ -5,40 +5,43 @@ $currentPage = 'sitemap';
 <!DOCTYPE html>
 <html lang="<?= e(getCurrentLocale()) ?>" dir="<?= isRTL() ? 'rtl' : 'ltr' ?>">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= e($title) ?> — <?= APP_NAME ?></title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="<?= baseUrl('assets/css/style.css') ?>">
+    <?php require __DIR__ . '/partials/_head_assets.php'; ?>
 </head>
 <body dir="<?= isRTL() ? 'rtl' : 'ltr' ?>">
 
-<div class="admin-layout">
+<div class="admin-layout flex w-full h-screen overflow-hidden">
     <!-- Sidebar -->
     <?php require __DIR__ . '/partials/sidebar.php'; ?>
 
     <!-- Main Content -->
-    <div class="admin-main">
-        <div class="admin-header">
-            <div class="header-left">
-                <h1 style="color: var(--neon-cobalt); margin:0; font-size:1.8rem;">🗺️ Sitemap Manager</h1>
-                <p style="color: var(--text-muted); font-size: 0.85rem;">Generate and edit your search engine structure.</p>
+    <div class="flex-1 flex flex-col min-w-0">
+        <header class="h-20 flex items-center justify-between px-8 bg-glass-bg border-b border-white/5 shrink-0 backdrop-blur-xl sticky top-0 z-[100]">
+            <div class="flex flex-col">
+                <div class="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em] mb-1 hidden sm:block">Index Orchestration</div>
+                <h1 class="text-xl font-black text-white tracking-tight flex items-center gap-3 group">
+                    <span class="text-neon-cyan drop-shadow-[0_0_8px_rgba(6,182,212,0.4)]">Neural Wayfinder</span>
+                    <span class="opacity-20 translate-y-px hidden sm:inline">/</span>
+                    <span class="text-sm tracking-widest text-slate-400 uppercase font-black hidden sm:inline">Sitemap XML</span>
+                </h1>
             </div>
-            <div class="header-actions">
+            <div class="flex items-center gap-6">
                 <form method="POST" style="display:inline;">
                     <input type="hidden" name="action" value="regenerate">
-                    <button type="submit" class="btn-secondary" onclick="return confirm('This will reload the sitemap from the current database records. Any manual changes will be lost. Proceed?')">
-                        🔄 Regenerate Now
+                    <button type="submit" class="px-4 sm:px-6 py-2.5 bg-white/5 hover:bg-white/10 text-white text-[10px] font-black uppercase tracking-widest rounded-xl transition-all border border-white/10 active:scale-95 flex items-center gap-2" onclick="return confirm('This will reload the sitemap from the current database records. Any manual changes will be lost. Proceed?')">
+                        <i class="ph ph-arrows-clockwise text-lg"></i> <span class="hidden sm:inline">Force Regeneration</span>
                     </button>
                 </form>
+                <?php require __DIR__ . '/partials/_topbar.php'; ?>
             </div>
-        </div>
+        </header>
 
-        <?php if ($saved): ?>
-            <div class="alert alert-success" style="background:rgba(16,185,129,0.1); border:1px solid rgba(16,185,129,0.2); color:var(--neon-emerald); padding:15px; border-radius:10px; margin-bottom:20px;">Sitemap has been updated successfully.</div>
-        <?php endif; ?>
+        <main class="flex-1 overflow-y-auto p-8 crm-main-scroll bg-[#0b0e14]">
+            <?php if ($saved): ?>
+                <div class="mb-8 p-4 bg-neon-emerald/10 border border-neon-emerald/20 rounded-2xl text-neon-emerald text-[10px] font-black uppercase tracking-widest flex items-center gap-3">
+                    <i class="ph-bold ph-check-circle text-lg"></i> Sitemap updated successfully.
+                </div>
+            <?php endif; ?>
 
         <div class="admin-card" style="background:rgba(255,255,255,0.03); border:1px solid var(--glass-border); border-radius:12px; padding:25px;">
             <div class="card-header" style="margin-bottom:20px;">
@@ -61,6 +64,7 @@ $currentPage = 'sitemap';
                 </form>
             </div>
         </div>
+        </main>
     </div>
 </div>
 

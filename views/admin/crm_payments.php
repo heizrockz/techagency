@@ -5,15 +5,8 @@ $currentPage = 'crm_payments';
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= htmlspecialchars($pageTitle . ' - ' . APP_NAME) ?></title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-    <script src="https://unpkg.com/@phosphor-icons/web"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="<?= htmlspecialchars(BASE_URL) ?>/assets/css/style.css">
+    <?php require __DIR__ . '/partials/_head_assets.php'; ?>
     <style>
         .progress-bar-container { transition: all 0.3s ease; opacity: 0; pointer-events: none; }
         .progress-bar-container.active { opacity: 1; pointer-events: auto; }
@@ -22,17 +15,24 @@ $currentPage = 'crm_payments';
     </style>
 </head>
 <body class="bg-[#0b0e14]">
-<div class="admin-layout flex w-full">
+<div class="admin-layout flex w-full h-screen overflow-hidden">
     <?php require __DIR__ . '/partials/sidebar.php'; ?>
-    <div class="crm-main leading-relaxed text-slate-300">
-        <header class="h-16 flex items-center justify-between px-6 bg-[#1a2333] border-b border-white/5 shrink-0">
-            <h1 class="text-xl font-semibold text-white tracking-tight flex items-center gap-2">
-                <i class="ph ph-hand-coins text-primary"></i>
-                Spendings & Expenditures
-            </h1>
-            <button onclick="openPaymentModal()" class="btn-primary">
-                <i class="ph ph-plus mr-2"></i> Record Expense
-            </button>
+    <div class="flex-1 flex flex-col min-w-0 bg-[#0b0e14]">
+        <header class="h-20 flex items-center justify-between px-8 bg-glass-bg border-b border-white/5 shrink-0 backdrop-blur-xl sticky top-0 z-[100]">
+            <div class="flex flex-col">
+                <div class="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em] mb-1 hidden sm:block">Fiscal Intelligence</div>
+                <h1 class="text-xl font-black text-white tracking-tight flex items-center gap-3 group">
+                    <span class="text-neon-cyan drop-shadow-[0_0_8px_rgba(6,182,212,0.4)]">Payments</span>
+                    <span class="opacity-20 translate-y-px hidden sm:inline">/</span>
+                    <span class="text-[10px] tracking-widest text-slate-400 uppercase font-black hidden sm:inline-block">Expenditures</span>
+                </h1>
+            </div>
+            <div class="flex items-center gap-6">
+                <button onclick="openPaymentModal()" class="px-3 sm:px-6 py-2.5 bg-neon-cyan hover:bg-cyan-400 text-black text-[10px] font-black uppercase tracking-widest rounded-xl transition-all shadow-lg active:scale-95 flex items-center gap-2">
+                    <i class="ph-bold ph-plus-circle text-lg"></i> <span class="hidden sm:inline">Record</span>
+                </button>
+                <?php require __DIR__ . '/partials/_topbar.php'; ?>
+            </div>
         </header>
 
         <main class="flex-1 overflow-y-auto p-6 bg-[#0b0e14] w-full h-full crm-main-scroll">
@@ -43,142 +43,162 @@ $currentPage = 'crm_payments';
                 </div>
             <?php endif; ?>
 
-            <!-- Stats Overview -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-                <div class="bg-[#1a2333]/40 backdrop-blur-md border border-white/5 rounded-2xl p-6 shadow-2xl relative overflow-hidden group">
-                    <div class="absolute -right-4 -top-4 w-20 h-20 bg-primary/5 rounded-full blur-2xl group-hover:bg-primary/10 transition-all"></div>
-                    <div class="flex justify-between items-start relative z-10">
-                        <div>
-                            <p class="text-xs font-bold uppercase tracking-widest text-slate-500 mb-2">Total Spendings</p>
-                            <h3 class="text-3xl font-extrabold text-white tracking-tight">$<?= number_format($totalSpend, 2) ?></h3>
-                            <div class="mt-2 text-[10px] text-slate-500 bg-white/5 px-2 py-0.5 rounded-full w-fit">Lifetime Total</div>
+            <!-- Stats Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-10">
+                <div class="admin-stat-card !bg-glass-bg border border-white/5 p-8 rounded-3xl relative overflow-hidden group hover:border-neon-cyan/40 transition-all shadow-premium">
+                    <div class="absolute top-0 right-0 w-32 h-32 bg-neon-cyan/5 blur-[60px] rounded-full -mr-16 -mt-16 group-hover:bg-neon-cyan/10 transition-colors"></div>
+                    <div class="flex items-center justify-between mb-6">
+                        <div class="w-14 h-14 rounded-2xl bg-neon-cyan/10 flex items-center justify-center border border-neon-cyan/20 group-hover:scale-110 transition-transform">
+                            <i class="ph-bold ph-chart-pie text-3xl text-neon-cyan"></i>
                         </div>
-                        <div class="w-12 h-12 rounded-2xl bg-primary/10 text-primary flex items-center justify-center shadow-inner group-hover:scale-110 transition-transform">
-                            <i class="ph ph-chart-pie-slice text-2xl"></i>
+                        <div class="text-right">
+                            <div class="text-[9px] font-black text-slate-600 uppercase tracking-[0.2em] mb-1">Total Outflow</div>
+                            <div class="text-3xl font-black text-white tracking-tighter">$<?= number_format($totalSpend, 2) ?></div>
                         </div>
+                    </div>
+                    <div class="flex items-center">
+                        <span class="text-[10px] font-black uppercase tracking-widest text-slate-500">Global Portfolio Drain</span>
                     </div>
                 </div>
 
-                <div class="bg-[#1a2333]/40 backdrop-blur-md border border-white/5 rounded-2xl p-6 shadow-2xl relative overflow-hidden group">
-                    <div class="absolute -right-4 -top-4 w-20 h-20 bg-blue-500/5 rounded-full blur-2xl group-hover:bg-blue-500/10 transition-all"></div>
-                    <div class="flex justify-between items-start relative z-10">
-                        <div>
-                            <p class="text-xs font-bold uppercase tracking-widest text-slate-500 mb-2">Current Month</p>
-                            <h3 class="text-3xl font-extrabold text-white tracking-tight">$<?= number_format($monthlySpend, 2) ?></h3>
-                            <div class="mt-2 text-[10px] text-blue-400 bg-blue-400/10 px-2 py-0.5 rounded-full w-fit">MTD Expenditure</div>
+                <div class="admin-stat-card !bg-glass-bg border border-white/5 p-8 rounded-3xl relative overflow-hidden group hover:border-neon-purple/40 transition-all shadow-premium">
+                    <div class="absolute top-0 right-0 w-32 h-32 bg-neon-purple/5 blur-[60px] rounded-full -mr-16 -mt-16 group-hover:bg-neon-purple/10 transition-colors"></div>
+                    <div class="flex items-center justify-between mb-6">
+                        <div class="w-14 h-14 rounded-2xl bg-neon-purple/10 flex items-center justify-center border border-neon-purple/20 group-hover:scale-110 transition-transform">
+                            <i class="ph-bold ph-calendar text-3xl text-neon-purple"></i>
                         </div>
-                        <div class="w-12 h-12 rounded-2xl bg-blue-500/10 text-blue-400 flex items-center justify-center shadow-inner group-hover:scale-110 transition-transform">
-                            <i class="ph ph-calendar-check text-2xl"></i>
+                        <div class="text-right">
+                            <div class="text-[9px] font-black text-slate-600 uppercase tracking-[0.2em] mb-1">Monthly Burn</div>
+                            <div class="text-3xl font-black text-white tracking-tighter">$<?= number_format($monthlySpend, 2) ?></div>
                         </div>
+                    </div>
+                    <div class="flex items-center">
+                        <span class="text-[10px] font-black uppercase tracking-widest text-slate-500">Active Operational Speed</span>
                     </div>
                 </div>
 
-                <div class="bg-[#1a2333]/40 backdrop-blur-md border border-white/5 rounded-2xl p-6 shadow-2xl relative overflow-hidden group">
-                    <div class="absolute -right-4 -top-4 w-20 h-20 bg-emerald-500/5 rounded-full blur-2xl group-hover:bg-emerald-500/10 transition-all"></div>
-                    <div class="flex justify-between items-start relative z-10">
-                        <div>
-                            <p class="text-xs font-bold uppercase tracking-widest text-slate-500 mb-2">Recent Record</p>
-                            <h3 class="text-lg font-bold text-white tracking-tight truncate max-w-[180px]">
-                                <?= !empty($payments) ? htmlspecialchars($payments[0]['title']) : 'No records' ?>
-                            </h3>
-                            <div class="mt-2 text-[10px] text-emerald-400 bg-emerald-400/10 px-2 py-0.5 rounded-full w-fit">Latest Transaction</div>
+                <div class="admin-stat-card !bg-glass-bg border border-white/5 p-8 rounded-3xl relative overflow-hidden group hover:border-neon-emerald/40 transition-all shadow-premium">
+                    <div class="absolute top-0 right-0 w-32 h-32 bg-neon-emerald/5 blur-[60px] rounded-full -mr-16 -mt-16 group-hover:bg-neon-emerald/10 transition-colors"></div>
+                    <div class="flex items-center justify-between mb-6">
+                        <div class="w-14 h-14 rounded-2xl bg-neon-emerald/10 flex items-center justify-center border border-neon-emerald/20 group-hover:scale-110 transition-transform">
+                            <i class="ph-bold ph-receipt text-3xl text-neon-emerald"></i>
                         </div>
-                        <div class="w-12 h-12 rounded-2xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center shadow-inner group-hover:scale-110 transition-transform">
-                            <i class="ph ph-receipt text-2xl"></i>
+                        <div class="text-right">
+                            <div class="text-[9px] font-black text-slate-600 uppercase tracking-[0.2em] mb-1">Last Transmission</div>
+                            <div class="text-lg font-black text-white tracking-tighter truncate max-w-[150px] uppercase">
+                                <?= !empty($payments) ? htmlspecialchars($payments[0]['title']) : 'NULL' ?>
+                            </div>
                         </div>
+                    </div>
+                    <div class="flex items-center">
+                        <span class="text-[10px] font-black uppercase tracking-widest text-slate-500">Live Transaction Entry</span>
                     </div>
                 </div>
             </div>
 
-            <!-- Filters & Table -->
-            <div class="bg-[#1a2333]/40 backdrop-blur-lg border border-white/5 rounded-3xl shadow-2xl overflow-hidden flex flex-col">
-                <div class="p-6 border-b border-white/5 flex flex-col sm:flex-row items-center justify-between gap-4">
-                    <form class="flex items-center gap-3 w-full sm:w-auto" method="GET" action="<?= BASE_URL ?>/admin/crm_payments">
-                        <div class="relative w-full sm:w-64">
-                            <i class="ph ph-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-500"></i>
-                            <input type="text" name="search" value="<?= htmlspecialchars($search) ?>" placeholder="Search records..." class="w-full bg-black/40 border border-white/10 rounded-xl py-2 pl-10 pr-4 text-sm focus:border-primary outline-none transition-all">
+            <!-- Ledger Activity -->
+            <div class="admin-table-wrapper backdrop-blur-xl border border-white/5 rounded-3xl overflow-hidden flex flex-col shadow-premium">
+                <div class="px-8 py-6 border-b border-white/5 flex flex-col sm:flex-row items-center justify-between gap-6 bg-white/[0.01]">
+                    <form class="flex items-center gap-4 w-full sm:w-auto" method="GET" action="<?= BASE_URL ?>/admin/crm_payments">
+                        <div class="relative w-full sm:w-96 group">
+                            <i class="ph ph-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-600 group-focus-within:text-neon-cyan transition-colors"></i>
+                            <input type="text" name="search" value="<?= htmlspecialchars($search) ?>" placeholder="Filter historical data sequences..." class="w-full bg-black/40 border border-white/10 rounded-2xl py-3 pl-12 pr-4 text-[11px] font-black uppercase tracking-widest text-white focus:border-neon-cyan outline-none transition-all placeholder:text-slate-800">
                         </div>
-                        <select name="category" onchange="this.form.submit()" class="bg-black/40 border border-white/10 rounded-xl py-2 px-4 text-sm focus:border-primary outline-none transition-all">
-                            <option value="">All Categories</option>
+                        <select name="category" onchange="this.form.submit()" class="bg-black/40 border border-white/10 rounded-2xl py-3 px-6 text-[10px] font-black uppercase tracking-widest text-slate-400 focus:border-neon-cyan outline-none transition-all cursor-pointer hover:bg-black/60 appearance-none min-w-[180px]">
+                            <option value="">Classification Filter</option>
                             <?php foreach($categories as $cat): ?>
                                 <option value="<?= $cat ?>" <?= $categoryFilter === $cat ? 'selected' : '' ?>><?= $cat ?></option>
                             <?php endforeach; ?>
                         </select>
                     </form>
-                    <div class="text-xs font-bold uppercase tracking-widest text-slate-500">
-                        Showing <?= count($payments) ?> Records
+                    <div class="text-[10px] font-black uppercase tracking-[0.3em] text-white flex items-center gap-3">
+                        <i class="ph ph-activity text-neon-cyan animate-pulse"></i>
+                        <span class="opacity-50"><?= count($payments) ?> Recorded Clusters</span>
                     </div>
                 </div>
 
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left border-collapse min-w-[950px]">
+                <div class="overflow-x-auto crm-main-scroll">
+                    <table class="admin-table w-full text-left border-collapse min-w-[1000px]">
                         <thead>
-                            <tr class="bg-black/40 text-slate-500 text-[10px] font-bold uppercase tracking-[0.2em]">
-                                <th class="py-5 px-8">Expenditure Details</th>
-                                <th class="py-5 px-4">Category</th>
-                                <th class="py-5 px-4">Project / Link</th>
-                                <th class="py-5 px-4 text-right">Amount</th>
-                                <th class="py-5 px-8 text-right">Actions</th>
+                            <tr class="text-slate-600 text-[8px] font-black uppercase tracking-[0.3em] bg-white/[0.01]">
+                                <th class="py-6 px-8">Transaction Origin</th>
+                                <th class="py-6 px-6 text-center">Protocol Class</th>
+                                <th class="py-6 px-6">Operational Link</th>
+                                <th class="py-6 px-6 text-right font-mono tracking-normal">Valuation (AED)</th>
+                                <th class="py-6 px-8 text-right tracking-[0.2em]">Navigation</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-white/[0.03] text-sm">
+                        <tbody class="divide-y divide-white/[0.02]">
                             <?php if(empty($payments)): ?>
                                 <tr>
-                                    <td colspan="5" class="py-20 text-center text-slate-500 italic">No expenditures recorded yet.</td>
+                                    <td colspan="5" class="py-20 text-center">
+                                        <div class="text-slate-700 text-[10px] font-black uppercase tracking-widest">No historical sequences detected.</div>
+                                    </td>
                                 </tr>
                             <?php else: ?>
                                 <?php foreach($payments as $p): ?>
-                                <tr class="hover:bg-white/[0.01] transition-colors group">
-                                    <td class="py-5 px-8">
-                                        <div class="flex items-center gap-4">
-                                            <div class="w-10 h-10 rounded-xl bg-black/40 border border-white/5 flex items-center justify-center text-lg shadow-inner">
-                                                <i class="ph-duotone ph-currency-circle-dollar text-primary"></i>
+                                <tr class="hover:bg-white/[0.03] transition-all group/row border-b border-white/[0.03] last:border-0 relative">
+                                    <td class="py-6 px-8" data-label="Title">
+                                        <div class="flex items-center gap-5">
+                                            <div class="w-12 h-12 rounded-2xl bg-black/40 border border-white/10 flex items-center justify-center text-xl shadow-inner group-hover/row:border-neon-cyan/40 group-hover/row:bg-neon-cyan/5 transition-all duration-300">
+                                                <i class="ph-bold ph-receipt text-neon-cyan group-hover/row:scale-110 transition-transform"></i>
                                             </div>
                                             <div>
-                                                <span class="text-white font-bold block mb-0.5"><?= htmlspecialchars($p['title']) ?></span>
-                                                <div class="flex flex-wrap gap-2 mt-1">
-                                                    <span class="text-[10px] text-slate-500 uppercase tracking-widest font-bold font-mono"><?= date('M d, Y', strtotime($p['payment_date'])) ?></span>
+                                                <span class="text-white font-black text-[11px] uppercase tracking-wider block mb-1 group-hover/row:text-neon-cyan transition-colors"><?= htmlspecialchars($p['title']) ?></span>
+                                                <div class="flex items-center gap-3">
+                                                    <span class="text-[9px] text-slate-600 uppercase tracking-widest font-black flex items-center gap-1.5">
+                                                        <i class="ph ph-calendar-blank text-[11px]"></i>
+                                                        <?= date('d M Y', strtotime($p['payment_date'])) ?>
+                                                    </span>
                                                     <?php if(!empty($p['attachments'])): ?>
-                                                        <div class="flex gap-1.5 hover:scale-105 transition-transform">
-                                                            <i class="ph ph-paperclip text-primary text-xs"></i>
-                                                            <span class="text-[9px] text-primary font-black uppercase"><?= count($p['attachments']) ?> Files</span>
+                                                        <div class="flex items-center gap-1 px-2 py-0.5 rounded-md bg-neon-cyan/5 border border-neon-cyan/20">
+                                                            <i class="ph-bold ph-paperclip text-neon-cyan text-[8px]"></i>
+                                                            <span class="text-[8px] text-neon-cyan font-black uppercase tracking-widest"><?= count($p['attachments']) ?> UNIT</span>
                                                         </div>
                                                     <?php endif; ?>
                                                 </div>
                                             </div>
                                         </div>
                                     </td>
-                                    <td class="py-5 px-4">
-                                        <span class="px-3 py-1 rounded-lg bg-white/5 border border-white/5 text-[11px] text-slate-400 font-bold uppercase tracking-tight">
+                                    <td class="py-6 px-6 text-center" data-label="Protocol">
+                                        <span class="inline-flex px-3 py-1 rounded-lg bg-white/5 border border-white/10 text-[8px] text-slate-400 font-black uppercase tracking-widest hover:border-neon-cyan/30 transition-colors">
                                             <?= htmlspecialchars($p['category']) ?>
                                         </span>
                                     </td>
-                                    <td class="py-5 px-4">
+                                    <td class="py-6 px-6" data-label="Link">
                                         <?php if($p['project_name']): ?>
-                                            <a href="<?= BASE_URL ?>/admin/crm_opportunity?id=<?= $p['opportunity_id'] ?>" class="text-primary hover:text-emerald-400 flex items-center gap-2 transition-colors">
-                                                <i class="ph ph-briefcase"></i>
-                                                <span class="truncate max-w-[150px] font-medium"><?= htmlspecialchars($p['project_name']) ?></span>
+                                            <a href="<?= BASE_URL ?>/admin/crm_opportunity?id=<?= $p['opportunity_id'] ?>" class="group/link flex items-center gap-3 transition-all">
+                                                <div class="w-8 h-8 rounded-xl bg-white/5 flex items-center justify-center group-hover/link:bg-neon-cyan/10 border border-white/5 group-hover/link:border-neon-cyan/20 transition-all">
+                                                    <i class="ph ph-rocket text-slate-500 group-hover/link:text-neon-cyan text-sm"></i>
+                                                </div>
+                                                <span class="text-[10px] font-black text-slate-500 group-hover/link:text-white uppercase tracking-widest truncate max-w-[180px]"><?= htmlspecialchars($p['project_name']) ?></span>
                                             </a>
                                         <?php else: ?>
-                                            <span class="text-slate-600 italic">General Expenditure</span>
+                                            <div class="flex items-center gap-3 text-slate-800 text-[9px] font-black uppercase tracking-widest">
+                                                <div class="w-1 h-1 rounded-full bg-slate-800"></div>
+                                                GLOBAL OBJECTIVE
+                                            </div>
                                         <?php endif; ?>
                                     </td>
-                                    <td class="py-5 px-4 text-right">
-                                        <span class="text-white font-extrabold text-base">$<?= number_format($p['amount'], 2) ?></span>
+                                    <td class="py-6 px-6 text-right" data-label="Valuation">
+                                        <div class="flex flex-col items-end">
+                                            <span class="text-white font-black text-lg tracking-tighter">$<?= number_format($p['amount'], 2) ?></span>
+                                            <span class="text-[8px] text-slate-700 font-bold uppercase tracking-widest mt-1">DRAIN QUANTUM</span>
+                                        </div>
                                     </td>
-                                    <td class="py-5 px-8 text-right">
-                                        <div class="flex justify-end gap-2">
-                                            <button onclick='viewPayment(<?= json_encode($p) ?>)' class="w-8 h-8 rounded-lg bg-blue-500/10 text-blue-400 hover:bg-blue-500 hover:text-white transition-all flex items-center justify-center" title="View">
-                                                <i class="ph ph-eye"></i>
+                                    <td class="py-6 px-8 text-right" data-label="Navigation">
+                                        <div class="flex justify-end gap-3 opacity-0 group-hover/row:opacity-100 transition-all translate-x-4 group-hover/row:translate-x-0">
+                                            <button onclick='viewPayment(<?= json_encode($p) ?>)' class="w-10 h-10 rounded-xl bg-neon-cyan/10 text-neon-cyan hover:bg-neon-cyan hover:text-black border border-neon-cyan/20 transition-all flex items-center justify-center shadow-lg active:scale-90" title="Audit Sequence">
+                                                <i class="ph-bold ph-eye text-lg"></i>
                                             </button>
-                                            <button onclick='editPayment(<?= json_encode($p) ?>)' class="w-8 h-8 rounded-lg bg-primary/10 text-primary hover:bg-primary hover:text-white transition-all flex items-center justify-center" title="Edit">
-                                                <i class="ph ph-pencil-simple"></i>
+                                            <button onclick='editPayment(<?= json_encode($p) ?>)' class="w-10 h-10 rounded-xl bg-white/5 text-slate-400 hover:text-white border border-white/10 transition-all flex items-center justify-center shadow-lg active:scale-90" title="Modify Intel">
+                                                <i class="ph-bold ph-pencil-simple text-lg"></i>
                                             </button>
-                                            <form action="<?= BASE_URL ?>/admin/crm_payments" method="POST" onsubmit="return confirm('Delete this record?')" class="inline-block">
+                                            <form action="<?= BASE_URL ?>/admin/crm_payments" method="POST" id="deletePayment_<?= $p['id'] ?>" class="inline-block">
                                                 <input type="hidden" name="action" value="delete_payment">
                                                 <input type="hidden" name="id" value="<?= $p['id'] ?>">
-                                                <button type="submit" class="w-8 h-8 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500 hover:text-white transition-all flex items-center justify-center">
-                                                    <i class="ph ph-trash"></i>
+                                                <button type="button" onclick="showDeleteModal('CLUSTER-<?= $p['id'] ?>', 'deletePayment_<?= $p['id'] ?>')" class="w-10 h-10 rounded-xl bg-neon-rose/5 text-neon-rose hover:bg-neon-rose hover:text-white border border-neon-rose/20 transition-all flex items-center justify-center shadow-lg active:scale-90">
+                                                    <i class="ph-bold ph-trash text-lg"></i>
                                                 </button>
                                             </form>
                                         </div>
@@ -451,5 +471,60 @@ $currentPage = 'crm_payments';
     }
 </script>
 
+<style>
+    /* Desktop-first: ensure table looks good on large screens */
+    @media screen and (min-width: 1025px) {
+        .admin-table { min-width: 1000px; }
+    }
+
+    /* Mobile-responsive card transformation */
+    @media (max-width: 1024px) {
+        .admin-table-wrapper { border-radius: 1.5rem !important; margin: -1rem !important; }
+        .admin-table thead { display: none !important; }
+        
+        .admin-table, 
+        .admin-table tbody, 
+        .admin-table tr, 
+        .admin-table td { 
+            display: block !important; 
+            width: 100% !important; 
+            min-width: 0 !important;
+        }
+        
+        .admin-table tr { 
+            margin-bottom: 20px !important; 
+            background: rgba(255,255,255,0.02) !important; 
+            border-radius: 1.5rem !important; 
+            padding: 20px !important;
+            border: 1px solid rgba(255,255,255,0.05) !important;
+        }
+        
+        .admin-table td { 
+            display: flex !important; 
+            justify-content: space-between !important; 
+            align-items: center !important; 
+            padding: 12px 0 !important; 
+            border-bottom: 1px solid rgba(255,255,255,0.03) !important;
+            text-align: right !important;
+            min-height: 44px !important;
+        }
+        
+        .admin-table td:last-child { border-bottom: none !important; }
+        
+        .admin-table td::before { 
+            content: attr(data-label) !important; 
+            font-weight: 900 !important; 
+            text-transform: uppercase !important; 
+            font-size: 0.65rem !important; 
+            color: #06b6d4 !important;
+            letter-spacing: 2px !important;
+            opacity: 0.6 !important;
+            text-align: left !important;
+            margin-right: 12px !important;
+        }
+    }
+</style>
+
+<?php require __DIR__ . '/partials/_delete_modal.php'; ?>
 </body>
 </html>

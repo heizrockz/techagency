@@ -1,148 +1,228 @@
 <!DOCTYPE html>
 <html lang="<?= e(getCurrentLocale()) ?>" dir="<?= isRTL() ? 'rtl' : 'ltr' ?>">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Products — <?= APP_NAME ?></title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="<?= baseUrl('assets/css/style.css') ?>">
+    <title>Product Protocol — <?= APP_NAME ?></title>
+    <?php require __DIR__ . '/partials/_head_assets.php'; ?>
 </head>
 <body dir="<?= isRTL() ? 'rtl' : 'ltr' ?>">
-<div class="admin-layout">
+<div class="admin-layout flex w-full h-screen overflow-hidden">
     <?php $currentPage = 'products'; require __DIR__ . '/partials/sidebar.php'; ?>
-    <div class="admin-main">
-        <div class="admin-header">
-            <h1>📦 Products / Ideas</h1>
-            <a href="<?= baseUrl('admin/products?action=new') ?>" class="btn-primary" style="padding: 8px 16px; font-size: 0.9rem;">+ Add Product</a>
-        </div>
-        
-        <?php if ($saved): ?>
-            <div class="alert alert-success">Saved successfully.</div>
-        <?php endif; ?>
-
-        <?php if ($action === 'edit' || $action === 'new'): ?>
-            <div class="admin-card" style="margin-bottom: 30px;">
-                <form method="POST" action="<?= baseUrl('admin/products') ?>">
-                    <input type="hidden" name="id" value="<?= $editProduct['id'] ?? 0 ?>">
-                    <div class="admin-grid-2">
-                        <div class="form-group">
-                            <label>Category</label>
-                            <select name="category" class="form-input">
-                                <?php $cat = $editProduct['category'] ?? 'website'; ?>
-                                <option value="website" <?= $cat==='website'?'selected':'' ?>>Website</option>
-                                <option value="app" <?= $cat==='app'?'selected':'' ?>>App</option>
-                                <option value="maintenance" <?= $cat==='maintenance'?'selected':'' ?>>Maintenance</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>Icon (globe, car, cart, hotel, billing, crm, wrench)</label>
-                            <input type="text" name="icon" class="form-input" value="<?= e($editProduct['icon'] ?? 'globe') ?>">
-                        </div>
-                        <div class="form-group">
-                            <label>Color (cobalt, violet, emerald, pink, cyan, orange)</label>
-                            <input type="text" name="color" class="form-input" value="<?= e($editProduct['color'] ?? 'cobalt') ?>">
-                        </div>
-                        <div class="form-group">
-                            <label>Sort Order</label>
-                            <input type="number" name="sort_order" class="form-input" value="<?= $editProduct['sort_order'] ?? 0 ?>">
-                        </div>
-                        <div class="form-group" style="display: flex; align-items: center; margin-top: 25px;">
-                            <label style="cursor: pointer; display: flex; align-items: center; gap: 10px;">
-                                <input type="checkbox" name="is_active" <?= (!isset($editProduct) || $editProduct['is_active']) ? 'checked' : '' ?>>
-                                Active
-                            </label>
-                        </div>
-                    </div>
-
-                    <?php foreach (SUPPORTED_LOCALES as $loc): ?>
-                        <div style="margin-top: 20px; padding: 15px; background: rgba(255,255,255,0.02); border-radius: 8px;">
-                            <h4 style="margin-bottom: 10px;"><?= strtoupper($loc) ?> Translation</h4>
-                            <div class="form-group">
-                                <label>Title</label>
-                                <input type="text" name="title_<?= $loc ?>" class="form-input" value="<?= e($editProduct['translations'][$loc]['title'] ?? '') ?>" dir="<?= $loc === 'ar' ? 'rtl' : 'ltr' ?>" required>
-                            </div>
-                            <div class="form-group">
-                                <label>Description</label>
-                                <textarea name="desc_<?= $loc ?>" class="form-input" rows="3" dir="<?= $loc === 'ar' ? 'rtl' : 'ltr' ?>"><?= e($editProduct['translations'][$loc]['description'] ?? '') ?></textarea>
-                            </div>
-                        </div>
-                    <?php endforeach; ?>
-
-                    <div style="margin-top: 20px;">
-                        <button type="submit" class="btn-primary">Save Product</button>
-                        <a href="<?= baseUrl('admin/products') ?>" class="btn-ghost" style="margin-left: 10px;">Cancel</a>
-                    </div>
-                </form>
-            </div>
-        <?php else: ?>
-            <div class="admin-card">
-                <div style="overflow-x: auto;">
-                    <table class="admin-table">
-                    <thead>
-                        <tr>
-                            <th>Category</th>
-                            <th>Translations</th>
-                            <th>Sort</th>
-                            <th>Status</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php foreach ($products as $p): ?>
-                        <tr>
-                            <td><span style="padding:4px 8px;border-radius:4px;background:var(--neon-<?= $p['color'] ?>);color:#fff;font-size:0.7rem;"><?= e($p['category']) ?></span></td>
-                            <td><?= e($p['trans']) ?></td>
-                            <td><?= $p['sort_order'] ?></td>
-                            <td><?= $p['is_active'] ? '<span style="color:var(--neon-emerald)">Active</span>' : '<span style="color:var(--text-muted)">Inactive</span>' ?></td>
-                            <td>
-                                <a href="<?= baseUrl('admin/products?action=edit&id='.$p['id']) ?>" style="color: var(--neon-cyan); margin-right: 10px;">Edit</a>
-                                <button type="button" onclick="showDeleteModal('Product #<?= $p['id'] ?> (<?= e($p['category']) ?>)', '<?= baseUrl('admin/products?action=delete&id='.$p['id']) ?>')" style="color: var(--neon-pink); background:none; border:none; cursor:pointer; font-size:inherit; font-family:inherit;">Delete</button>
-                            </td>
-                        </tr>
-                        <?php endforeach; ?>
-                    </tbody>
-                    </table>
+    <div class="flex-1 flex flex-col min-w-0">
+        <header class="h-20 flex items-center justify-between px-8 bg-glass-bg border-b border-white/5 shrink-0 backdrop-blur-xl sticky top-0 z-[100]">
+            <div class="absolute inset-0 bg-gradient-to-r from-violet-500/5 via-transparent to-transparent"></div>
+            <div class="relative flex items-center gap-4">
+                <div class="w-10 h-10 rounded-xl bg-violet-500/10 flex items-center justify-center border border-violet-500/20">
+                    <i class="ph ph-cube text-2xl text-violet-500 animate-pulse"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold text-white tracking-tight">Products</h1>
+                    <p class="text-[10px] text-white/40 uppercase tracking-widest font-black hidden sm:block">Innovation Registry</p>
                 </div>
             </div>
-        <?php endif; ?>
+            <div class="relative flex items-center gap-4">
+                <a href="<?= baseUrl('admin/products?action=new') ?>" class="group flex items-center gap-2 px-3 sm:px-5 py-2.5 bg-violet-500/10 hover:bg-violet-500/20 border border-violet-500/20 hover:border-violet-500/40 rounded-xl transition-all duration-300">
+                    <i class="ph ph-plus-circle text-lg text-violet-500 group-hover:rotate-90 transition-transform duration-500"></i>
+                    <span class="text-sm font-semibold text-violet-500 hidden sm:inline">Deploy</span>
+                </a>
+                <div class="h-8 w-px bg-white/10 mx-2"></div>
+                <?php require __DIR__ . '/partials/_topbar.php'; ?>
+            </div>
+        </header>
+        
+        <main class="flex-1 overflow-y-auto p-8 crm-main-scroll bg-[#0b0e14]">
+            <?php if ($saved): ?>
+                <div class="mb-8 p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-xl flex items-center gap-3 animate-in fade-in slide-in-from-top-4">
+                    <div class="w-8 h-8 rounded-lg bg-emerald-500/20 flex items-center justify-center">
+                        <i class="ph ph-check-circle text-emerald-500"></i>
+                    </div>
+                    <p class="text-emerald-500 font-medium">Asset parameters synchronized successfully.</p>
+                </div>
+            <?php endif; ?>
+
+            <?php if ($action === 'edit' || $action === 'new'): ?>
+                <div class="max-w-4xl mx-auto">
+                    <div class="admin-card relative overflow-hidden group">
+                        <div class="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity">
+                            <i class="ph ph-package text-8xl text-violet-500"></i>
+                        </div>
+                        
+                        <div class="relative flex items-center gap-3 mb-8">
+                            <div class="w-10 h-10 rounded-lg bg-violet-500/10 flex items-center justify-center border border-violet-500/20 text-violet-500">
+                                <i class="ph ph-pencil-line text-xl"></i>
+                            </div>
+                            <h2 class="text-xl font-bold text-white"><?= $action === 'edit' ? 'Modify Asset Specifications' : 'Initialize New Product Idea' ?></h2>
+                        </div>
+
+                        <form method="POST" action="<?= baseUrl('admin/products') ?>" class="relative space-y-8">
+                            <input type="hidden" name="id" value="<?= $editProduct['id'] ?? 0 ?>">
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div class="space-y-2">
+                                    <label class="text-sm font-semibold text-white/60 ml-1">Classification Category</label>
+                                    <select name="category" class="form-input">
+                                        <?php $cat = $editProduct['category'] ?? 'website'; ?>
+                                        <option value="website" <?= $cat==='website'?'selected':'' ?>>Web Architecture</option>
+                                        <option value="app" <?= $cat==='app'?'selected':'' ?>>Mobile Subsystem</option>
+                                        <option value="maintenance" <?= $cat==='maintenance'?'selected':'' ?>>Operational Maintenance</option>
+                                    </select>
+                                </div>
+
+                                <div class="space-y-2">
+                                    <label class="text-sm font-semibold text-white/60 ml-1">Icon Identifier</label>
+                                    <div class="relative group/input">
+                                        <i class="ph ph-tag absolute left-4 top-1/2 -translate-y-1/2 text-violet-500/50 group-focus-within/input:text-violet-500 transition-colors"></i>
+                                        <input type="text" name="icon" class="form-input !pl-12" placeholder="globe, monitor, etc." value="<?= e($editProduct['icon'] ?? 'globe') ?>">
+                                    </div>
+                                </div>
+
+                                <div class="space-y-2">
+                                    <label class="text-sm font-semibold text-white/60 ml-1">Spectral Signature</label>
+                                    <select name="color" class="form-input">
+                                        <?php 
+                                        $colors = ['cobalt', 'violet', 'emerald', 'pink', 'cyan', 'orange'];
+                                        $selectedColor = $editProduct['color'] ?? 'cobalt';
+                                        foreach($colors as $c): ?>
+                                            <option value="<?= $c ?>" <?= $selectedColor === $c ? 'selected' : '' ?>><?= ucfirst($c) ?></option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                </div>
+
+                                <div class="space-y-2">
+                                    <label class="text-sm font-semibold text-white/60 ml-1">Sequence Priority</label>
+                                    <input type="number" name="sort_order" class="form-input" value="<?= $editProduct['sort_order'] ?? 0 ?>">
+                                </div>
+
+                                <div class="flex items-center pt-8">
+                                    <label class="relative flex items-center gap-3 cursor-pointer group">
+                                        <input type="checkbox" name="is_active" class="peer hidden" <?= (!isset($editProduct) || $editProduct['is_active']) ? 'checked' : '' ?>>
+                                        <div class="w-12 h-6 bg-white/5 rounded-full border border-white/10 peer-checked:bg-violet-500/20 peer-checked:border-violet-500/40 transition-all duration-300"></div>
+                                        <div class="absolute left-1 top-1 w-4 h-4 bg-white/20 rounded-full peer-checked:left-7 peer-checked:bg-violet-500 transition-all duration-300 shadow-lg"></div>
+                                        <span class="text-sm font-medium text-white/60 group-hover:text-white transition-colors">Asset Operational</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="space-y-6">
+                                <?php foreach (SUPPORTED_LOCALES as $loc): ?>
+                                    <div class="p-6 rounded-2xl bg-white/[0.03] border border-white/5 relative overflow-hidden group/loc">
+                                        <div class="absolute top-0 right-0 w-24 h-24 bg-violet-500/5 rounded-full -mr-12 -mt-12 blur-2xl group-hover/loc:bg-violet-500/10 transition-colors"></div>
+                                        
+                                        <div class="flex items-center justify-between mb-6">
+                                            <div class="flex items-center gap-2">
+                                                <div class="w-2 h-2 rounded-full bg-violet-500 animate-pulse"></div>
+                                                <h4 class="text-sm font-bold text-white uppercase tracking-widest"><?= strtoupper($loc) ?> Signal Channel</h4>
+                                            </div>
+                                            <span class="px-2 py-0.5 rounded-md bg-white/5 text-[10px] font-bold text-white/40 border border-white/10"><?= $loc === 'ar' ? 'RTL' : 'LTR' ?></span>
+                                        </div>
+
+                                        <div class="space-y-4">
+                                            <div class="space-y-2">
+                                                <label class="text-xs font-semibold text-white/40 ml-1">Title</label>
+                                                <input type="text" name="title_<?= $loc ?>" class="form-input <?= $loc === 'ar' ? 'rtl-input' : '' ?>" value="<?= e($editProduct['translations'][$loc]['title'] ?? '') ?>" required>
+                                            </div>
+                                            <div class="space-y-2">
+                                                <label class="text-xs font-semibold text-white/40 ml-1">Description</label>
+                                                <textarea name="desc_<?= $loc ?>" class="form-input min-h-[100px] <?= $loc === 'ar' ? 'rtl-input' : '' ?>" rows="3"><?= e($editProduct['translations'][$loc]['description'] ?? '') ?></textarea>
+                                            </div>
+                                        </div>
+                                    </div>
+                                <?php endforeach; ?>
+                            </div>
+
+                            <div class="flex items-center gap-4 pt-6 border-t border-white/5">
+                                <button type="submit" class="group relative px-8 py-3 bg-violet-500 text-black font-bold rounded-xl hover:bg-violet-400 transition-all shadow-lg shadow-violet-500/20 overflow-hidden">
+                                    <span class="relative z-10">Commit Asset</span>
+                                    <div class="absolute inset-0 bg-white/20 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
+                                </button>
+                                <a href="<?= baseUrl('admin/products') ?>" class="px-8 py-3 bg-white/5 text-white font-semibold rounded-xl hover:bg-white/10 transition-all border border-white/10">
+                                    Abort
+                                </a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            <?php else: ?>
+                <div class="admin-card p-0 overflow-hidden border-white/5">
+                    <div class="p-6 border-b border-white/5 flex items-center justify-between bg-white/[0.01]">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-xl bg-violet-500/10 flex items-center justify-center border border-violet-500/20">
+                                <i class="ph ph-package text-violet-500 text-xl"></i>
+                            </div>
+                            <h3 class="font-bold text-white tracking-tight text-lg">Innovation Asset Matrix</h3>
+                        </div>
+                        <div class="bg-white/5 px-4 py-1.5 rounded-full border border-white/10">
+                            <span class="text-[10px] text-white/40 uppercase tracking-widest font-bold">Total Assets:</span>
+                            <span class="text-sm font-mono text-violet-500 font-bold ml-2"><?= count($products) ?></span>
+                        </div>
+                    </div>
+                    
+                    <div class="overflow-x-auto">
+                        <table class="admin-table">
+                            <thead>
+                                <tr>
+                                    <th class="!pl-8">Asset Entity</th>
+                                    <th>Translation Data</th>
+                                    <th class="text-center">Seq Index</th>
+                                    <th class="text-center">Status</th>
+                                    <th class="!pr-8 text-right">Operations</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-white/5">
+                                <?php foreach ($products as $p): ?>
+                                    <tr class="group hover:bg-white/[0.02] transition-colors duration-300">
+                                        <td class="!pl-8">
+                                            <div class="flex items-center gap-4">
+                                                <div class="w-12 h-12 rounded-2xl bg-<?= $p['color'] ?>/10 flex items-center justify-center border border-<?= $p['color'] ?>/20 group-hover:scale-110 transition-transform duration-500">
+                                                    <i class="ph ph-<?= e($p['icon']) ?> text-2xl text-<?= $p['color'] ?>"></i>
+                                                </div>
+                                                <div class="flex flex-col">
+                                                    <span class="text-xs font-bold text-white/40 uppercase tracking-widest"><?= e($p['category']) ?></span>
+                                                    <span class="text-sm font-bold text-white group-hover:text-violet-500 transition-colors uppercase"><?= e($p['trans']) ?></span>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="flex gap-1.5">
+                                                <?php foreach (SUPPORTED_LOCALES as $loc): ?>
+                                                    <span class="px-1.5 py-0.5 rounded bg-white/5 text-[9px] font-bold text-white/30 border border-white/5 uppercase"><?= $loc ?></span>
+                                                <?php endforeach; ?>
+                                            </div>
+                                        </td>
+                                        <td class="text-center">
+                                            <span class="text-xs font-mono text-white/40 bg-white/5 px-2 py-1 rounded-md border border-white/10"><?= $p['sort_order'] ?></span>
+                                        </td>
+                                        <td class="text-center">
+                                            <?php if($p['is_active']): ?>
+                                                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-500 text-[10px] font-bold uppercase tracking-widest border border-emerald-500/20">
+                                                    Operational
+                                                </span>
+                                            <?php else: ?>
+                                                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/5 text-white/40 text-[10px] font-bold uppercase tracking-widest border border-white/10">
+                                                    Standby
+                                                </span>
+                                            <?php endif; ?>
+                                        </td>
+                                        <td class="!pr-8 text-right">
+                                            <div class="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                <a href="<?= baseUrl('admin/products?action=edit&id='.$p['id']) ?>" class="w-8 h-8 rounded-lg bg-violet-500/10 flex items-center justify-center text-violet-500 hover:bg-violet-500 hover:text-black transition-all">
+                                                    <i class="ph ph-pencil-simple"></i>
+                                                </a>
+                                                <button onclick="showDeleteModal('<?= e($p['trans']) ?>', '<?= baseUrl('admin/products?action=delete&id='.$p['id']) ?>')" class="w-8 h-8 rounded-lg bg-pink-500/10 flex items-center justify-center text-pink-500 hover:bg-pink-500 hover:text-white transition-all">
+                                                    <i class="ph ph-trash"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            <?php endif; ?>
+        </main>
     </div>
 </div>
 
-<!-- Delete Confirmation Modal -->
-<div id="deleteModal" style="display:none; position:fixed; inset:0; z-index:9999; background:rgba(0,0,0,0.7); backdrop-filter:blur(8px); align-items:center; justify-content:center;">
-    <div style="background:#1a2333; border:1px solid rgba(255,255,255,0.1); border-radius:1.5rem; padding:2rem; max-width:420px; width:90%; box-shadow:0 25px 50px rgba(0,0,0,0.5); animation:modalIn 0.2s ease-out;">
-        <div style="text-align:center; margin-bottom:1.5rem;">
-            <div style="width:64px; height:64px; border-radius:50%; background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.2); display:flex; align-items:center; justify-content:center; margin:0 auto 1rem;">
-                <i class="ph ph-warning" style="font-size:2rem; color:#f87171;"></i>
-            </div>
-            <h3 style="color:#fff; font-size:1.25rem; font-weight:700; margin-bottom:0.5rem;">Confirm Deletion</h3>
-            <p style="color:#94a3b8; font-size:0.875rem; line-height:1.6;">Are you sure you want to delete <strong id="deleteItemName" style="color:#f87171;"></strong>? This action cannot be undone.</p>
-        </div>
-        <div style="display:flex; gap:0.75rem; justify-content:center;">
-            <button onclick="closeDeleteModal()" style="padding:0.625rem 1.5rem; background:rgba(255,255,255,0.05); color:#94a3b8; font-weight:700; font-size:0.7rem; text-transform:uppercase; letter-spacing:0.1em; border-radius:0.75rem; border:1px solid rgba(255,255,255,0.1); cursor:pointer; transition:all 0.2s;">Cancel</button>
-            <a id="deleteConfirmBtn" href="#" style="padding:0.625rem 1.5rem; background:#ef4444; color:#fff; font-weight:700; font-size:0.7rem; text-transform:uppercase; letter-spacing:0.1em; border-radius:0.75rem; border:none; cursor:pointer; text-decoration:none; display:inline-flex; align-items:center; gap:0.5rem; transition:all 0.2s;">
-                <i class="ph ph-trash"></i> Delete
-            </a>
-        </div>
-    </div>
-</div>
-<style>
-@keyframes modalIn { from { opacity:0; transform:scale(0.95) translateY(10px); } to { opacity:1; transform:scale(1) translateY(0); } }
-#deleteModal button:hover { background:rgba(255,255,255,0.1) !important; color:#fff !important; }
-#deleteConfirmBtn:hover { background:#dc2626 !important; box-shadow:0 0 20px rgba(239,68,68,0.3); }
-</style>
-<script>
-function showDeleteModal(name, url) {
-    document.getElementById('deleteItemName').textContent = name;
-    document.getElementById('deleteConfirmBtn').href = url;
-    document.getElementById('deleteModal').style.display = 'flex';
-}
-function closeDeleteModal() {
-    document.getElementById('deleteModal').style.display = 'none';
-}
-document.getElementById('deleteModal').addEventListener('click', function(e) {
-    if (e.target === this) closeDeleteModal();
-});
-</script>
+<?php require __DIR__ . '/partials/_delete_modal.php'; ?>
 </body>
 </html>

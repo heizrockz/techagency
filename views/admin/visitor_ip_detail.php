@@ -23,21 +23,27 @@ $currentPage = 'dashboard';
     </script>
 </head>
 <body>
-<div class="admin-layout flex w-full">
+<div class="admin-layout flex w-full h-screen overflow-hidden">
     <?php require __DIR__ . '/partials/sidebar.php'; ?>
     <div class="crm-main leading-relaxed text-slate-300 bg-[#0f1115]">
         
         <!-- Header -->
-        <header class="h-16 flex items-center justify-between px-6 bg-[#1a2333] border-b border-white/5 shrink-0">
+        <!-- Header -->
+        <header class="h-20 flex items-center justify-between px-8 bg-glass-bg border-b border-white/5 shrink-0 backdrop-blur-xl sticky top-0 z-[100]">
             <div class="flex items-center gap-4">
-                <a href="<?= baseUrl('admin/visitors') ?>" class="text-slate-400 hover:text-white transition-colors p-2 -ml-2 rounded-lg hover:bg-white/5">
-                    <i class="ph ph-arrow-left text-xl"></i>
+                <a href="<?= baseUrl('admin/visitors') ?>" class="w-12 h-12 flex items-center justify-center rounded-2xl bg-white/5 text-slate-500 hover:text-neon-cyan hover:bg-neon-cyan/5 border border-white/10 hover:border-neon-cyan/20 transition-all active:scale-95 shadow-lg group">
+                    <i class="ph-bold ph-arrow-left text-xl transition-transform group-hover:-translate-x-1"></i>
                 </a>
-                <h1 class="text-xl font-semibold text-white tracking-tight flex items-center gap-2">
-                    <i class="ph ph-detective text-primary"></i>
-                    IP Activity Detail
-                </h1>
+                <div class="flex flex-col">
+                    <div class="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em] mb-1 hidden sm:block">Deep Intelligence</div>
+                    <h1 class="text-xl font-black text-white tracking-tight flex items-center gap-3 group">
+                        <span class="text-neon-cyan drop-shadow-[0_0_8px_rgba(6,182,212,0.4)]">IP Detail</span>
+                        <span class="opacity-20 translate-y-px hidden sm:inline">/</span>
+                        <span class="text-[10px] tracking-widest text-slate-400 uppercase font-black hidden sm:inline-block"><?= htmlspecialchars($ip) ?></span>
+                    </h1>
+                </div>
             </div>
+            <?php require __DIR__ . '/partials/_topbar.php'; ?>
         </header>
 
         <main class="flex-1 overflow-y-auto p-4 lg:p-6 crm-main-scroll bg-[#0b0e14]">
@@ -48,67 +54,81 @@ $currentPage = 'dashboard';
                 <?php else: ?>
 
                 <!-- IP Summary Card -->
-                <div class="bg-[#1a2333]/40 backdrop-blur-lg border border-white/5 rounded-3xl p-8 shadow-2xl">
-                    <div class="flex flex-col md:flex-row items-start md:items-center gap-6">
+                <div class="admin-table-wrapper backdrop-blur-2xl border border-white/5 rounded-[2.5rem] overflow-hidden shadow-premium p-10 bg-white/[0.01] relative group">
+                    <div class="absolute -right-20 -top-20 w-64 h-64 bg-neon-cyan/5 rounded-full blur-[100px] transition-all duration-700 group-hover:bg-neon-cyan/10"></div>
+                    
+                    <div class="relative z-10 flex flex-col items-start gap-6 md:gap-10">
                         <!-- Flag & Location -->
-                        <div class="flex items-center gap-5">
-                            <div class="w-20 h-20 rounded-2xl bg-black/40 border border-white/5 flex items-center justify-center text-4xl shadow-xl" id="ip-flag">
+                        <div class="flex items-center gap-8">
+                            <div class="w-24 h-24 rounded-3xl bg-black/40 border border-white/10 flex items-center justify-center text-5xl shadow-2xl ring-1 ring-white/5 group-hover:scale-110 group-hover:rotate-3 transition-all duration-500" id="ip-flag">
                                 <script>document.getElementById('ip-flag').innerText = getCountryFlag('<?= htmlspecialchars($ipInfo['country_code']) ?>');</script>
                             </div>
                             <div>
-                                <h2 class="text-2xl font-extrabold text-white tracking-tight"><?= htmlspecialchars($ip) ?></h2>
-                                <p class="text-slate-400 mt-1"><?= htmlspecialchars($ipInfo['city']) ?>, <?= htmlspecialchars($ipInfo['region']) ?>, <?= htmlspecialchars($ipInfo['country']) ?></p>
-                                <p class="text-slate-500 text-xs mt-1 flex items-center gap-2">
-                                    <i class="ph ph-broadcast"></i> <?= htmlspecialchars($ipInfo['isp']) ?>
+                                <h2 class="text-3xl font-black text-white tracking-tighter uppercase drop-shadow-sm"><?= htmlspecialchars($ip) ?></h2>
+                                <p class="text-[11px] font-black text-slate-400 uppercase tracking-widest mt-2 flex items-center gap-3">
+                                    <span class="text-white"><?= htmlspecialchars($ipInfo['city']) ?></span>
+                                    <span class="opacity-20">/</span>
+                                    <span><?= htmlspecialchars($ipInfo['region']) ?></span>
+                                    <span class="opacity-20">/</span>
+                                    <span class="text-neon-cyan"><?= htmlspecialchars($ipInfo['country']) ?></span>
                                 </p>
+                                <div class="mt-4 flex items-center gap-3 px-4 py-2 bg-black/40 rounded-xl border border-white/5 w-fit">
+                                    <i class="ph-duotone ph-broadcast text-neon-cyan text-lg"></i>
+                                    <span class="text-[9px] font-black uppercase tracking-[0.2em] text-slate-500"><?= htmlspecialchars($ipInfo['isp']) ?></span>
+                                </div>
                             </div>
                         </div>
 
                         <!-- Stats -->
-                        <div class="flex gap-4 ml-auto">
-                            <div class="bg-black/30 border border-white/5 rounded-2xl px-6 py-4 text-center">
-                                <div class="text-2xl font-extrabold text-white"><?= $ipPageCount ?></div>
-                                <div class="text-[10px] text-slate-500 uppercase tracking-widest font-bold mt-1">Total Visits</div>
+                        <div class="flex flex-wrap gap-4 w-full md:w-auto md:ml-auto">
+                            <div class="flex-1 min-w-[120px] bg-black/40 border border-white/10 rounded-3xl px-6 py-4 text-center shadow-inner group-hover:border-neon-cyan/30 transition-all">
+                                <div class="text-2xl font-black text-white tracking-tighter"><?= $ipPageCount ?></div>
+                                <div class="text-[8px] text-slate-600 font-extrabold uppercase tracking-[0.2em] mt-1">Total_Flux</div>
                             </div>
-                            <div class="bg-black/30 border border-white/5 rounded-2xl px-6 py-4 text-center">
-                                <div class="text-2xl font-extrabold text-white"><?= $ipUniquePages ?></div>
-                                <div class="text-[10px] text-slate-500 uppercase tracking-widest font-bold mt-1">Unique Pages</div>
+                            <div class="flex-1 min-w-[120px] bg-black/40 border border-white/10 rounded-3xl px-6 py-4 text-center shadow-inner group-hover:border-neon-purple/30 transition-all">
+                                <div class="text-2xl font-black text-white tracking-tighter"><?= $ipUniquePages ?></div>
+                                <div class="text-[8px] text-slate-600 font-extrabold uppercase tracking-[0.2em] mt-1">Unique_Nodes</div>
                             </div>
-                            <div class="bg-black/30 border border-white/5 rounded-2xl px-6 py-4 text-center">
+                            <div class="flex-1 min-w-[120px] bg-black/40 border border-white/10 rounded-3xl px-6 py-4 text-center shadow-inner group-hover:border-neon-amber/30 transition-all">
                                 <?php if ($ipIsBot): ?>
-                                    <div class="text-2xl">🤖</div>
-                                    <div class="text-[10px] text-amber-400 uppercase tracking-widest font-bold mt-1">Bot</div>
+                                    <div class="text-2xl filter drop-shadow-[0_0_8px_rgba(245,158,11,0.4)]">🤖</div>
+                                    <div class="text-[8px] text-neon-amber font-extrabold uppercase tracking-[0.2em] mt-1">Neural_Bot</div>
                                 <?php else: ?>
-                                    <div class="text-2xl">👤</div>
-                                    <div class="text-[10px] text-emerald-400 uppercase tracking-widest font-bold mt-1">Human</div>
+                                    <div class="text-2xl filter drop-shadow-[0_0_8px_rgba(16,185,129,0.4)]">👤</div>
+                                    <div class="text-[8px] text-neon-emerald font-extrabold uppercase tracking-[0.2em] mt-1">Human_Ent</div>
                                 <?php endif; ?>
                             </div>
                         </div>
                     </div>
 
                     <!-- User Agent -->
-                    <div class="mt-6 p-4 bg-black/30 border border-white/5 rounded-xl">
-                        <div class="text-[10px] text-slate-500 uppercase tracking-widest font-bold mb-2">User Agent</div>
-                        <code class="text-xs text-slate-300 break-all leading-relaxed"><?= htmlspecialchars($ipInfo['user_agent']) ?></code>
+                    <div class="mt-10 p-6 bg-black/40 border border-white/5 rounded-2xl relative overflow-hidden group/agent">
+                        <div class="absolute inset-0 bg-gradient-to-r from-neon-cyan/5 to-transparent opacity-0 group-hover/agent:opacity-100 transition-opacity"></div>
+                        <div class="text-[9px] font-black text-slate-600 uppercase tracking-[0.3em] mb-3 relative z-10 flex items-center gap-3">
+                            <i class="ph-bold ph-browser text-neon-cyan"></i> Client Agent Signature
+                        </div>
+                        <code class="text-[10px] text-slate-400 font-mono font-bold break-all leading-relaxed relative z-10 block"><?= htmlspecialchars($ipInfo['user_agent']) ?></code>
                     </div>
                 </div>
 
                 <!-- Activity Timeline -->
-                <div class="bg-[#1a2333]/40 backdrop-blur-lg border border-white/5 rounded-3xl shadow-2xl overflow-hidden">
-                    <div class="p-6 lg:p-8 border-b border-white/5">
-                        <h2 class="text-xl font-bold text-white flex items-center gap-3">
-                            <span class="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center text-primary">
-                                <i class="ph ph-path"></i>
-                            </span>
-                            Page Visit Timeline
-                        </h2>
-                        <p class="text-slate-500 text-sm mt-1">Complete browsing history for this visitor</p>
+                <div class="admin-table-wrapper backdrop-blur-2xl border border-white/5 rounded-[2.5rem] overflow-hidden shadow-premium mb-20">
+                    <div class="p-10 border-b border-white/5 bg-white/[0.01]">
+                        <div class="flex items-center gap-4">
+                            <div class="w-10 h-10 rounded-xl bg-neon-cyan/10 text-neon-cyan flex items-center justify-center text-xl shadow-lg border border-neon-cyan/20">
+                                <i class="ph-duotone ph-path"></i>
+                            </div>
+                            <div class="flex flex-col">
+                                <h2 class="text-[11px] font-black uppercase tracking-[0.3em] text-white m-0">Temporal Access Chain</h2>
+                                <p class="text-[8px] text-slate-600 font-bold uppercase tracking-tight mt-1">Sequence of node interactions mapped by chronos-markers</p>
+                            </div>
+                        </div>
                     </div>
 
-                    <div class="p-6 lg:p-8">
+                    <div class="p-10">
                         <div class="relative">
                             <!-- Timeline line -->
-                            <div class="absolute left-[23px] top-0 bottom-0 w-px bg-white/5"></div>
+                            <div class="absolute left-[27px] top-0 bottom-0 w-px bg-white/5 border-l border-white/5"></div>
 
                             <?php 
                             $prevDate = '';
@@ -118,27 +138,28 @@ $currentPage = 'dashboard';
                                 $prevDate = $visitDate;
                             ?>
                                 <?php if ($showDate): ?>
-                                    <div class="relative flex items-center gap-4 mb-4 <?= $visit !== $ipVisits[0] ? 'mt-8' : '' ?>">
-                                        <div class="w-12 h-6 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center z-10">
-                                            <i class="ph ph-calendar-blank text-primary text-xs"></i>
+                                    <div class="relative flex items-center gap-6 mb-8 <?= $visit !== $ipVisits[0] ? 'mt-12' : '' ?>">
+                                        <div class="w-14 h-8 rounded-xl bg-neon-cyan/10 border border-neon-cyan/20 flex items-center justify-center z-10 shadow-lg">
+                                            <i class="ph-bold ph-calendar-blank text-neon-cyan text-xs"></i>
                                         </div>
-                                        <span class="text-xs font-bold text-primary uppercase tracking-widest"><?= $visitDate ?></span>
+                                        <span class="text-[10px] font-black text-neon-cyan uppercase tracking-[0.3em] shadow-sm"><?= $visitDate ?></span>
                                     </div>
                                 <?php endif; ?>
 
-                                <div class="relative flex items-start gap-4 mb-3 group">
+                                <div class="relative flex items-start gap-6 mb-4 group/item">
                                     <!-- Timeline dot -->
-                                    <div class="w-12 flex items-center justify-center z-10 pt-1">
-                                        <div class="w-3 h-3 rounded-full bg-slate-700 border-2 border-slate-600 group-hover:bg-primary group-hover:border-primary transition-all shadow-lg"></div>
+                                    <div class="w-14 flex items-center justify-center z-10 pt-2.5">
+                                        <div class="w-2.5 h-2.5 rounded-full bg-slate-900 border-2 border-slate-700 group-hover/item:bg-neon-cyan group-hover/item:border-neon-cyan group-hover/item:shadow-[0_0_10px_rgba(6,182,212,0.8)] transition-all duration-300"></div>
                                     </div>
                                     <!-- Content -->
-                                    <div class="flex-1 bg-black/20 border border-white/5 rounded-xl px-5 py-3 group-hover:border-primary/20 transition-all">
+                                    <div class="flex-1 bg-black/40 border border-white/5 rounded-2xl px-6 py-4 group-hover/item:border-neon-cyan/20 transition-all duration-300 shadow-inner group-hover/item:bg-white/[0.02]">
                                         <div class="flex items-center justify-between">
-                                            <a href="<?= htmlspecialchars(BASE_URL . $visit['page_url']) ?>" target="_blank" class="text-primary hover:text-emerald-400 font-bold text-sm flex items-center gap-2 transition-colors">
-                                                <i class="ph ph-link-simple"></i>
-                                                <?= htmlspecialchars($visit['page_url'] == '/' ? '/ (Homepage)' : $visit['page_url']) ?>
+                                            <a href="<?= htmlspecialchars(BASE_URL . $visit['page_url']) ?>" target="_blank" class="text-white hover:text-neon-cyan font-black text-[11px] uppercase tracking-wider flex items-center gap-3 transition-colors group/link">
+                                                <i class="ph-bold ph-link-simple opacity-40 group-hover/link:opacity-100"></i>
+                                                <?= htmlspecialchars($visit['page_url'] == '/' ? '/ (Index_Nexus)' : $visit['page_url']) ?>
                                             </a>
-                                            <span class="text-[10px] text-slate-500 font-bold uppercase tracking-widest shrink-0 ml-4">
+                                            <span class="text-[9px] text-slate-600 font-black uppercase tracking-[0.2em] shrink-0 ml-6 flex items-center gap-2">
+                                                <i class="ph ph-clock text-xs"></i>
                                                 <?= date('h:i:s A', strtotime($visit['visited_at'])) ?>
                                             </span>
                                         </div>

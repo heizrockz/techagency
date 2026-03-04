@@ -18,30 +18,36 @@ $currencies = ['AED' => 'AED (د.إ)', 'USD' => 'USD ($)', 'EUR' => 'EUR (€)',
 <!DOCTYPE html>
 <html lang="<?= e(getCurrentLocale()) ?>" dir="<?= isRTL() ? 'rtl' : 'ltr' ?>">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= e($title) ?> — <?= APP_NAME ?></title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="<?= baseUrl('assets/css/style.css') ?>">
+    <?php require __DIR__ . '/partials/_head_assets.php'; ?>
 </head>
 <body dir="<?= isRTL() ? 'rtl' : 'ltr' ?>">
 
-<div class="admin-layout">
+<div class="admin-layout flex w-full h-screen overflow-hidden">
     <?php require __DIR__ . '/partials/sidebar.php'; ?>
     
-    <div class="admin-main">
-        <div class="admin-header">
-            <div>
-                <h1 style="color: var(--theme-gold); margin:0;">🧾 <?= e($title) ?></h1>
-                <p style="color: var(--text-muted); font-size: 0.9rem;">Fill in the details below to generate.</p>
+    <div class="flex-1 flex flex-col min-w-0">
+        <header class="h-20 flex items-center justify-between px-8 bg-glass-bg border-b border-white/5 shrink-0 backdrop-blur-xl sticky top-0 z-[100]">
+            <div class="flex flex-col">
+                <div class="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em] mb-1 hidden sm:block">Financial Synthesis</div>
+                <h1 class="text-xl font-black text-white tracking-tight flex items-center gap-3 group">
+                    <span class="text-neon-cyan drop-shadow-[0_0_8px_rgba(6,182,212,0.4)]"><?= e($title) ?></span>
+                </h1>
             </div>
-            <div class="admin-actions">
-                <?php if ($invoice['id']): ?>
-                    <a href="<?= baseUrl('admin/invoices?action=print&id=' . $invoice['id']) ?>" target="_blank" rel="noopener noreferrer" class="btn-secondary">🖨️ Print / PDF</a>
-                <?php endif; ?>
-                <a href="<?= baseUrl('admin/invoices') ?>" class="btn-ghost">← Back to List</a>
+            <div class="flex items-center gap-6">
+                <div class="flex items-center gap-4">
+                    <?php if ($invoice && isset($invoice['id']) && $invoice['id']): ?>
+                        <a href="<?= baseUrl('admin/invoices?action=print&id=' . $invoice['id']) ?>" target="_blank" rel="noopener noreferrer" class="px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-neon-gold hover:bg-neon-gold/10 border border-white/5 hover:border-neon-gold/20 transition-all flex items-center gap-2">
+                            <i class="ph ph-printer"></i> <span class="hidden sm:inline">Dispatch Node</span>
+                        </a>
+                    <?php endif; ?>
+                    <a href="<?= baseUrl('admin/invoices') ?>" class="px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-white hover:bg-white/5 border border-white/5 transition-all flex items-center gap-2">
+                        <i class="ph ph-arrow-left"></i> <span class="hidden sm:inline">Abort Protocol</span>
+                    </a>
+                </div>
+                <?php require __DIR__ . '/partials/_topbar.php'; ?>
             </div>
-        </div>
+        </header>
 
         <?php if(isset($_GET['saved'])): ?>
             <div style="background: rgba(16, 185, 129, 0.1); border: 1px solid var(--theme-primary); color: var(--theme-primary); padding: 15px; border-radius: 8px; margin-bottom: 20px;">
@@ -49,25 +55,31 @@ $currencies = ['AED' => 'AED (د.إ)', 'USD' => 'USD ($)', 'EUR' => 'EUR (€)',
             </div>
         <?php endif; ?>
 
-        <form method="POST" action="<?= baseUrl('admin/invoices') ?>" class="admin-card invoice-form">
+        <form method="POST" action="<?= baseUrl('admin/invoices') ?>" class="p-6 space-y-10">
             <input type="hidden" name="id" value="<?= $invoice['id'] ?? 0 ?>">
             
-            <div class="admin-grid-2" style="margin-bottom: 30px; align-items: start;">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 align-start">
                 <!-- Document Info -->
-                <div class="admin-card" style="padding: 20px; background: rgba(0,0,0,0.15);">
-                    <h3 style="color: var(--neon-cyan); margin-bottom: 15px; border-bottom: 1px solid var(--glass-border); padding-bottom: 10px;">Document Details</h3>
+                <div class="admin-stat-card !bg-glass-bg border border-white/5 !p-8 shadow-premium relative overflow-hidden group">
+                    <div class="absolute -right-10 -top-10 w-32 h-32 bg-neon-cyan/5 rounded-full blur-3xl group-hover:bg-neon-cyan/10 transition-all"></div>
+                    <div class="flex items-center gap-4 mb-8 border-b border-white/5 pb-6">
+                        <div class="w-12 h-12 rounded-2xl bg-neon-cyan/10 text-neon-cyan flex items-center justify-center text-2xl shadow-lg border border-neon-cyan/20">
+                            <i class="ph-duotone ph-file-text"></i>
+                        </div>
+                        <h3 class="text-[11px] font-black uppercase tracking-[0.3em] text-white">Document Parameters</h3>
+                    </div>
                     
-                    <div class="admin-grid-2" style="gap: 15px;">
-                        <div>
-                            <label>Document Type</label>
-                            <select name="type" class="form-input">
-                                <option value="invoice" <?= $type==='invoice'?'selected':'' ?>>Invoice</option>
-                                <option value="quote" <?= $type==='quote'?'selected':'' ?>>Quote</option>
+                    <div class="grid grid-cols-2 gap-6 mb-6">
+                        <div class="space-y-2">
+                            <label class="block text-[10px] font-black text-slate-500 uppercase tracking-widest">Protocol Type</label>
+                            <select name="type" class="w-full bg-black/40 border border-white/10 rounded-xl py-3 px-4 text-xs font-bold uppercase tracking-widest text-white focus:border-neon-cyan outline-none transition-all cursor-pointer">
+                                <option value="invoice" <?= $type==='invoice'?'selected':'' ?>>Active Invoice</option>
+                                <option value="quote" <?= $type==='quote'?'selected':'' ?>>Deferred Quote</option>
                             </select>
                         </div>
-                        <div>
-                            <label>Currency</label>
-                            <select name="invoice_currency" class="form-input">
+                        <div class="space-y-2">
+                            <label class="block text-[10px] font-black text-slate-500 uppercase tracking-widest">Valuation Unit</label>
+                            <select name="invoice_currency" class="w-full bg-black/40 border border-white/10 rounded-xl py-3 px-4 text-xs font-bold uppercase tracking-widest text-white focus:border-neon-cyan outline-none transition-all cursor-pointer font-mono">
                                 <?php foreach ($currencies as $code => $label): ?>
                                     <option value="<?= $code ?>" <?= $currency===$code?'selected':'' ?>><?= e($label) ?></option>
                                 <?php endforeach; ?>
@@ -75,150 +87,243 @@ $currencies = ['AED' => 'AED (د.إ)', 'USD' => 'USD ($)', 'EUR' => 'EUR (€)',
                         </div>
                     </div>
 
-                    <div class="admin-grid-2" style="gap: 15px;">
-                        <div>
-                            <label>Invoice/Quote Number *</label>
-                            <input type="text" name="invoice_number" value="<?= e($invNum) ?>" class="form-input" required>
-                            <small style="color:var(--text-muted);">Auto-generated. Edit only if needed.</small>
+                    <div class="grid grid-cols-2 gap-6 mb-6">
+                        <div class="space-y-2">
+                            <label class="block text-[10px] font-black text-slate-500 uppercase tracking-widest">Sequence Identifier *</label>
+                            <input type="text" name="invoice_number" value="<?= e($invNum) ?>" class="w-full bg-black/40 border border-white/10 rounded-xl py-3 px-4 text-xs font-black tracking-[0.2em] text-neon-cyan focus:border-neon-cyan outline-none transition-all" required>
+                            <p class="text-[8px] text-slate-600 font-bold uppercase tracking-tight">Encryption auto-generated</p>
                         </div>
-                        <div>
-                            <label>Status</label>
-                            <select name="status" class="form-input">
-                                <option value="draft" <?= $status==='draft'?'selected':'' ?>>Draft</option>
-                                <option value="sent" <?= $status==='sent'?'selected':'' ?>>Sent</option>
-                                <option value="paid" <?= $status==='paid'?'selected':'' ?>>Paid / Accepted</option>
-                                <option value="cancelled" <?= $status==='cancelled'?'selected':'' ?>>Cancelled</option>
+                        <div class="space-y-2">
+                            <label class="block text-[10px] font-black text-slate-500 uppercase tracking-widest">Deployment Status</label>
+                            <select name="status" class="w-full bg-black/40 border border-white/10 rounded-xl py-3 px-4 text-xs font-bold uppercase tracking-widest text-white focus:border-neon-cyan outline-none transition-all cursor-pointer">
+                                <option value="draft" <?= $status==='draft'?'selected':'' ?>>Draft Node</option>
+                                <option value="sent" <?= $status==='sent'?'selected':'' ?>>Active / Sent</option>
+                                <option value="paid" <?= $status==='paid'?'selected':'' ?>>Settled Protocol</option>
+                                <option value="cancelled" <?= $status==='cancelled'?'selected':'' ?>>Terminated</option>
                             </select>
+                        </div>
+                    </div>
+
+                    <div class="space-y-6 pt-6 border-t border-white/5">
+                        <div class="space-y-2">
+                            <label class="block text-[10px] font-black text-slate-500 uppercase tracking-widest">Primary Operator</label>
+                            <select name="salesperson_id" class="w-full bg-black/40 border border-white/10 rounded-xl py-3 px-4 text-xs font-bold uppercase tracking-widest text-slate-400 focus:border-neon-cyan outline-none transition-all cursor-pointer">
+                                <option value="0">-- Unassigned --</option>
+                                <?php foreach ($salespersons as $s): ?>
+                                    <option value="<?= $s['id'] ?>" <?= ($invoice && isset($invoice['salesperson_id']) && $invoice['salesperson_id'] == $s['id']) ? 'selected' : '' ?>>
+                                        <?= htmlspecialchars($s['full_name'] ?: $s['username']) ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+
+                        <div class="space-y-3">
+                            <label class="block text-[10px] font-black text-slate-500 uppercase tracking-widest">Network Collaborators</label>
+                            <div class="bg-black/40 border border-white/10 rounded-2xl p-4 max-h-[140px] overflow-y-auto crm-main-scroll grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <?php foreach ($salespersons as $s): ?>
+                                    <label class="flex items-center gap-3 p-2 rounded-lg hover:bg-white/5 transition-all cursor-pointer group/item">
+                                        <div class="relative flex items-center justify-center">
+                                            <input type="checkbox" name="extra_salesperson_ids[]" value="<?= $s['id'] ?>" 
+                                                <?= (isset($extra_salesperson_ids) && in_array($s['id'], $extra_salesperson_ids)) ? 'checked' : '' ?>
+                                                class="peer appearance-none w-5 h-5 rounded-md border border-white/20 checked:border-neon-cyan checked:bg-neon-cyan/20 transition-all cursor-pointer">
+                                            <i class="ph ph-check absolute text-[10px] text-neon-cyan opacity-0 peer-checked:opacity-100 transition-opacity"></i>
+                                        </div>
+                                        <span class="text-[10px] font-black text-slate-500 group-hover/item:text-slate-300 transition-colors uppercase tracking-widest"><?= htmlspecialchars($s['full_name'] ?: $s['username']) ?></span>
+                                    </label>
+                                <?php endforeach; ?>
+                            </div>
                         </div>
                     </div>
                 </div>
 
                 <!-- Client Info -->
-                <div class="admin-card" style="padding: 20px; background: rgba(0,0,0,0.15);">
-                    <h3 style="color: var(--neon-emerald); margin-bottom: 15px; border-bottom: 1px solid var(--glass-border); padding-bottom: 10px;">Client Details</h3>
+                <div class="admin-stat-card !bg-glass-bg border border-white/5 !p-8 shadow-premium relative overflow-hidden group">
+                    <div class="absolute -right-10 -top-10 w-32 h-32 bg-neon-emerald/5 rounded-full blur-3xl group-hover:bg-neon-emerald/10 transition-all"></div>
+                    <div class="flex items-center gap-4 mb-8 border-b border-white/5 pb-6">
+                        <div class="w-12 h-12 rounded-2xl bg-neon-emerald/10 text-neon-emerald flex items-center justify-center text-2xl shadow-lg border border-neon-emerald/20">
+                            <i class="ph-duotone ph-user-circle-plus"></i>
+                        </div>
+                        <h3 class="text-[11px] font-black uppercase tracking-[0.3em] text-white">Target Account Intelligence</h3>
+                    </div>
                     
-                    <div class="form-group">
-                        <label>Select Contact</label>
-        <select name="contact_id" id="contact-select" class="form-input" onchange="fillContactDetails(this.value)">
-            <option value="0">— Manual Entry —</option>
-            <?php foreach ($contacts as $c): ?>
-                <option value="<?= $c['id'] ?>" 
-                    data-name="<?= e($c['name']) ?>"
-                    data-email="<?= e($c['email'] ?? '') ?>"
-                    data-phone="<?= e($c['phone'] ?? '') ?>"
-                    data-address="<?= e(($c['location'] ?? '') . ($c['country'] ? ', ' . $c['country'] : '')) ?>"
-                    data-vat="<?= e($c['vat_number'] ?? '') ?>"
-                    data-website="<?= e($c['website'] ?? '') ?>"
-                    <?= (int)$contactId === (int)$c['id'] ? 'selected' : '' ?>
-                ><?= e($c['name']) ?> <?= $c['type'] === 'company' ? '🏢' : '👤' ?></option>
-            <?php endforeach; ?>
-        </select>
-    </div>
-
-                    <div class="form-group">
-                        <label>Client Name / Company *</label>
-                        <input type="text" name="client_name" id="client-name" value="<?= e($invoice['client_name'] ?? '') ?>" class="form-input" required>
-                    </div>
-
-                    <div class="admin-grid-2" style="gap: 15px;">
-                        <div>
-                            <label>Email Address</label>
-                            <input type="email" name="client_email" id="client-email" value="<?= e($invoice['client_email'] ?? '') ?>" class="form-input">
+                    <div class="space-y-6">
+                        <div class="space-y-2">
+                            <label class="block text-[10px] font-black text-slate-500 uppercase tracking-widest">Synchronize Contact</label>
+                            <select name="contact_id" id="contact-select" class="w-full bg-black/40 border border-white/10 rounded-xl py-3 px-4 text-xs font-black uppercase tracking-widest text-neon-emerald focus:border-neon-emerald outline-none transition-all cursor-pointer" onchange="fillContactDetails(this.value)">
+                                <option value="0">— Manual Override —</option>
+                                <?php foreach ($contacts as $c): ?>
+                                    <option value="<?= $c['id'] ?>" 
+                                        data-name="<?= e($c['name']) ?>"
+                                        data-email="<?= e($c['email'] ?? '') ?>"
+                                        data-phone="<?= e($c['phone'] ?? '') ?>"
+                                        data-address="<?= e(($c['location'] ?? '') . ($c['country'] ? ', ' . $c['country'] : '')) ?>"
+                                        data-vat="<?= e($c['vat_number'] ?? '') ?>"
+                                        data-website="<?= e($c['website'] ?? '') ?>"
+                                        <?= (int)$contactId === (int)$c['id'] ? 'selected' : '' ?>
+                                    ><?= e($c['name']) ?> <?= $c['type'] === 'company' ? '🏢' : '👤' ?></option>
+                                <?php endforeach; ?>
+                            </select>
                         </div>
-                        <div>
-                            <label>Phone Number</label>
-                            <input type="text" name="client_phone" id="client-phone" value="<?= e($invoice['client_phone'] ?? '') ?>" class="form-input">
-                        </div>
-                    </div>
 
-                    <div class="form-group">
-                        <label>Billing Address</label>
-                        <textarea name="client_address" id="client-address" class="form-input" style="min-height: 50px;"><?= e($invoice['client_address'] ?? '') ?></textarea>
+                        <div class="space-y-2">
+                            <label class="block text-[10px] font-black text-slate-500 uppercase tracking-widest">Protocol Entity Name *</label>
+                            <input type="text" name="client_name" id="client-name" value="<?= e($invoice['client_name'] ?? '') ?>" class="w-full bg-black/40 border border-white/10 rounded-xl py-4 px-5 text-sm font-black tracking-tight text-white focus:border-neon-emerald outline-none transition-all placeholder:text-slate-800" required placeholder="Entity Identification">
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-6">
+                            <div class="space-y-2">
+                                <label class="block text-[10px] font-black text-slate-500 uppercase tracking-widest">Communication Channel</label>
+                                <input type="email" name="client_email" id="client-email" value="<?= e($invoice['client_email'] ?? '') ?>" class="w-full bg-black/40 border border-white/10 rounded-xl py-3 px-4 text-xs font-bold text-white focus:border-neon-emerald outline-none transition-all placeholder:text-slate-800" placeholder="node@protocol.ai">
+                            </div>
+                            <div class="space-y-2">
+                                <label class="block text-[10px] font-black text-slate-500 uppercase tracking-widest">Signal Frequency</label>
+                                <input type="text" name="client_phone" id="client-phone" value="<?= e($invoice['client_phone'] ?? '') ?>" class="w-full bg-black/40 border border-white/10 rounded-xl py-3 px-4 text-xs font-bold text-white focus:border-neon-emerald outline-none transition-all placeholder:text-slate-800" placeholder="+00 000 0000">
+                            </div>
+                        </div>
+
+                        <div class="space-y-2">
+                            <label class="block text-[10px] font-black text-slate-500 uppercase tracking-widest">Deployment Coordinates (Billing Address)</label>
+                            <textarea name="client_address" id="client-address" class="w-full bg-black/40 border border-white/10 rounded-xl py-4 px-5 text-xs font-medium text-slate-400 focus:border-neon-emerald outline-none transition-all min-h-[100px] placeholder:text-slate-800" placeholder="Physical location identifiers..."><?= e($invoice['client_address'] ?? '') ?></textarea>
+                        </div>
                     </div>
                 </div>
             </div>
 
             <!-- Line Items -->
-            <h3 style="color: var(--theme-gold); margin-bottom: 15px; border-bottom: 1px solid var(--glass-border); padding-bottom: 10px; display: flex; justify-content: space-between; align-items: center;">
-                <span>Line Items <span style="cursor:help; color:var(--text-muted); font-size:0.75rem;" title="Add products by typing in the Service Name field — matching CRM products will appear as suggestions. You can also add custom items.">ⓘ</span></span>
-                <div>
-                    <button type="button" class="admin-btn" id="add-item-btn" style="padding: 4px 10px; font-size: 0.8rem;">+ Add a line</button>
+            <div class="space-y-6">
+                <div class="flex items-center justify-between border-b border-white/5 pb-6">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-neon-gold/10 text-neon-gold flex items-center justify-center text-xl border border-neon-gold/20 shadow-lg shadow-neon-gold/5">
+                            <i class="ph-duotone ph-list-numbers"></i>
+                        </div>
+                        <div class="flex flex-col">
+                            <h3 class="text-[11px] font-black uppercase tracking-[0.3em] text-white">Service Specifications</h3>
+                            <p class="text-[8px] text-slate-600 font-bold uppercase tracking-tight mt-0.5">Line item nodes for financial calculation</p>
+                        </div>
+                    </div>
+                    <button type="button" class="px-4 py-2 bg-neon-gold/10 hover:bg-neon-gold/20 text-neon-gold text-[10px] font-black uppercase tracking-widest rounded-xl transition-all border border-neon-gold/20 flex items-center gap-2 group" id="add-item-btn">
+                        <i class="ph ph-plus-circle group-hover:rotate-90 transition-transform"></i> Add Specification
+                    </button>
                 </div>
-            </h3>
 
-            <div style="overflow-x: visible; margin-bottom: 20px; padding-bottom: 15px;">
-                <table class="admin-table" id="items-table">
-                    <thead>
-                        <tr>
-                            <th style="width: 28%">Product <span style="cursor:help; color:var(--text-muted); font-size:0.7rem;" title="Type to search CRM products or enter a custom name">ⓘ</span></th>
-                            <th style="width: 25%">Description</th>
-                            <th style="width: 8%">Qty</th>
-                            <th style="width: 12%">Unit Price</th>
-                            <th style="width: 8%">VAT % <span style="cursor:help; color:var(--text-muted); font-size:0.7rem;" title="Value Added Tax percentage applied to this line item">ⓘ</span></th>
-                            <th style="width: 12%">Total</th>
-                            <th style="width: 5%"></th>
-                        </tr>
-                    </thead>
-                    <tbody id="items-body">
-                        <?php if (empty($items)): ?>
-                            <tr class="item-row">
-                                <td style="position:relative;"><input type="text" name="items[0][service_name]" class="form-input product-search" autocomplete="off" placeholder="Type to find product..." required></td>
-                                <td><input type="text" name="items[0][description]" class="form-input item-desc"></td>
-                                <td><input type="number" step="0.01" name="items[0][qty]" value="1.00" class="form-input item-qty" required></td>
-                                <td><input type="number" step="0.01" name="items[0][unit_price]" value="0.00" class="form-input item-price" required></td>
-                                <td><input type="number" step="0.01" name="items[0][vat_rate]" value="5.00" class="form-input item-vat"></td>
-                                <td class="item-line-total">0.00</td>
-                                <td><button type="button" class="admin-btn remove-item" style="color: #f43f5e; border-color: transparent;" title="Remove this line">🗑</button></td>
+                <div class="admin-table-wrapper backdrop-blur-xl border border-white/5 rounded-3xl overflow-hidden shadow-premium">
+                    <table class="admin-table w-full text-left border-collapse" id="items-table">
+                        <thead>
+                            <tr class="text-slate-500 text-[9px] font-black uppercase tracking-[0.3em] bg-white/[0.01]">
+                                <th class="py-5 px-6 w-[30%] text-neon-cyan">Logical Product Cluster</th>
+                                <th class="py-5 px-4 w-[25%] opacity-70">Descriptor Note</th>
+                                <th class="py-5 px-4 w-[8%] text-center">Quant</th>
+                                <th class="py-5 px-4 w-[12%] text-center">Unit Val</th>
+                                <th class="py-5 px-4 w-[8%] text-center">Tax %</th>
+                                <th class="py-5 px-4 w-[12%] text-right">Sum Val</th>
+                                <th class="py-5 px-6 w-[5%]"></th>
                             </tr>
-                        <?php else: ?>
-                            <?php foreach ($items as $i => $item): ?>
-                                <tr class="item-row">
-                                    <td style="position:relative;"><input type="text" name="items[<?= $i ?>][service_name]" value="<?= e($item['service_name']) ?>" class="form-input product-search" autocomplete="off" placeholder="Type to find product..." required></td>
-                                    <td><input type="text" name="items[<?= $i ?>][description]" value="<?= e($item['description']) ?>" class="form-input item-desc"></td>
-                                    <td><input type="number" step="0.01" name="items[<?= $i ?>][qty]" value="<?= e($item['qty']) ?>" class="form-input item-qty" required></td>
-                                    <td><input type="number" step="0.01" name="items[<?= $i ?>][unit_price]" value="<?= e($item['unit_price']) ?>" class="form-input item-price" required></td>
-                                    <td><input type="number" step="0.01" name="items[<?= $i ?>][vat_rate]" value="<?= e($item['vat_rate']) ?>" class="form-input item-vat"></td>
-                                    <td class="item-line-total">0.00</td>
-                                    <td><button type="button" class="admin-btn remove-item" style="color: #f43f5e; border-color: transparent;" title="Remove this line">🗑</button></td>
+                        </thead>
+                        <tbody id="items-body" class="divide-y divide-white/[0.02]">
+                            <?php if (empty($items)): ?>
+                                <tr class="item-row hover:bg-white/[0.02] transition-colors group/row border-b border-white/[0.03] last:border-0 relative">
+                                    <td class="py-5 px-6 relative">
+                                        <input type="text" name="items[0][service_name]" class="w-full bg-black/40 border border-white/10 rounded-xl py-2.5 px-4 text-xs font-black tracking-tight text-white focus:border-neon-cyan outline-none transition-all placeholder:text-slate-800 product-search" autocomplete="off" placeholder="Node identifier..." required>
+                                    </td>
+                                    <td class="py-5 px-4">
+                                        <input type="text" name="items[0][description]" class="w-full bg-transparent border-none text-xs text-slate-400 focus:outline-none placeholder:text-slate-800 item-desc" placeholder="Operational details...">
+                                    </td>
+                                    <td class="py-5 px-4">
+                                        <input type="number" step="0.01" name="items[0][qty]" value="1.00" class="w-full bg-black/20 border border-white/5 rounded-lg py-2 px-2 text-xs font-black text-center text-white focus:border-neon-cyan outline-none transition-all item-qty" required>
+                                    </td>
+                                    <td class="py-5 px-4">
+                                        <input type="number" step="0.01" name="items[0][unit_price]" value="0.00" class="w-full bg-black/20 border border-white/5 rounded-lg py-2 px-2 text-xs font-black text-center text-white focus:border-neon-cyan outline-none transition-all item-price" required>
+                                    </td>
+                                    <td class="py-5 px-4">
+                                        <input type="number" step="0.01" name="items[0][vat_rate]" value="5.00" class="w-full bg-black/20 border border-white/5 rounded-lg py-2 px-2 text-xs font-bold text-center text-slate-500 focus:border-neon-cyan outline-none transition-all item-vat">
+                                    </td>
+                                    <td class="py-5 px-4 text-right">
+                                        <span class="text-xs font-black text-white tracking-tight item-line-total">0.00</span>
+                                    </td>
+                                    <td class="py-5 px-6 text-right">
+                                        <button type="button" class="w-8 h-8 rounded-lg bg-neon-rose/5 text-neon-rose hover:bg-neon-rose/20 transition-all flex items-center justify-center remove-item opacity-0 group-hover/row:opacity-100" title="Purge Line">
+                                            <i class="ph ph-trash-simple"></i>
+                                        </button>
+                                    </td>
                                 </tr>
-                            <?php endforeach; ?>
-                        <?php endif; ?>
-                    </tbody>
-                </table>
+                            <?php else: ?>
+                                <?php foreach ($items as $i => $item): ?>
+                                    <tr class="item-row hover:bg-white/[0.02] transition-colors group/row border-b border-white/[0.03] last:border-0 relative">
+                                        <td class="py-5 px-6 relative">
+                                            <input type="text" name="items[<?= $i ?>][service_name]" value="<?= e($item['service_name']) ?>" class="w-full bg-black/40 border border-white/10 rounded-xl py-2.5 px-4 text-xs font-black tracking-tight text-white focus:border-neon-cyan outline-none transition-all placeholder:text-slate-800 product-search" autocomplete="off" placeholder="Node identifier..." required>
+                                        </td>
+                                        <td class="py-5 px-4">
+                                            <input type="text" name="items[<?= $i ?>][description]" value="<?= e($item['description'] ?? '') ?>" class="w-full bg-transparent border-none text-xs text-slate-400 focus:outline-none placeholder:text-slate-800 item-desc" placeholder="Operational details...">
+                                        </td>
+                                        <td class="py-5 px-4">
+                                            <input type="number" step="0.01" name="items[<?= $i ?>][qty]" value="<?= e($item['qty']) ?>" class="w-full bg-black/20 border border-white/5 rounded-lg py-2 px-2 text-xs font-black text-center text-white focus:border-neon-cyan outline-none transition-all item-qty" required>
+                                        </td>
+                                        <td class="py-5 px-4">
+                                            <input type="number" step="0.01" name="items[<?= $i ?>][unit_price]" value="<?= e($item['unit_price']) ?>" class="w-full bg-black/20 border border-white/5 rounded-lg py-2 px-2 text-xs font-black text-center text-white focus:border-neon-cyan outline-none transition-all item-price" required>
+                                        </td>
+                                        <td class="py-5 px-4">
+                                            <input type="number" step="0.01" name="items[<?= $i ?>][vat_rate]" value="<?= e($item['vat_rate']) ?>" class="w-full bg-black/20 border border-white/5 rounded-lg py-2 px-2 text-xs font-bold text-center text-slate-500 focus:border-neon-cyan outline-none transition-all item-vat">
+                                        </td>
+                                        <td class="py-5 px-4 text-right">
+                                            <span class="text-xs font-black text-white tracking-tight item-line-total">0.00</span>
+                                        </td>
+                                        <td class="py-5 px-6 text-right">
+                                            <button type="button" class="w-8 h-8 rounded-lg bg-neon-rose/5 text-neon-rose hover:bg-neon-rose/20 transition-all flex items-center justify-center remove-item opacity-0 group-hover/row:opacity-100" title="Purge Line">
+                                                <i class="ph ph-trash-simple"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                        </tbody>
+                    </table>
+                </div>
             </div>
 
             <!-- Totals -->
-            <div style="display: flex; justify-content: flex-end; margin-bottom: 30px;">
-                <div style="width: 100%; max-width: 350px; background: rgba(0,0,0,0.2); padding: 20px; border-radius: 8px; border: 1px solid var(--glass-border);">
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
-                        <span style="color: var(--text-secondary);">Subtotal:</span>
-                        <strong id="calc-subtotal">0.00</strong>
+            <div class="flex justify-end pt-10">
+                <div class="w-full max-w-sm space-y-4 bg-white/[0.03] backdrop-blur-3xl border border-white/5 p-8 rounded-3xl shadow-premium relative group">
+                    <div class="absolute -left-10 -bottom-10 w-24 h-24 bg-neon-cyan/5 rounded-full blur-2xl"></div>
+                    
+                    <div class="flex justify-between items-center text-[10px] font-black uppercase tracking-widest text-slate-500">
+                        <span>Net Value (Pre-Discount):</span>
+                        <span class="text-white font-black tracking-tight text-sm" id="calc-subtotal">0.00</span>
                     </div>
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 10px; align-items: center;">
-                        <span style="color: var(--text-secondary);">Global Discount:</span>
-                        <input type="number" step="0.01" name="discount" id="global-discount" value="<?= e($invoice['discount'] ?? '0.00') ?>" class="form-input" style="width: 80px; padding: 4px 8px;">
+
+                    <div class="flex justify-between items-center text-[10px] font-black uppercase tracking-widest text-slate-500">
+                        <span>Operational Discount:</span>
+                        <div class="flex items-center gap-2">
+                            <span class="text-neon-rose">-</span>
+                            <input type="number" step="0.01" name="discount" id="global-discount" value="<?= e($invoice['discount'] ?? '0.00') ?>" class="w-24 bg-black/40 border border-white/10 rounded-xl py-1.5 px-3 text-xs font-black text-neon-rose text-right focus:border-neon-rose outline-none transition-all">
+                        </div>
                     </div>
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
-                        <span style="color: var(--text-secondary);">Total VAT:</span>
-                        <strong id="calc-vat">0.00</strong>
+
+                    <div class="flex justify-between items-center text-[10px] font-black uppercase tracking-widest text-slate-500">
+                        <span>Aggregate Tax Liability:</span>
+                        <span class="text-white font-black tracking-tight text-sm" id="calc-vat">0.00</span>
                     </div>
-                    <div style="display: flex; justify-content: space-between; margin-top: 15px; padding-top: 15px; border-top: 1px double var(--glass-border); font-size: 1.2rem;">
-                        <span style="color: var(--theme-gold); font-weight: 800;">Total:</span>
-                        <strong id="calc-total" style="color: var(--theme-primary);">0.00</strong>
-                    </div>
-                    <div style="display: flex; justify-content: space-between; margin-top: 15px; align-items: center;">
-                        <span style="color: var(--text-secondary);">Amount Paid (Split):</span>
-                        <input type="number" step="0.01" name="amount_paid" id="amount-paid" value="<?= e($invoice['amount_paid'] ?? '0.00') ?>" class="form-input" style="width: 100px; padding: 4px 8px; border-color: var(--neon-emerald);">
-                    </div>
-                    <div style="display: flex; justify-content: space-between; margin-top: 10px; font-size: 1.1rem;">
-                        <span style="color: #f43f5e; font-weight: 600;">Balance Due:</span>
-                        <strong id="calc-balance" style="color: #f43f5e;">0.00</strong>
+
+                    <div class="pt-6 mt-2 border-t border-white/5 space-y-4">
+                        <div class="flex justify-between items-center">
+                            <span class="text-[11px] font-black uppercase tracking-[0.3em] text-neon-cyan group-hover:drop-shadow-[0_0_8px_rgba(6,182,212,0.4)] transition-all">Total Protocol Value:</span>
+                            <span class="text-2xl font-black text-white tracking-tighter" id="calc-total">0.00</span>
+                        </div>
+
+                        <div class="flex justify-between items-center pt-4 border-t border-white/[0.02]">
+                            <span class="text-[10px] font-black uppercase tracking-widest text-neon-emerald">Settled Credit:</span>
+                            <input type="number" step="0.01" name="amount_paid" id="amount-paid" value="<?= e($invoice['amount_paid'] ?? '0.00') ?>" class="w-28 bg-neon-emerald/5 border border-neon-emerald/20 rounded-xl py-2 px-3 text-xs font-black text-neon-emerald text-right focus:border-neon-emerald outline-none transition-all shadow-[0_0_15px_rgba(16,185,129,0.05)]">
+                        </div>
+
+                        <div class="flex justify-between items-center pt-2">
+                            <span class="text-[11px] font-black uppercase tracking-[0.2em] text-neon-rose">Outstanding Liability:</span>
+                            <span class="text-xl font-black text-neon-rose drop-shadow-[0_0_10px_rgba(244,63,94,0.3)]" id="calc-balance">0.00</span>
+                        </div>
                     </div>
                     
-                    <?php if (($invoice['id'] ?? 0) > 0 && ($invoice['amount_paid'] ?? 0) > 0): ?>
-                        <div style="margin-top: 15px; text-align: right;">
-                            <a href="<?= baseUrl('admin/invoices?action=receipt&id=' . $invoice['id']) ?>" target="_blank" class="admin-btn" style="background: var(--neon-emerald); color: #fff; border:none; padding: 5px 10px; font-size: 0.85rem;">
-                                🧾 View CRM Receipt
+                    <?php if (isset($invoice['id']) && $invoice['id'] > 0 && ($invoice['amount_paid'] ?? 0) > 0): ?>
+                        <div class="pt-6 text-right">
+                            <a href="<?= baseUrl('admin/invoices?action=receipt&id=' . $invoice['id']) ?>" target="_blank" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-neon-emerald/10 text-neon-emerald text-[9px] font-black uppercase tracking-widest hover:bg-neon-emerald/20 border border-neon-emerald/20 transition-all">
+                                <i class="ph ph-receipt"></i> Access CRM Receipt Node
                             </a>
                         </div>
                     <?php endif; ?>
@@ -226,23 +331,25 @@ $currencies = ['AED' => 'AED (د.إ)', 'USD' => 'USD ($)', 'EUR' => 'EUR (€)',
             </div>
 
             <!-- Notes, Terms & Payment Terms -->
-            <div class="admin-grid-3" style="gap: 20px; margin-bottom: 30px;">
-                <div class="form-group">
-                    <label>Client Notes (Printed on invoice)</label>
-                    <textarea name="notes" class="form-input" style="min-height: 100px;"><?= e($invoice['notes'] ?? '') ?></textarea>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="admin-stat-card !bg-black/20 border border-white/5 !p-6 space-y-3">
+                    <label class="block text-[10px] font-black text-slate-500 uppercase tracking-widest">Target Account Notes</label>
+                    <textarea name="notes" class="w-full bg-transparent border border-white/5 rounded-xl py-3 px-4 text-xs text-slate-400 focus:border-neon-cyan outline-none transition-all min-h-[120px] placeholder:text-slate-800" placeholder="Notes printed on internal node copies..."><?= e($invoice['notes'] ?? '') ?></textarea>
                 </div>
-                <div class="form-group">
-                    <label>Terms & Conditions</label>
-                    <textarea name="terms" class="form-input" style="min-height: 100px;"><?= e($invoice['terms'] ?? $defaultTerms ?? '') ?></textarea>
+                <div class="admin-stat-card !bg-black/20 border border-white/5 !p-6 space-y-3">
+                    <label class="block text-[10px] font-black text-slate-500 uppercase tracking-widest">Protocol Terms</label>
+                    <textarea name="terms" class="w-full bg-transparent border border-white/5 rounded-xl py-3 px-4 text-xs text-slate-400 focus:border-neon-cyan outline-none transition-all min-h-[120px] placeholder:text-slate-800" placeholder="Standard legal parameters..."><?= e($invoice['terms'] ?? $defaultTerms ?? '') ?></textarea>
                 </div>
-                <div class="form-group">
-                    <label>Payment Terms</label>
-                    <textarea name="payment_terms" class="form-input" style="min-height: 100px;" placeholder="e.g. 50% upfront, 50% on delivery. Net 30 days."><?= e($paymentTerms) ?></textarea>
+                <div class="admin-stat-card !bg-black/20 border border-white/5 !p-6 space-y-3">
+                    <label class="block text-[10px] font-black text-slate-500 uppercase tracking-widest">Settlement Schedule</label>
+                    <textarea name="payment_terms" class="w-full bg-transparent border border-white/5 rounded-xl py-3 px-4 text-xs text-slate-400 focus:border-neon-cyan outline-none transition-all min-h-[120px] placeholder:text-slate-800" placeholder="e.g. 50% upfront, 50% on deployment."><?= e($paymentTerms) ?></textarea>
                 </div>
             </div>
 
-            <div style="text-align: right; margin-top: 30px; border-top: 1px solid var(--glass-border); padding-top: 20px;">
-                <button type="submit" class="btn-primary">💾 Save Document</button>
+            <div class="flex justify-end pt-10 border-t border-white/5">
+                <button type="submit" class="px-10 py-4 bg-neon-cyan hover:bg-cyan-400 text-black text-[11px] font-black uppercase tracking-[0.2em] rounded-2xl transition-all shadow-[0_0_25px_rgba(6,182,212,0.3)] hover:shadow-[0_0_35px_rgba(6,182,212,0.5)] transform hover:-translate-y-1 flex items-center gap-3 active:scale-95">
+                    <i class="ph ph-shield-check text-lg"></i> Commit Financial Protocol
+                </button>
             </div>
         </form>
     </div>
@@ -548,15 +655,31 @@ document.addEventListener('DOMContentLoaded', () => {
 
     btnAdd.addEventListener('click', () => {
         const tr = document.createElement('tr');
-        tr.className = 'item-row';
+        tr.className = 'item-row hover:bg-white/[0.02] transition-colors group/row border-b border-white/[0.03] last:border-0 relative';
         tr.innerHTML = `
-            <td style="position:relative;"><input type="text" name="items[${itemIdx}][service_name]" class="form-input product-search" autocomplete="off" placeholder="Type to find product..." required></td>
-            <td><input type="text" name="items[${itemIdx}][description]" class="form-input item-desc"></td>
-            <td><input type="number" step="0.01" name="items[${itemIdx}][qty]" value="1.00" class="form-input item-qty" required></td>
-            <td><input type="number" step="0.01" name="items[${itemIdx}][unit_price]" value="0.00" class="form-input item-price" required></td>
-            <td><input type="number" step="0.01" name="items[${itemIdx}][vat_rate]" value="5.00" class="form-input item-vat"></td>
-            <td class="item-line-total">0.00</td>
-            <td><button type="button" class="admin-btn remove-item" style="color: #f43f5e; border-color: transparent;" title="Remove this line">🗑</button></td>
+            <td class="py-5 px-6 relative">
+                <input type="text" name="items[${itemIdx}][service_name]" class="w-full bg-black/40 border border-white/10 rounded-xl py-2.5 px-4 text-xs font-black tracking-tight text-white focus:border-neon-cyan outline-none transition-all placeholder:text-slate-800 product-search" autocomplete="off" placeholder="Node identifier..." required>
+            </td>
+            <td class="py-5 px-4">
+                <input type="text" name="items[${itemIdx}][description]" class="w-full bg-transparent border-none text-xs text-slate-400 focus:outline-none placeholder:text-slate-800 item-desc" placeholder="Operational details...">
+            </td>
+            <td class="py-5 px-4">
+                <input type="number" step="0.01" name="items[${itemIdx}][qty]" value="1.00" class="w-full bg-black/20 border border-white/5 rounded-lg py-2 px-2 text-xs font-black text-center text-white focus:border-neon-cyan outline-none transition-all item-qty" required>
+            </td>
+            <td class="py-5 px-4">
+                <input type="number" step="0.01" name="items[${itemIdx}][unit_price]" value="0.00" class="w-full bg-black/20 border border-white/5 rounded-lg py-2 px-2 text-xs font-black text-center text-white focus:border-neon-cyan outline-none transition-all item-price" required>
+            </td>
+            <td class="py-5 px-4">
+                <input type="number" step="0.01" name="items[${itemIdx}][vat_rate]" value="5.00" class="w-full bg-black/20 border border-white/5 rounded-lg py-2 px-2 text-xs font-bold text-center text-slate-500 focus:border-neon-cyan outline-none transition-all item-vat">
+            </td>
+            <td class="py-5 px-4 text-right">
+                <span class="text-xs font-black text-white tracking-tight item-line-total">0.00</span>
+            </td>
+            <td class="py-5 px-6 text-right">
+                <button type="button" class="w-8 h-8 rounded-lg bg-neon-rose/5 text-neon-rose hover:bg-neon-rose/20 transition-all flex items-center justify-center remove-item opacity-0 group-hover/row:opacity-100" title="Purge Line">
+                    <i class="ph ph-trash-simple"></i>
+                </button>
+            </td>
         `;
         itemsBody.appendChild(tr);
         itemIdx++;

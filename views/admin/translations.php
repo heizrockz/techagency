@@ -1,23 +1,32 @@
 <!DOCTYPE html>
 <html lang="<?= e(getCurrentLocale()) ?>" dir="<?= isRTL() ? 'rtl' : 'ltr' ?>">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Translations — <?= APP_NAME ?></title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="<?= baseUrl('assets/css/style.css') ?>">
+    <?php require __DIR__ . '/partials/_head_assets.php'; ?>
 </head>
 <body dir="<?= isRTL() ? 'rtl' : 'ltr' ?>">
-<div class="admin-layout">
+<div class="admin-layout flex w-full h-screen overflow-hidden">
     <?php $currentPage = 'translations'; require __DIR__ . '/partials/sidebar.php'; ?>
-    <div class="admin-main">
-        <div class="admin-header">
-            <h1>🌐 DB Translations</h1>
-            <p style="color:var(--text-muted); font-size:0.9rem; margin-top:5px;">Override default language file translations or add new ones without editing PHP.</p>
-        </div>
+    <div class="flex-1 flex flex-col min-w-0">
+        <header class="h-20 flex items-center justify-between px-8 bg-glass-bg border-b border-white/5 shrink-0 backdrop-blur-xl sticky top-0 z-[100]">
+            <div class="flex flex-col">
+                <div class="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em] mb-1 hidden sm:block">Language Logic</div>
+                <h1 class="text-xl font-black text-white tracking-tight flex items-center gap-3 group">
+                    <span class="text-neon-cyan drop-shadow-[0_0_8px_rgba(6,182,212,0.4)]">Semantic Bridge</span>
+                    <span class="opacity-20 translate-y-px hidden sm:inline">/</span>
+                    <span class="text-sm tracking-widest text-slate-400 uppercase font-black hidden sm:inline">Translation Nodes</span>
+                </h1>
+            </div>
+            <div class="flex items-center gap-6">
+                <?php require __DIR__ . '/partials/_topbar.php'; ?>
+            </div>
+        </header>
         
+        <main class="flex-1 overflow-y-auto p-8 crm-main-scroll bg-[#0b0e14]">
         <?php if ($saved): ?>
-            <div class="alert alert-success">Translations saved successfully.</div>
+            <div class="mb-8 p-4 bg-neon-emerald/10 border border-neon-emerald/20 rounded-2xl text-neon-emerald text-[10px] font-black uppercase tracking-widest flex items-center gap-3">
+                <i class="ph-bold ph-check-circle text-lg"></i> Parameters Committed Successfully
+            </div>
         <?php endif; ?>
 
         <div class="admin-card" style="margin-bottom: 30px;">
@@ -49,8 +58,8 @@
         </div>
 
         <?php if (!empty($translations)): ?>
-        <form method="POST" action="<?= baseUrl('admin/translations') ?>">
-            <input type="hidden" name="action" value="save">
+        <form method="POST" action="<?= baseUrl('admin/translations') ?>" id="translations_form">
+            <input type="hidden" name="action" value="save" id="trans_action">
             <div class="admin-card">
                 <h3>Existing Database Translations</h3>
                 
@@ -60,7 +69,7 @@
                             <h4 style="font-family: monospace; color: var(--neon-cyan); margin: 0;"><?= e($key) ?></h4>
                             <div style="display: flex; gap: 10px; align-items: center;">
                                 <input type="text" name="groups[<?= e($key) ?>]" value="<?= e($locales['en']['trans_group'] ?? 'general') ?>" style="background:transparent; border:1px solid var(--glass-border); color:var(--text-muted); padding:2px 8px; border-radius:4px; font-size:0.75rem; width:100px;">
-                                <button type="submit" name="action" value="delete" onclick="document.getElementById('del_<?= e($key) ?>').name='trans_key'; document.getElementById('del_<?= e($key) ?>').value='<?= e($key) ?>'; return confirm('Delete this translation key?');" style="background:none; border:none; color:var(--neon-pink); cursor:pointer; font-size:0.8rem;">Delete</button>
+                                <button type="button" onclick="showDeleteModal('<?= e($key) ?>', function() { document.getElementById('trans_action').value='delete'; document.getElementById('del_<?= e($key) ?>').name='trans_key'; document.getElementById('del_<?= e($key) ?>').value='<?= e($key) ?>'; document.getElementById('translations_form').submit(); })" style="background:none; border:none; color:var(--neon-pink); cursor:pointer; font-size:0.8rem;">Delete</button>
                                 <input type="hidden" id="del_<?= e($key) ?>">
                             </div>
                         </div>
@@ -79,7 +88,17 @@
             <button type="submit" class="btn-primary" style="margin-top: 20px; font-size: 1.1rem; padding: 12px 30px;">Save All Changes</button>
         </form>
         <?php endif; ?>
+        </main>
     </div>
 </div>
+
+<?php require __DIR__ . '/partials/_delete_modal.php'; ?>
+<style>
+    @media screen and (max-width: 1024px) {
+        .admin-card { padding: 1.5rem !important; }
+        .admin-grid-2 { grid-template-columns: 1fr; gap: 1rem; }
+        header { padding: 0 1.5rem !important; h-24 !important; flex-direction: column; justify-content: center; gap: 0.5rem; }
+    }
+</style>
 </body>
 </html>

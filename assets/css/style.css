@@ -5,39 +5,106 @@
 
 /* ── CSS Variables ─ New Premium Theme ──────────────────────────── */
 :root {
-    /* Deep Charcoal Backgrounds */
-    --bg-primary: #0f1115;
-    --bg-secondary: #1a1d24;
-    --bg-card: rgba(26, 29, 36, 0.7);
+    /* Deep Space Backgrounds */
+    --bg-primary: #0b0e14;
+    --bg-secondary: #0f172a;
+    --bg-surface: #1a2333;
+
+    /* Glassmorphism System */
     --glass-bg: rgba(255, 255, 255, 0.03);
     --glass-border: rgba(255, 255, 255, 0.08);
     --glass-hover: rgba(255, 255, 255, 0.12);
+    --glass-blur: blur(12px);
+    --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
 
-    /* Premium Accents: Emerald, Gold, Sapphire */
-    --neon-cobalt: #0ea5e9;
-    --neon-violet: #d946ef;
-    --neon-cyan: #06b6d4;
-    --neon-pink: #f43f5e;
+    /* Futuristic Accents */
     --neon-emerald: #10b981;
+    --neon-cyan: #06b6d4;
+    --neon-violet: #8b5cf6;
+    --neon-amber: #f59e0b;
+    --neon-rose: #f43f5e;
 
-    /* Core Theme Colors */
-    --theme-primary: #10b981;
-    --theme-gold: #fbbf24;
+    --theme-primary: var(--neon-emerald);
+    --theme-accent: var(--neon-cyan);
 
+    /* Functional Colors */
     --text-primary: #f8fafc;
-    --text-secondary: rgba(248, 250, 252, 0.7);
-    --text-muted: rgba(248, 250, 252, 0.4);
+    --text-secondary: #94a3b8;
+    --text-muted: #64748b;
 
-    --radius-sm: 8px;
-    --radius-md: 16px;
-    --radius-lg: 24px;
-    --radius-xl: 32px;
+    /* Spacing & Radius Overhaul */
+    --gap-core: 2rem;
+    --radius-premium: 18px;
+    --sidebar-width: 280px;
 
     --font-en: 'Outfit', 'Inter', system-ui, sans-serif;
     --font-ar: 'IBM Plex Sans Arabic', 'Amiri', sans-serif;
 
-    --transition-smooth: opacity 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), background 0.4s ease, color 0.4s ease, box-shadow 0.4s ease;
-    --transition-bounce: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.5s ease;
+    --transition-premium: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    --glow-primary: 0 0 20px rgba(16, 185, 129, 0.3);
+}
+
+/* ── Neon Utility Classes ────────────────────────────────────── */
+.text-neon-cyan {
+    color: var(--neon-cyan);
+}
+
+.bg-neon-cyan {
+    background-color: var(--neon-cyan);
+}
+
+.text-neon-emerald {
+    color: var(--neon-emerald);
+}
+
+.bg-neon-emerald {
+    background-color: var(--neon-emerald);
+}
+
+.text-neon-purple {
+    color: var(--neon-purple);
+}
+
+.bg-neon-purple {
+    background-color: var(--neon-purple);
+}
+
+.text-neon-amber {
+    color: var(--neon-amber);
+}
+
+.bg-neon-amber {
+    background-color: var(--neon-amber);
+}
+
+.text-neon-rose {
+    color: var(--neon-rose);
+}
+
+.bg-neon-rose {
+    background-color: var(--neon-rose);
+}
+
+.bg-glass-bg {
+    background-color: var(--glass-bg);
+}
+
+.border-white\/5 {
+    border-color: rgba(255, 255, 255, 0.05);
+}
+
+.border-white\/10 {
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+.shadow-premium {
+    box-shadow: var(--glass-shadow);
+}
+
+/* ── Global Spacing Cleanup ── */
+.admin-layout {
+    gap: 0;
+    /* Handled by margins */
 }
 
 /* ── Opportunity State Styles ──────────────────────────────── */
@@ -2663,9 +2730,10 @@ body[dir="rtl"] .admin-form-group select {
 }
 
 .admin-sidebar {
-    width: 264px;
-    background: linear-gradient(175deg, #0c1021 0%, #080d1a 40%, #060a14 100%);
-    border-right: 1px solid rgba(255, 255, 255, 0.05);
+    width: var(--sidebar-width);
+    background: linear-gradient(180deg, #0f172a 0%, #0b0e14 100%);
+    backdrop-filter: var(--glass-blur);
+    border-right: 1px solid var(--glass-border);
     padding: 0;
     display: flex;
     flex-direction: column;
@@ -2674,8 +2742,7 @@ body[dir="rtl"] .admin-form-group select {
     left: 0;
     height: 100vh;
     z-index: 100;
-    overflow-y: auto;
-    overflow-x: hidden;
+    transition: var(--transition-premium);
 }
 
 .admin-sidebar::-webkit-scrollbar {
@@ -3054,13 +3121,153 @@ body[dir="rtl"] .sidebar-group-items a {
 
 .admin-main {
     flex: 1;
-    margin-left: 264px;
-    padding: 32px;
+    margin-left: var(--sidebar-width);
+    padding: var(--gap-core);
+    background: var(--bg-primary);
 }
+
+/* ── Futuristic Card System ── */
+.admin-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: var(--gap-core);
+    padding: var(--gap-core);
+}
+
+.admin-stat-card {
+    background: var(--glass-bg);
+    backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-premium);
+    padding: 1.75rem;
+    position: relative;
+    overflow: hidden;
+    transition: var(--transition-premium);
+    box-shadow: var(--glass-shadow);
+}
+
+.admin-stat-card:hover {
+    transform: translateY(-5px);
+    border-color: var(--neon-cyan);
+    background: var(--glass-hover);
+    box-shadow: 0 0 25px rgba(6, 182, 212, 0.15);
+}
+
+.admin-stat-card .stat-value {
+    font-size: 2.25rem;
+    font-weight: 800;
+    color: var(--text-primary);
+    line-height: 1;
+    margin-bottom: 0.5rem;
+    font-family: 'Outfit', sans-serif;
+}
+
+.admin-stat-card .stat-title {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--text-muted);
+}
+
+.admin-stat-card .stat-icon {
+    position: absolute;
+    top: 1.5rem;
+    right: 1.5rem;
+    font-size: 2rem;
+    opacity: 0.15;
+    transition: var(--transition-premium);
+}
+
+.admin-stat-card:hover .stat-icon {
+    opacity: 0.6;
+    color: var(--neon-cyan);
+    transform: scale(1.1);
+}
+
+.admin-card {
+    background: var(--glass-bg);
+    backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-premium);
+    padding: var(--gap-core);
+    margin: var(--gap-core);
+    box-shadow: var(--glass-shadow);
+}
+
+/* ── Glow Accents ── */
+.glow-emerald {
+    border-bottom: 3px solid var(--neon-emerald);
+}
+
+.glow-cyan {
+    border-bottom: 3px solid var(--neon-cyan);
+}
+
+.glow-rose {
+    border-bottom: 3px solid var(--neon-rose);
+}
+
+@keyframes pulseGlow {
+    0% {
+        box-shadow: 0 0 5px rgba(16, 185, 129, 0.2);
+    }
+
+    50% {
+        box-shadow: 0 0 20px rgba(16, 185, 129, 0.4);
+    }
+
+    100% {
+        box-shadow: 0 0 5px rgba(16, 185, 129, 0.2);
+    }
+}
+
+.animate-glow-emerald {
+    animation: pulseGlow 3s infinite;
+}
+
+/* ── New-style admin pages (flex header + scrollable content) ── */
+.admin-layout>.flex-1 {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    overflow-x: hidden;
+    background: var(--bg-primary);
+    transition: margin-left 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@media (min-width: 769px) {
+    .admin-layout>.flex-1 {
+        margin-left: var(--sidebar-width);
+    }
+
+    body[dir="rtl"] .admin-layout>.flex-1 {
+        margin-left: 0;
+        margin-right: var(--sidebar-width);
+    }
+}
+
+.admin-layout>.flex-1>header {
+    flex-shrink: 0;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: rgba(15, 23, 42, 0.8);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--glass-border);
+}
+
+.admin-layout>.flex-1>.admin-content,
+.admin-layout>.flex-1>main,
+.admin-layout>.flex-1>.fb-wrap {
+    flex: 1;
+    overflow-y: auto;
+}
+
 
 .crm-main {
     flex: 1;
-    margin-left: 264px;
     display: flex;
     flex-direction: column;
     height: 100vh;
@@ -3840,21 +4047,103 @@ body[dir="rtl"] .crm-main {
     margin-bottom: 32px;
 }
 
+/* ── Futuristic Table System ── */
+.admin-table-wrapper {
+    background: var(--glass-bg);
+    backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-premium);
+    overflow: hidden;
+    box-shadow: var(--glass-shadow);
+}
+
+.admin-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+    font-size: 0.88rem;
+}
+
+.admin-table th {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 1.25rem 1.5rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    font-size: 0.65rem;
+    color: var(--text-muted);
+    border-bottom: 1px solid var(--glass-border);
+}
+
+.admin-table td {
+    padding: 1.15rem 1.5rem;
+    color: var(--text-secondary);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+    transition: var(--transition-premium);
+}
+
+.admin-table tr:last-child td {
+    border-bottom: none;
+}
+
+.admin-table tr:hover td {
+    background: rgba(255, 255, 255, 0.02);
+    color: var(--text-primary);
+}
+
+/* Status Badges - Futuristic */
+.status-badge {
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.status-new {
+    background: rgba(16, 185, 129, 0.1);
+    color: var(--neon-emerald);
+    border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.status-pending {
+    background: rgba(245, 158, 11, 0.1);
+    color: var(--neon-amber);
+    border: 1px solid rgba(245, 158, 11, 0.2);
+}
+
+.status-cancelled {
+    background: rgba(244, 63, 94, 0.1);
+    color: var(--neon-rose);
+    border: 1px solid rgba(244, 63, 94, 0.2);
+}
+
 /* ── Select status dropdown inline ────────────────────────── */
 .inline-form {
     display: inline;
 }
 
 .inline-select {
-    padding: 4px 8px;
-    border-radius: 6px;
+    padding: 6px 10px;
+    border-radius: 8px;
     border: 1px solid var(--glass-border);
-    background: rgba(255, 255, 255, 0.03);
+    background: rgba(255, 255, 255, 0.05);
     color: var(--text-primary);
     font-size: 0.8rem;
     font-family: inherit;
-    outline: none;
+    backdrop-filter: blur(4px);
     cursor: pointer;
+    transition: var(--transition-premium);
+    outline: none;
+}
+
+.inline-select:hover {
+    border-color: var(--neon-cyan);
+    background: rgba(255, 255, 255, 0.08);
 }
 
 /* ── Scroll indicator dots ────────────────────────────────── */
@@ -5216,12 +5505,12 @@ body[dir="rtl"] .testimonial-card::before {
 .inbox-dashboard {
     display: grid;
     grid-template-columns: 320px 1fr 300px;
-    height: calc(100vh - 120px);
+    height: calc(100vh - 100px);
     background: var(--bg-secondary);
     border: 1px solid var(--glass-border);
     border-radius: var(--radius-lg);
     overflow: hidden;
-    margin-top: 20px;
+    margin: 10px 20px 20px 20px;
 }
 
 /* Sidebar: Session List */
@@ -5389,9 +5678,9 @@ body[dir="rtl"] .testimonial-card::before {
 }
 
 /* Responsive adjustments */
-@media (max-width: 1200px) {
+@media (max-width: 1300px) {
     .inbox-dashboard {
-        grid-template-columns: 280px 1fr;
+        grid-template-columns: 320px 1fr;
     }
 
     .inbox-profile {
@@ -5405,7 +5694,7 @@ body[dir="rtl"] .testimonial-card::before {
         height: calc(100vh - 80px);
         /* Taller on mobile */
         border-radius: 0;
-        margin-top: 10px;
+        margin: 0;
     }
 
     .inbox-sidebar {
@@ -5776,6 +6065,29 @@ body[dir="rtl"] .testimonial-card::before {
     border-left: 4px solid #ec4899 !important;
 }
 
+/* CRM Custom Scrollbars */
+.crm-main-scroll::-webkit-scrollbar,
+.crm-column-scroll::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+.crm-main-scroll::-webkit-scrollbar-track,
+.crm-column-scroll::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.crm-main-scroll::-webkit-scrollbar-thumb,
+.crm-column-scroll::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+}
+
+.crm-main-scroll::-webkit-scrollbar-thumb:hover,
+.crm-column-scroll::-webkit-scrollbar-thumb:hover {
+    background: rgba(6, 182, 212, 0.3);
+}
+
 .truncate-3 {
     display: -webkit-box;
     -webkit-line-clamp: 3;
@@ -5798,48 +6110,70 @@ body[dir="rtl"] .testimonial-card::before {
     height: 100vh;
 }
 
-/* Sidebar collapse on mobile */
-@media (max-width: 768px) {
-    .admin-layout {
-        flex-direction: column !important;
-    }
+/* Sidebar drawer styles */
+.admin-mobile-toggle {
+    display: none;
+}
 
-    .admin-layout>aside,
-    .admin-layout>.admin-sidebar {
-        width: 100% !important;
-        height: auto !important;
+.admin-sidebar {
+    width: var(--sidebar-width, 280px);
+    background: #0a0d12;
+    border-right: 1px solid rgba(255, 255, 255, 0.05);
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 1000;
+}
+
+@media (max-width: 1024px) {
+    .admin-sidebar {
         position: fixed;
-        bottom: 0;
+        top: 0;
         left: 0;
+        height: 100vh !important;
+        transform: translateX(-100%);
+        box-shadow: 20px 0 80px rgba(0, 0, 0, 0.8);
+    }
+
+    .admin-sidebar.active {
+        transform: translateX(0);
+    }
+
+    .admin-mobile-toggle {
+        display: flex !important;
+        position: fixed;
+        bottom: 24px;
+        right: 24px;
+        z-index: 1100;
+        width: 56px;
+        height: 56px;
+        background: #06b6d4;
+        color: #000;
+        border-radius: 50%;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 8px 32px rgba(6, 182, 212, 0.4);
+        border: none;
+        cursor: pointer;
+        transition: transform 0.2s;
+    }
+
+    .admin-mobile-toggle:active {
+        transform: scale(0.9);
+    }
+
+    .admin-mobile-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.8);
+        backdrop-filter: blur(8px);
         z-index: 999;
-        display: flex;
-        flex-direction: row;
-        overflow-x: auto;
-        padding: 0.5rem;
-        gap: 0.25rem;
-        border-top: 1px solid rgba(255, 255, 255, 0.1);
-        background: #0f1115 !important;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.4s ease;
     }
 
-    .admin-layout>aside .admin-brand,
-    .admin-layout>.admin-sidebar .admin-brand {
-        display: none !important;
-    }
-
-    .admin-layout>aside a,
-    .admin-layout>.admin-sidebar a {
-        font-size: 0.65rem;
-        padding: 0.35rem 0.5rem;
-        white-space: nowrap;
-    }
-
-    .admin-layout>aside .sidebar-section-title {
-        display: none !important;
-    }
-
-    .crm-main {
-        height: calc(100vh - 60px);
-        padding-bottom: 60px;
+    .admin-mobile-overlay.active {
+        opacity: 1;
+        visibility: visible;
     }
 }
 
@@ -6051,5 +6385,240 @@ body[dir="rtl"] .testimonial-card::before {
         min-height: 44px;
         display: flex;
         align-items: center;
+    }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Admin Panel — Global Responsive & UI Consistency
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Admin Main Content ────── */
+.admin-main {
+    padding: 24px;
+    min-height: 100vh;
+    background: var(--bg-primary);
+    flex: 1;
+    min-width: 0;
+}
+
+/* ── Admin Header — topbar alignment fix ────────────────── */
+.admin-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 24px;
+}
+
+.admin-header .header-left {
+    flex: 1;
+    min-width: 0;
+}
+
+.admin-header .header-right {
+    flex-shrink: 0;
+}
+
+/* ── Admin Table — responsive horizontal scroll ─────────── */
+.admin-card {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.admin-table {
+    min-width: 600px;
+}
+
+/* ── Admin Stats Grid ───────────────────────────────────── */
+.admin-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+/* ── Notification Dropdown Max Width on Small Screens ──── */
+@media (max-width: 640px) {
+    #notifMenu {
+        width: calc(100vw - 2rem) !important;
+        right: -60px !important;
+        max-width: 360px;
+    }
+
+    #topProfileMenu {
+        width: calc(100vw - 2rem) !important;
+        right: -20px !important;
+        max-width: 280px;
+    }
+}
+
+/* ── General Admin Pages — Mobile ───────────────────────── */
+@media (max-width: 768px) {
+
+    /* Main content adjusts when sidebar becomes bottom nav */
+    .admin-main {
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+        padding: 16px;
+        padding-bottom: 80px;
+        min-height: calc(100vh - 60px);
+    }
+
+    /* Admin header stacks on mobile */
+    .admin-header {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 8px;
+    }
+
+    .admin-header h1 {
+        font-size: 1.25rem !important;
+    }
+
+    .admin-header .header-right {
+        align-self: flex-end;
+    }
+
+    /* Admin stats: 1 column on mobile */
+    .admin-stats {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+
+    /* Admin card padding */
+    .admin-card {
+        padding: 16px !important;
+        border-radius: 12px;
+    }
+
+    /* Form grids stack */
+    .admin-grid-2 {
+        grid-template-columns: 1fr !important;
+    }
+
+    .admin-grid-3 {
+        grid-template-columns: 1fr !important;
+    }
+
+    /* Table font size */
+    .admin-table th,
+    .admin-table td {
+        padding: 8px 10px;
+        font-size: 0.8rem;
+    }
+
+    /* Button group wraps */
+    .admin-header-actions {
+        width: 100%;
+        justify-content: flex-end;
+    }
+
+    /* Sidebar section title in bottom nav */
+    .sidebar-section-title {
+        display: none !important;
+    }
+}
+
+/* ── Very Small Screens ─────────────────────────────────── */
+@media (max-width: 480px) {
+    .admin-main {
+        padding: 10px;
+        padding-bottom: 80px;
+    }
+
+    .admin-header h1 {
+        font-size: 1.1rem !important;
+    }
+
+    /* Hide less critical table columns */
+    .admin-table th:nth-child(n+5),
+    .admin-table td:nth-child(n+5) {
+        display: none;
+    }
+
+    /* Full width buttons */
+    .btn-primary,
+    .btn-admin-save {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+/* ── Email Marketing Page ───────────────────────────────── */
+@media (max-width: 768px) {
+
+    .admin-main .grid,
+    .admin-main [style*="display: grid"] {
+        grid-template-columns: 1fr !important;
+    }
+}
+
+/* ── User Management Cards — Mobile ─────────────────────── */
+@media (max-width: 640px) {
+    #users-card-view {
+        grid-template-columns: 1fr !important;
+    }
+
+    /* List view table: hide email and sales columns */
+    #users-list-view table th:nth-child(3),
+    #users-list-view table td:nth-child(3),
+    #users-list-view table th:nth-child(4),
+    #users-list-view table td:nth-child(4) {
+        display: none;
+    }
+}
+
+/* ── Access Control / Permissions — Mobile ──────────────── */
+@media (max-width: 768px) {
+
+    /* Any flex row that should stack */
+    .admin-main .flex-col-mobile {
+        flex-direction: column !important;
+        align-items: stretch !important;
+    }
+}
+
+/* ── Invoice Pages — Mobile ─────────────────────────────── */
+@media (max-width: 768px) {
+    .admin-main table {
+        display: block;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .admin-main table th,
+    .admin-main table td {
+        white-space: nowrap;
+        font-size: 0.8rem;
+    }
+}
+
+/* Unified mobile adjustments */
+@media (max-width: 768px) {
+    .admin-main {
+        padding: 16px;
+        padding-bottom: 32px;
+    }
+
+    header {
+        padding: 0 16px !important;
+    }
+}
+
+/* ── Print-specific (hide sidebar/topbar for printing) ──── */
+@media print {
+
+    .admin-sidebar,
+    .admin-layout>aside,
+    .admin-header .header-right,
+    #notificationDropdown,
+    #userProfileDropdown {
+        display: none !important;
+    }
+
+    .admin-main {
+        margin-left: 0 !important;
+        padding: 0 !important;
     }
 }

@@ -61,6 +61,9 @@ function handleBookingSubmit(): void {
             empty($extraFields) ? null : json_encode($extraFields)
         ]);
 
+        require_once __DIR__ . '/../includes/helpers.php';
+        addAdminNotification('booking', 'New Booking Created', "You have a new booking from {$name} for {$service}.", 'admin/bookings');
+
         header('Location: ' . baseUrl('/booking/success'));
         exit;
     } catch (Exception $e) {

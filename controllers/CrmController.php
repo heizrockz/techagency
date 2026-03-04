@@ -9,6 +9,7 @@ require_once __DIR__ . '/../includes/auth.php';
 
 function adminCrmPipeline(): void {
     requireAdmin();
+    requirePermission('crm');
     $db = getDB();
 
     // Handle new POST actions for dynamic stages
@@ -43,10 +44,11 @@ function adminCrmPipeline(): void {
             $stage = trim($_POST['stage'] ?? 'New Lead');
             $priority = (int)($_POST['priority'] ?? 0);
             $color = trim($_POST['color_code'] ?? '');
+            $salespersonId = (int)($_POST['salesperson_id'] ?? 0);
             
             if ($title) {
-                $stmt = $db->prepare("INSERT INTO crm_opportunities (title, stage, priority, color_code) VALUES (?, ?, ?, ?)");
-                $stmt->execute([$title, $stage, $priority, $color]);
+                $stmt = $db->prepare("INSERT INTO crm_opportunities (title, stage, priority, color_code, salesperson_id) VALUES (?, ?, ?, ?, ?)");
+                $stmt->execute([$title, $stage, $priority, $color, $salespersonId ?: null]);
             }
             redirect('admin/crm_pipeline');
         }
@@ -141,7 +143,6 @@ function adminCrmPipeline(): void {
         }
 
         if ($action === 'create_invoice') {
-            // ... (keep existing)
             $oppId = (int)($_POST['id'] ?? 0);
             $splitType = $_POST['split_type'] ?? '100'; 
             
@@ -254,20 +255,35 @@ function adminCrmPipeline(): void {
     // Fetch all opportunities with optional search
     $sql = "SELECT o.*, c.name as contact_name FROM crm_opportunities o LEFT JOIN contacts c ON o.contact_id = c.id";
     $params = [];
+    $where = [];
     
+    // Visibility restriction for standard admins
+    if (!isSuperAdmin()) {
+        $adminId = (int)$_SESSION['admin_id'];
+        $where[] = "(o.salesperson_id = ? OR o.id IN (SELECT opportunity_id FROM crm_opportunity_salespeople WHERE admin_id = ?))";
+        $params[] = $adminId;
+        $params[] = $adminId;
+    }
+
     if ($search) {
         if ($search === 'Won') {
-            $sql .= " WHERE o.stage = 'Won'";
+            $where[] = "o.stage = 'Won'";
         } elseif ($search === 'Lost') {
-            $sql .= " WHERE o.stage = 'Lost'";
+            $where[] = "o.stage = 'Lost'";
         } elseif ($search === 'New') {
-            $sql .= " WHERE o.stage = 'New Lead'";
+            $where[] = "o.stage = 'New Lead'";
         } else {
-            $sql .= " WHERE o.title LIKE ? OR o.email LIKE ? OR o.phone LIKE ?";
-            $params = ["%$search%", "%$search%", "%$search%"];
+            $where[] = "(o.title LIKE ? OR o.email LIKE ? OR o.phone LIKE ?)";
+            $params[] = "%$search%";
+            $params[] = "%$search%";
+            $params[] = "%$search%";
         }
     }
     
+    if ($where) {
+        $sql .= " WHERE " . implode(" AND ", $where);
+    }
+
     $sql .= " ORDER BY o.priority DESC, o.created_at DESC";
     $stmt = $db->prepare($sql);
     $stmt->execute($params);
@@ -285,21 +301,29 @@ function adminCrmPipeline(): void {
         ];
     }
     
+    $firstStageName = !empty($stagesRows) ? $stagesRows[0]['name'] : null;
+    
     // Group opportunities by stage name
     foreach ($opportunities as $opp) {
         $stageName = $opp['stage'];
         if (isset($pipeline[$stageName])) {
             $pipeline[$stageName]['opportunities'][] = $opp;
+        } elseif ($firstStageName) {
+            $pipeline[$firstStageName]['opportunities'][] = $opp;
         }
     }
 
     $stages = array_column($stagesRows, 'name'); // for the quick-add dropdown
+
+    // Fetch salespersons for assignment dropdown
+    $salespersons = $db->query("SELECT id, username, full_name, avatar_emoji, is_salesperson FROM admins WHERE is_salesperson = 1 OR username = 'admin' ORDER BY full_name, username")->fetchAll();
 
     require __DIR__ . '/../views/admin/crm_pipeline.php';
 }
 
 function adminCrmOpportunity($id = null): void {
     requireAdmin();
+    requirePermission('crm');
     $db = getDB();
 
     $opportunity = null;
@@ -310,11 +334,22 @@ function adminCrmOpportunity($id = null): void {
     $allProducts = [];
 
     if ($id) {
-        $stmt = $db->prepare("SELECT * FROM crm_opportunities WHERE id = ?");
-        $stmt->execute([$id]);
+        // Visibility restriction for standard admins
+        $accessSql = "SELECT o.* FROM crm_opportunities o WHERE o.id = ?";
+        $accessParams = [$id];
+        if (!isSuperAdmin()) {
+            $adminId = (int)$_SESSION['admin_id'];
+            $accessSql .= " AND (o.salesperson_id = ? OR o.id IN (SELECT opportunity_id FROM crm_opportunity_salespeople WHERE admin_id = ?))";
+            $accessParams[] = $adminId;
+            $accessParams[] = $adminId;
+        }
+
+        $stmt = $db->prepare($accessSql);
+        $stmt->execute($accessParams);
         $opportunity = $stmt->fetch();
 
         if (!$opportunity) {
+            setFlash('Access denied or opportunity not found.', 'error');
             redirect('admin/crm_pipeline');
         }
 
@@ -354,6 +389,11 @@ function adminCrmOpportunity($id = null): void {
         ");
         $stmt->execute([$id, $id]);
         $attachments = $stmt->fetchAll();
+
+        // Fetch Extra Salespeople
+        $stmt = $db->prepare("SELECT admin_id FROM crm_opportunity_salespeople WHERE opportunity_id = ?");
+        $stmt->execute([$id]);
+        $extra_salesperson_ids = $stmt->fetchAll(PDO::FETCH_COLUMN);
     }
 
     // Fetch all available products for select modal
@@ -372,34 +412,64 @@ function adminCrmOpportunity($id = null): void {
             'color_code' => trim($_POST['color_code'] ?? ''),
             'notes' => trim($_POST['notes'] ?? ''),
             'contact_id' => !empty($_POST['contact_id']) ? (int)$_POST['contact_id'] : null,
+            'salesperson_id' => !empty($_POST['salesperson_id']) ? (int)$_POST['salesperson_id'] : null,
         ];
+
+        $extraSalespersonIds = $_POST['extra_salesperson_ids'] ?? [];
 
         if ($id) {
             $stmt = $db->prepare("
                 UPDATE crm_opportunities 
-                SET title = ?, email = ?, phone = ?, expected_revenue = ?, probability = ?, stage = ?, color_code = ?, notes = ?, contact_id = ? 
+                SET title = ?, email = ?, phone = ?, expected_revenue = ?, probability = ?, stage = ?, color_code = ?, notes = ?, contact_id = ?, salesperson_id = ? 
                 WHERE id = ?
             ");
             $stmt->execute([
                 $data['title'], $data['email'], $data['phone'], $data['expected_revenue'], 
-                $data['probability'], $data['stage'], $data['color_code'], $data['notes'], $data['contact_id'], 
+                $data['probability'], $data['stage'], $data['color_code'], $data['notes'], $data['contact_id'], $data['salesperson_id'],
                 $id
             ]);
+
+            // Log salesperson change in internal notes
+            if ($opportunity['salesperson_id'] != $data['salesperson_id']) {
+                $newSalesId = (int)$data['salesperson_id'];
+                $newSalesperson = $newSalesId ? $db->query("SELECT username FROM admins WHERE id = $newSalesId")->fetchColumn() : 'None';
+                $stmtLog = $db->prepare("INSERT INTO crm_log_notes (opportunity_id, admin_id, note_type, content) VALUES (?, ?, 'note', ?)");
+                $stmtLog->execute([$id, $_SESSION['admin_id'], "Primary Salesperson changed to: $newSalesperson"]);
+            }
+
             setFlash('Opportunity updated.');
-            redirect('admin/crm_opportunity?id=' . $id);
+            // (Sync extra salespeople logic will follow below)
         } else {
             $stmt = $db->prepare("
-                INSERT INTO crm_opportunities (title, email, phone, expected_revenue, probability, stage, color_code, notes, contact_id) 
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                INSERT INTO crm_opportunities (title, email, phone, expected_revenue, probability, stage, color_code, notes, contact_id, salesperson_id) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ");
             $stmt->execute([
                 $data['title'], $data['email'], $data['phone'], $data['expected_revenue'], 
-                $data['probability'], $data['stage'], $data['color_code'], $data['notes'], $data['contact_id']
+                $data['probability'], $data['stage'], $data['color_code'], $data['notes'], $data['contact_id'], $data['salesperson_id']
             ]);
-            $newId = $db->lastInsertId();
+            $id = $db->lastInsertId();
+            
+            if ($data['salesperson_id']) {
+                $newSalesperson = $db->query("SELECT username FROM admins WHERE id = {$data['salesperson_id']}")->fetchColumn();
+                $stmtLog = $db->prepare("INSERT INTO crm_log_notes (opportunity_id, admin_id, note_type, content) VALUES (?, ?, 'note', ?)");
+                $stmtLog->execute([$id, $_SESSION['admin_id'], "Assigned Primary Salesperson: $newSalesperson"]);
+            }
+
             setFlash('Opportunity created.');
-            redirect('admin/crm_opportunity?id=' . $newId);
         }
+
+        // Sync Extra Salespeople
+        $db->prepare("DELETE FROM crm_opportunity_salespeople WHERE opportunity_id = ?")->execute([$id]);
+        if (is_array($extraSalespersonIds)) {
+            $stmtExtra = $db->prepare("INSERT INTO crm_opportunity_salespeople (opportunity_id, admin_id) VALUES (?, ?)");
+            foreach ($extraSalespersonIds as $extraId) {
+                if ($extraId == $data['salesperson_id']) continue;
+                $stmtExtra->execute([$id, (int)$extraId]);
+            }
+        }
+
+        redirect('admin/crm_opportunity?id=' . $id);
     }
     
     // Handle adding log note
@@ -457,13 +527,17 @@ function adminCrmOpportunity($id = null): void {
 
     // Fetch contacts for dropdown
     $contacts = $db->query("SELECT id, name FROM contacts ORDER BY name ASC")->fetchAll();
+    // Fetch salespersons for assignment dropdown
+    $salespersons = $db->query("SELECT id, username, full_name, avatar_emoji, is_salesperson FROM admins WHERE is_salesperson = 1 OR username = 'admin' ORDER BY full_name, username")->fetchAll();
 
     require __DIR__ . '/../views/admin/crm_opportunity.php';
 }
 
 
+
 function adminCrmPayments(): void {
     requireAdmin();
+    requirePermission('crm');
     $db = getDB();
 
     // Integrated Migration (ensure table exists)
@@ -673,6 +747,7 @@ function adminCrmPayments(): void {
 
 function adminCrmProducts(): void {
     requireAdmin();
+    requirePermission('crm');
     $db = getDB();
     
     if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {

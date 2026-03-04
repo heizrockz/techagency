@@ -4,6 +4,7 @@
  */
 require_once __DIR__ . '/../includes/db.php';
 require_once __DIR__ . '/../includes/helpers.php';
+require_once __DIR__ . '/../includes/auth.php';
 require_once __DIR__ . '/../includes/sitemap_generator.php';
 require_once __DIR__ . '/../includes/smtp.php';
 
@@ -20,6 +21,157 @@ function adminLogin(): void {
         $error = t('admin_login_error');
     }
     require __DIR__ . '/../views/admin/login.php';
+}
+
+// ── Notifications ───────────────────────────────────────────
+function adminNotifications() {
+    $db = getDB();
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        $action = $_POST['action'] ?? '';
+        if ($action === 'mark_all_read') {
+            $db->exec("UPDATE notifications SET is_read = 1 WHERE is_read = 0");
+            setFlash('All notifications marked as read', 'success');
+        } elseif ($action === 'mark_read') {
+            $id = (int)($_POST['id'] ?? 0);
+            $stmt = $db->prepare("UPDATE notifications SET is_read = 1 WHERE id = ?");
+            $stmt->execute([$id]);
+        } elseif ($action === 'delete') {
+            $id = (int)($_POST['id'] ?? 0);
+            $stmt = $db->prepare("DELETE FROM notifications WHERE id = ?");
+            $stmt->execute([$id]);
+            setFlash('Notification deleted', 'success');
+        }
+        header('Location: ' . baseUrl('admin/notifications'));
+        exit;
+    }
+    
+    $stmt = $db->query("SELECT * FROM notifications ORDER BY created_at DESC LIMIT 100");
+    $allNotifications = $stmt->fetchAll();
+    
+    require __DIR__ . '/../views/admin/notifications.php';
+}
+
+// ── User Management & Logs ─────────────────────────────────
+function adminUsers() {
+    requireSuperAdmin();
+    $db = getDB();
+
+    // Auto-migrate ip_filter_enabled column if missing
+    try {
+        $db->exec("ALTER TABLE `admins` ADD COLUMN `ip_filter_enabled` TINYINT(1) NOT NULL DEFAULT 0 AFTER `is_salesperson` ");
+    } catch (Exception $e) {}
+
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        $action = $_POST['action'] ?? '';
+        
+        if ($action === 'create') {
+            $username = trim($_POST['username'] ?? '');
+            $recovery_email = trim($_POST['email'] ?? '');
+            $password = $_POST['password'] ?? '';
+            $role = $_POST['role'] ?? 'standard';
+            $fullName = trim($_POST['full_name'] ?? '');
+            $isSalesperson = isset($_POST['is_salesperson']) ? 1 : 0;
+            $permissions = isset($_POST['permissions']) ? json_encode($_POST['permissions']) : json_encode([]);
+            
+            if (empty($username) || empty($password)) {
+                setFlash('Username and password are required', 'error');
+            } else {
+                try {
+                    $hash = password_hash($password, PASSWORD_DEFAULT);
+                    $stmt = $db->prepare('INSERT INTO admins (username, password, recovery_email, role, full_name, is_salesperson, permissions) VALUES (?, ?, ?, ?, ?, ?, ?)');
+                    if ($stmt->execute([$username, $hash, $recovery_email, $role, $fullName, $isSalesperson, $permissions])) {
+                        logAdminActivity('create_user', "Created admin user: {$username}" . ($isSalesperson ? ' (Sales)' : ''));
+                        setFlash('Admin user created successfully', 'success');
+                    }
+                } catch (Exception $e) {
+                    setFlash('Error creating user (username might be taken)', 'error');
+                }
+            }
+        } elseif ($action === 'toggle_salesperson') {
+            $id = (int)($_POST['id'] ?? 0);
+            $val = (int)($_POST['is_salesperson'] ?? 0);
+            $stmt = $db->prepare('UPDATE admins SET is_salesperson = ? WHERE id = ?');
+            $stmt->execute([$val ? 0 : 1, $id]);
+            logAdminActivity('toggle_salesperson', "Toggled salesperson for admin ID: {$id}");
+            setFlash('Sales role updated', 'success');
+        } elseif ($action === 'toggle_ip_filter') {
+            $id = (int)($_POST['id'] ?? 0);
+            $val = (int)($_POST['ip_filter_enabled'] ?? 0);
+            $stmt = $db->prepare('UPDATE admins SET ip_filter_enabled = ? WHERE id = ?');
+            $stmt->execute([$val ? 0 : 1, $id]);
+            logAdminActivity('toggle_ip_filter', "Toggled IP filter for admin ID: {$id}");
+            setFlash('Security lock updated', 'success');
+        } elseif ($action === 'delete') {
+            $id = (int)($_POST['id'] ?? 0);
+            if ($id === 1) {
+                setFlash('Cannot delete the primary Super Admin account', 'error');
+            } elseif ($id === $_SESSION['admin_id']) {
+                setFlash('Cannot delete yourself', 'error');
+            } else {
+                $stmt = $db->prepare('DELETE FROM admins WHERE id = ?');
+                if ($stmt->execute([$id])) {
+                    logAdminActivity('delete_user', "Deleted admin user ID: {$id}");
+                    setFlash('Admin user deleted successfully', 'success');
+                }
+            }
+        } elseif ($action === 'update_role') {
+            $id = (int)($_POST['id'] ?? 0);
+            $role = $_POST['role'] ?? 'standard';
+            if ($id === 1 && $role !== 'super_admin') {
+                setFlash('Cannot downgrade the primary Super Admin', 'error');
+            } else {
+                $stmt = $db->prepare('UPDATE admins SET role = ? WHERE id = ?');
+                if ($stmt->execute([$role, $id])) {
+                    logAdminActivity('update_user_role', "Updated role for admin ID {$id} to {$role}");
+                    setFlash('Role updated successfully', 'success');
+                }
+            }
+        } elseif ($action === 'add_ip') {
+            $adminId = (int)($_POST['admin_id'] ?? 0);
+            $ip = trim($_POST['ip_address'] ?? '');
+            $expires = !empty($_POST['expires_at']) ? $_POST['expires_at'] : null;
+            
+            if ($adminId && $ip) {
+                $stmt = $db->prepare("INSERT INTO admin_ip_whitelist (admin_id, ip_address, expires_at) VALUES (?, ?, ?)");
+                $stmt->execute([$adminId, $ip, $expires]);
+                logAdminActivity('add_ip_whitelist', "Added IP $ip to admin ID $adminId" . ($expires ? " (expires $expires)" : ""));
+                setFlash('IP added to whitelist', 'success');
+            }
+        } elseif ($action === 'delete_ip') {
+            $id = (int)($_POST['id'] ?? 0);
+            if ($id) {
+                $stmt = $db->prepare("DELETE FROM admin_ip_whitelist WHERE id = ?");
+                $stmt->execute([$id]);
+                logAdminActivity('delete_ip_whitelist', "Deleted IP whitelist entry ID: $id");
+                setFlash('IP removed from whitelist', 'success');
+            }
+        }
+        header('Location: ' . baseUrl('admin/users'));
+        exit;
+    }
+
+    $stmt = $db->query("SELECT id, username, recovery_email, role, full_name, avatar_emoji, is_salesperson, ip_filter_enabled, created_at FROM admins ORDER BY id");
+    $admins = $stmt->fetchAll();
+    
+    // Fetch whitelists for each admin
+    foreach ($admins as &$admin) {
+        $stmtW = $db->prepare("SELECT * FROM admin_ip_whitelist WHERE admin_id = ? ORDER BY created_at DESC");
+        $stmtW->execute([$admin['id']]);
+        $admin['whitelisted_ips'] = $stmtW->fetchAll();
+    }
+    unset($admin);
+    
+    require __DIR__ . '/../views/admin/users.php';
+}
+
+function adminActivityLogs() {
+    requireSuperAdmin();
+    $db = getDB();
+    
+    $stmt = $db->query("SELECT l.*, a.username, a.full_name FROM admin_activity_logs l LEFT JOIN admins a ON l.admin_id = a.id ORDER BY l.created_at DESC LIMIT 500");
+    $logs = $stmt->fetchAll();
+    
+    require __DIR__ . '/../views/admin/activity_logs.php';
 }
 
 /* ═══ Dashboard ═══ */
@@ -39,6 +191,8 @@ function adminDashboard(): void {
 
 /* ═══ Visitor Analytics ═══ */
 function adminVisitors(): void {
+    requireAdmin();
+    requirePermission('visitors');
     $db = getDB();
     $action = $_GET['action'] ?? 'list';
 
@@ -96,6 +250,8 @@ function adminVisitors(): void {
 
 /* ═══ Bookings ═══ */
 function adminBookings(): void {
+    requireAdmin();
+    requirePermission('bookings');
     $db = getDB();
     $statusFilter = $_GET['status'] ?? 'all';
     if ($statusFilter !== 'all') {
@@ -125,6 +281,8 @@ function adminUpdateBookingStatus(): void {
 
 /* ═══ Services CRUD ═══ */
 function adminServices(): void {
+    requireAdmin();
+    requirePermission('content');
     $db = getDB();
     $saved = false;
     $action = $_GET['action'] ?? 'list';
@@ -191,6 +349,8 @@ function adminServices(): void {
 
 /* ═══ Clients CRUD ═══ */
 function adminClients(): void {
+    requireAdmin();
+    requirePermission('content');
     $db = getDB();
     $saved = false;
     $action = $_GET['action'] ?? 'list';
@@ -232,6 +392,8 @@ function adminClients(): void {
 
 /* ═══ Products CRUD ═══ */
 function adminProducts(): void {
+    requireAdmin();
+    requirePermission('content');
     $db = getDB();
     $saved = false;
     $action = $_GET['action'] ?? 'list';
@@ -293,6 +455,8 @@ function adminProducts(): void {
 
 /* ═══ Booking Fields CRUD ═══ */
 function adminBookingFields(): void {
+    requireAdmin();
+    requirePermission('settings');
     $db = getDB();
     $saved = false;
     $action = $_GET['action'] ?? 'list';
@@ -355,6 +519,7 @@ function adminBookingFields(): void {
 
 /* ═══ Site Settings ═══ */
 function adminSettings(): void {
+    requirePermission('settings');
     $db = getDB();
     $saved = false;
 
@@ -447,6 +612,8 @@ function adminSettings(): void {
 
 /* ═══ Content Editor ═══ */
 function adminContent(): void {
+    requireAdmin();
+    requirePermission('content');
     $db = getDB();
     $saved = false;
 
@@ -514,6 +681,7 @@ function adminContent(): void {
 
 /* ═══ SEO Editor ═══ */
 function adminSeo(): void {
+    requirePermission('seo');
     $db = getDB();
     $saved = false;
 
@@ -592,6 +760,8 @@ function adminSeo(): void {
 
 /* ═══ Translations Editor ═══ */
 function adminTranslations(): void {
+    requireAdmin();
+    requirePermission('settings');
     $db = getDB();
     $saved = false;
 
@@ -638,6 +808,8 @@ function adminTranslations(): void {
 
 /* ═══ Portfolio CRUD ═══ */
 function adminPortfolio(): void {
+    requireAdmin();
+    requirePermission('content');
     $db = getDB();
     $saved = false;
     $action = $_GET['action'] ?? 'list';
@@ -710,6 +882,8 @@ function adminPortfolio(): void {
 
 /* ═══ Blogs CRUD ═══ */
 function adminBlogs(): void {
+    requireAdmin();
+    requirePermission('blogs');
     $db = getDB();
     $saved = false;
     $action = $_GET['action'] ?? 'list';
@@ -853,6 +1027,8 @@ function adminBlogs(): void {
 
 /* ═══ Team Members CRUD ═══ */
 function adminTeam(): void {
+    requireAdmin();
+    requirePermission('content');
     $db = getDB();
     $saved = false;
     $action = $_GET['action'] ?? 'list';
@@ -919,6 +1095,8 @@ function adminTeam(): void {
 
 /* ═══ Testimonials CRUD ═══ */
 function adminTestimonials(): void {
+    requireAdmin();
+    requirePermission('content');
     $db = getDB();
     $saved = false;
     $action = $_GET['action'] ?? 'list';
@@ -986,6 +1164,8 @@ function adminTestimonials(): void {
 
 /* ═══ Chatbot Editor ═══ */
 function adminChatbot(): void {
+    requireAdmin();
+    requirePermission('settings');
     $db = getDB();
 
     // ── AJAX API Endpoints ──────────────────────────────────
@@ -1150,6 +1330,8 @@ function adminChatbot(): void {
 
 /* ═══ Chatbot Inbox ═══ */
 function adminInbox(): void {
+    requireAdmin();
+    requirePermission('inbox');
     $db = getDB();
     $action = $_GET['action'] ?? 'list';
     $selectedId = isset($_GET['id']) ? intval($_GET['id']) : null;
@@ -1189,11 +1371,18 @@ function adminInbox(): void {
 
 /* ═══ Invoices & Quotes ═══ */
 function adminInvoices(): void {
+    requireAdmin();
+    requirePermission('crm');
     $db = getDB();
     $action = $_GET['action'] ?? 'list';
 
     if ($action === 'delete' && isset($_GET['id'])) {
-        $db->prepare('DELETE FROM invoices WHERE id = ?')->execute([intval($_GET['id'])]);
+        try {
+            $db->prepare('DELETE FROM invoices WHERE id = ?')->execute([intval($_GET['id'])]);
+            setFlash('Invoice deleted successfully.', 'success');
+        } catch (PDOException $e) {
+            setFlash('Cannot delete invoice because it contains items or payments.', 'error');
+        }
         header('Location: ' . baseUrl('admin/invoices'));
         exit;
     }
@@ -1215,6 +1404,7 @@ function adminInvoices(): void {
         $invoiceCurrency = $_POST['invoice_currency'] ?? 'AED';
         $paymentTerms = trim($_POST['payment_terms'] ?? '');
         $amountPaid = floatval($_POST['amount_paid'] ?? 0);
+        $salespersonId = intval($_POST['salesperson_id'] ?? 0);
 
         // Check uniqueness of invoice number (skip own record)
         $checkStmt = $db->prepare('SELECT id FROM invoices WHERE invoice_number = ? AND id != ?');
@@ -1224,12 +1414,29 @@ function adminInvoices(): void {
         }
 
         if ($id > 0) {
-            $db->prepare('UPDATE invoices SET type=?, invoice_number=?, client_name=?, client_email=?, client_phone=?, client_address=?, discount=?, vat_rate=?, status=?, notes=?, terms=?, contact_id=?, invoice_currency=?, payment_terms=?, amount_paid=? WHERE id=?')
-               ->execute([$type, $invoiceNumber, $clientName, $clientEmail, $clientPhone, $clientAddress, $discount, $vatRate, $status, $notes, $terms, $contactId ?: null, $invoiceCurrency, $paymentTerms, $amountPaid, $id]);
+            $db->prepare('UPDATE invoices SET type=?, invoice_number=?, client_name=?, client_email=?, client_phone=?, client_address=?, discount=?, vat_rate=?, status=?, notes=?, terms=?, contact_id=?, invoice_currency=?, payment_terms=?, amount_paid=?, salesperson_id=? WHERE id=?')
+               ->execute([$type, $invoiceNumber, $clientName, $clientEmail, $clientPhone, $clientAddress, $discount, $vatRate, $status, $notes, $terms, $contactId ?: null, $invoiceCurrency, $paymentTerms, $amountPaid, $salespersonId ?: null, $id]);
         } else {
-            $db->prepare('INSERT INTO invoices (type, invoice_number, client_name, client_email, client_phone, client_address, discount, vat_rate, status, notes, terms, contact_id, invoice_currency, payment_terms, amount_paid) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')
-               ->execute([$type, $invoiceNumber, $clientName, $clientEmail, $clientPhone, $clientAddress, $discount, $vatRate, $status, $notes, $terms, $contactId ?: null, $invoiceCurrency, $paymentTerms, $amountPaid]);
+            $db->prepare('INSERT INTO invoices (type, invoice_number, client_name, client_email, client_phone, client_address, discount, vat_rate, status, notes, terms, contact_id, invoice_currency, payment_terms, amount_paid, salesperson_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')
+               ->execute([$type, $invoiceNumber, $clientName, $clientEmail, $clientPhone, $clientAddress, $discount, $vatRate, $status, $notes, $terms, $contactId ?: null, $invoiceCurrency, $paymentTerms, $amountPaid, $salespersonId ?: null]);
             $id = $db->lastInsertId();
+        }
+
+        // Handle Extra Salespeople
+        $db->prepare('DELETE FROM crm_invoice_salespeople WHERE invoice_id = ?')->execute([$id]);
+        if (isset($_POST['extra_salesperson_ids']) && is_array($_POST['extra_salesperson_ids'])) {
+            $stmtExtra = $db->prepare('INSERT INTO crm_invoice_salespeople (invoice_id, admin_id) VALUES (?, ?)');
+            foreach ($_POST['extra_salesperson_ids'] as $extraId) {
+                if ($extraId == $salespersonId) continue; // Skip if same as primary
+                $stmtExtra->execute([$id, intval($extraId)]);
+            }
+        }
+
+        // Log salesperson change if applicable
+        if (isset($invoice) && $invoice['salesperson_id'] != $salespersonId) {
+            logActivity('Invoice Update', "Changed primary salesperson for invoice #{$invoiceNumber}");
+        } elseif (!isset($invoice) && $salespersonId) {
+            logActivity('Invoice Create', "Assigned primary salesperson to invoice #{$invoiceNumber}");
         }
 
         // Handle Items
@@ -1256,15 +1463,36 @@ function adminInvoices(): void {
     // Fetch contacts for dropdown
     $contacts = $db->query('SELECT * FROM contacts ORDER BY name ASC')->fetchAll();
 
+    // Fetch salespersons for dropdown
+    $salespersons = $db->query("SELECT id, username, full_name, avatar_emoji, is_salesperson FROM admins WHERE is_salesperson = 1 OR username = 'admin' ORDER BY full_name, username")->fetchAll();
+
     if ($action === 'edit' && isset($_GET['id'])) {
         $id = intval($_GET['id']);
-        $stmt = $db->prepare('SELECT * FROM invoices WHERE id = ?');
-        $stmt->execute([$id]);
+        $sql = "SELECT * FROM invoices WHERE id = ?";
+        $params = [$id];
+        if (!isSuperAdmin()) {
+            $adminId = (int)$_SESSION['admin_id'];
+            $sql .= " AND (salesperson_id = ? OR id IN (SELECT invoice_id FROM crm_invoice_salespeople WHERE admin_id = ?))";
+            $params[] = $adminId;
+            $params[] = $adminId;
+        }
+        $stmt = $db->prepare($sql);
+        $stmt->execute($params);
         $invoice = $stmt->fetch();
+
+        if (!$invoice) {
+            setFlash('Access denied or invoice not found.', 'error');
+            redirect('admin/invoices');
+        }
         
         $itemsStmt = $db->prepare('SELECT * FROM invoice_items WHERE invoice_id = ? ORDER BY id ASC');
         $itemsStmt->execute([$id]);
         $items = $itemsStmt->fetchAll();
+
+        // Fetch Extra Salespeople
+        $stmtEx = $db->prepare("SELECT admin_id FROM crm_invoice_salespeople WHERE invoice_id = ?");
+        $stmtEx->execute([$id]);
+        $extra_salesperson_ids = $stmtEx->fetchAll(PDO::FETCH_COLUMN);
 
         require __DIR__ . '/../views/admin/invoice_edit.php';
         return;
@@ -1286,10 +1514,18 @@ function adminInvoices(): void {
 
     if ($action === 'print' && isset($_GET['id'])) {
         $id = intval($_GET['id']);
-        $stmt = $db->prepare('SELECT * FROM invoices WHERE id = ?');
-        $stmt->execute([$id]);
+        $sql = "SELECT * FROM invoices WHERE id = ?";
+        $params = [$id];
+        if (!isSuperAdmin()) {
+            $adminId = (int)$_SESSION['admin_id'];
+            $sql .= " AND (salesperson_id = ? OR id IN (SELECT invoice_id FROM crm_invoice_salespeople WHERE admin_id = ?))";
+            $params[] = $adminId;
+            $params[] = $adminId;
+        }
+        $stmt = $db->prepare($sql);
+        $stmt->execute($params);
         $invoice = $stmt->fetch();
-        if (!$invoice) die('Invoice not found');
+        if (!$invoice) die('Access denied or invoice not found.');
 
         $itemsStmt = $db->prepare('SELECT * FROM invoice_items WHERE invoice_id = ? ORDER BY id ASC');
         $itemsStmt->execute([$id]);
@@ -1301,10 +1537,18 @@ function adminInvoices(): void {
 
     if ($action === 'receipt' && isset($_GET['id'])) {
         $id = intval($_GET['id']);
-        $stmt = $db->prepare('SELECT * FROM invoices WHERE id = ?');
-        $stmt->execute([$id]);
+        $sql = "SELECT * FROM invoices WHERE id = ?";
+        $params = [$id];
+        if (!isSuperAdmin()) {
+            $adminId = (int)$_SESSION['admin_id'];
+            $sql .= " AND (salesperson_id = ? OR id IN (SELECT invoice_id FROM crm_invoice_salespeople WHERE admin_id = ?))";
+            $params[] = $adminId;
+            $params[] = $adminId;
+        }
+        $stmt = $db->prepare($sql);
+        $stmt->execute($params);
         $invoice = $stmt->fetch();
-        if (!$invoice) die('Invoice not found');
+        if (!$invoice) die('Access denied or invoice not found.');
 
         $itemsStmt = $db->prepare('SELECT * FROM invoice_items WHERE invoice_id = ? ORDER BY id ASC');
         $itemsStmt->execute([$id]);
@@ -1315,17 +1559,35 @@ function adminInvoices(): void {
     }
 
     // List
-    $invoices = $db->query('SELECT * FROM invoices ORDER BY created_at DESC')->fetchAll();
+    $sql = "SELECT * FROM invoices";
+    $params = [];
+    if (!isSuperAdmin()) {
+        $adminId = (int)$_SESSION['admin_id'];
+        $sql .= " WHERE (salesperson_id = ? OR id IN (SELECT invoice_id FROM crm_invoice_salespeople WHERE admin_id = ?))";
+        $params[] = $adminId;
+        $params[] = $adminId;
+    }
+    $sql .= " ORDER BY created_at DESC";
+    $stmt = $db->prepare($sql);
+    $stmt->execute($params);
+    $invoices = $stmt->fetchAll();
     require __DIR__ . '/../views/admin/invoice_list.php';
 }
 
 /* ═══ Contacts / CRM ═══ */
 function adminContacts(): void {
+    requireAdmin();
+    requirePermission('crm');
     $db = getDB();
     $action = $_GET['action'] ?? 'list';
 
     if ($action === 'delete' && isset($_GET['id'])) {
-        $db->prepare('DELETE FROM contacts WHERE id = ?')->execute([intval($_GET['id'])]);
+        try {
+            $db->prepare('DELETE FROM contacts WHERE id = ?')->execute([intval($_GET['id'])]);
+            setFlash('Contact deleted successfully.', 'success');
+        } catch (PDOException $e) {
+            setFlash('Cannot delete contact because it is linked to invoices or opportunities.', 'error');
+        }
         header('Location: ' . baseUrl('admin/contacts'));
         exit;
     }
@@ -1420,6 +1682,8 @@ function adminProfile(): void {
 }
 /* ═══ Sitemap Editor ═══ */
 function adminSitemap(): void {
+    requireAdmin();
+    requirePermission('settings');
     $db = getDB();
     $saved = false;
     $sitemapPath = __DIR__ . '/../sitemap.xml';
@@ -1444,6 +1708,8 @@ function adminSitemap(): void {
 
 /* ═══ Email Marketing ═══ */
 function adminEmailMarketing(): void {
+    requireAdmin();
+    requirePermission('crm');
     $db = getDB();
     $saved = false;
     $sent = false;

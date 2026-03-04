@@ -5,24 +5,34 @@ $currentPage = 'marketing';
 <!DOCTYPE html>
 <html lang="<?= e(getCurrentLocale()) ?>" dir="<?= isRTL() ? 'rtl' : 'ltr' ?>">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= e($title) ?> — <?= APP_NAME ?></title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="<?= baseUrl('assets/css/style.css') ?>">
+    <?php require __DIR__ . '/partials/_head_assets.php'; ?>
 </head>
 <body dir="<?= isRTL() ? 'rtl' : 'ltr' ?>">
 
-<div class="admin-layout">
+<div class="admin-layout flex w-full h-screen overflow-hidden">
     <?php require __DIR__ . '/partials/sidebar.php'; ?>
     
-    <div class="admin-main">
-        <div class="admin-header">
-            <div class="header-left">
-                <h1 style="color: var(--neon-cobalt); margin:0; font-size:1.8rem;">✉️ Email Marketing</h1>
-                <p style="color: var(--text-muted); font-size: 0.85rem;">Configure SMTP and send bulk or single email campaigns.</p>
+    <div class="flex-1 flex flex-col min-w-0">
+        <header class="h-auto lg:h-20 flex flex-col lg:flex-row items-center justify-between px-4 lg:px-8 bg-glass-bg border-b border-white/5 shrink-0 backdrop-blur-xl sticky top-0 z-[100] py-4 lg:py-0 gap-4 lg:gap-0">
+            <div class="flex items-center justify-between w-full lg:w-auto">
+                <div class="flex flex-col">
+                    <div class="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em] mb-1 hidden sm:block">Communication Matrix</div>
+                    <h1 class="text-xl font-black text-white tracking-tight flex items-center gap-3 group">
+                        <span class="text-neon-cyan drop-shadow-[0_0_8px_rgba(6,182,212,0.4)]">Email Marketing</span>
+                        <span class="opacity-20 translate-y-px hidden sm:inline">/</span>
+                        <span class="text-[10px] tracking-widest text-slate-400 uppercase font-black hidden sm:inline-block">Broadcast Engine</span>
+                    </h1>
+                </div>
+                <div class="lg:hidden">
+                    <?php require __DIR__ . '/partials/_topbar.php'; ?>
+                </div>
             </div>
-        </div>
+            
+            <div class="hidden lg:block">
+                <?php require __DIR__ . '/partials/_topbar.php'; ?>
+            </div>
+        </header>
 
         <?php if ($saved): ?>
             <div class="alert alert-success" style="background:rgba(16,185,129,0.1); border:1px solid rgba(16,185,129,0.2); color:var(--neon-emerald); padding:15px; border-radius:10px; margin-bottom:20px;">Email settings saved and verified successfully.</div>
@@ -38,8 +48,8 @@ $currentPage = 'marketing';
 
         <!-- Collapsible Configuration Section -->
         <div class="admin-card collapsible-card" style="margin-bottom: 30px;">
-            <div class="card-header" style="cursor:pointer; display:flex; justify-content:space-between; align-items:center;" onclick="toggleConfig()">
-                <h3 class="card-title" style="font-size:1.1rem; font-weight:600; margin:0;">⚙️ SMTP / IMAP Configuration</h3>
+            <div class="card-header" style="cursor:pointer; display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:10px;" onclick="toggleConfig()">
+                <h3 class="card-title" style="font-size:1rem; font-weight:600; margin:0;">⚙️ SMTP / IMAP Configuration</h3>
                 <span id="config-toggle-icon" style="font-size:1.2rem; transition: transform 0.3s;">▼</span>
             </div>
             <div id="config-content" style="display:none; padding-top:20px; border-top:1px solid rgba(255,255,255,0.05); margin-top:15px;">
@@ -105,11 +115,11 @@ $currentPage = 'marketing';
                 <div class="card-header" style="margin-bottom:20px;">
                     <h3 class="card-title" style="font-size:1.1rem; font-weight:600;">🚀 Launch New Campaign</h3>
                 </div>
-                <div class="card-body">
+                <div class="card-body p-4 sm:p-8">
                     <form id="campaignForm" enctype="multipart/form-data">
                         <div id="campError" style="display:none; background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.2); color:#f43f5e; padding:12px 16px; border-radius:8px; margin-bottom:15px; font-size:0.85rem;"></div>
-                        <div class="admin-grid-2" style="gap:30px;">
-                            <div class="col-left">
+                        <div class="flex flex-col lg:flex-row gap-8 lg:gap-12">
+                            <div class="flex-1 min-w-0">
                                 <div class="form-group" style="margin-bottom:15px;">
                                     <label style="display:block; font-size:0.8rem; color:var(--text-muted); margin-bottom:5px;">Campaign Subject</label>
                                     <input type="text" name="subject" id="campSubject" class="form-control" placeholder="Our Latest AI Insights" style="width:100%; padding:10px; background:rgba(255,255,255,0.05); border:1px solid var(--glass-border); border-radius:8px; color:white;">
@@ -131,14 +141,14 @@ $currentPage = 'marketing';
                                 <?php endif; ?>
                             </div>
 
-                            <div class="col-right">
+                            <div class="w-full lg:w-80 shrink-0">
                                 <div class="form-group" style="margin-bottom:20px;">
                                     <label style="display:block; font-size:0.8rem; color:var(--text-muted); margin-bottom:10px;">Recipient Type</label>
-                                    <div style="display:flex; gap:20px;">
-                                        <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+                                    <div style="display:flex; flex-wrap:wrap; gap:12px 20px;">
+                                        <label style="display:flex; align-items:center; gap:8px; cursor:pointer; font-size:0.85rem; color:var(--text-secondary);">
                                             <input type="radio" name="send_type" value="single" checked onclick="toggleRecipientType('single')"> Single / Manual
                                         </label>
-                                        <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+                                        <label style="display:flex; align-items:center; gap:8px; cursor:pointer; font-size:0.85rem; color:var(--text-secondary);">
                                             <input type="radio" name="send_type" value="bulk" onclick="toggleRecipientType('bulk')"> Bulk (CSV)
                                         </label>
                                     </div>
@@ -170,7 +180,7 @@ $currentPage = 'marketing';
 
         <!-- Progress Modal -->
         <div id="progressModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:9999; backdrop-filter:blur(6px);">
-            <div style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:600px; max-height:80vh; background:#0f1117; border:1px solid rgba(255,255,255,0.1); border-radius:16px; overflow:hidden; box-shadow:0 20px 60px rgba(0,0,0,0.5);">
+            <div style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:90%; max-width:600px; max-height:80vh; background:#0f1117; border:1px solid rgba(255,255,255,0.1); border-radius:16px; overflow:hidden; box-shadow:0 20px 60px rgba(0,0,0,0.5);">
                 <div style="padding:20px 24px; border-bottom:1px solid rgba(255,255,255,0.06); display:flex; align-items:center; justify-content:space-between;">
                     <h3 style="margin:0; color:white; font-size:1.1rem;">📧 Sending Campaign</h3>
                     <span id="progressCounter" style="color:var(--neon-cyan); font-size:0.9rem; font-weight:600;">0 / 0</span>

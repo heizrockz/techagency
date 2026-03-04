@@ -3,7 +3,7 @@
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
 </button>
 
-<div class="admin-sidebar" id="adminSidebar">
+<div class="admin-sidebar shrink-0 h-screen flex flex-col overflow-y-auto crm-main-scroll" id="adminSidebar">
     <!-- Brand -->
     <div class="admin-brand">
         <?php $logo = getSetting('site_logo'); if(!empty($logo)): ?>
@@ -21,20 +21,27 @@
             <span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></span>
             <span><?= t('admin_dashboard') ?></span>
         </a>
+        <?php if(hasPermission('inbox')): ?>
         <a href="<?= baseUrl('admin/inbox') ?>" class="<?= $currentPage === 'inbox' ? 'active' : '' ?>">
             <span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg></span>
             <span>Inbox</span>
         </a>
+        <?php endif; ?>
+        <?php if(hasPermission('visitors')): ?>
         <a href="<?= baseUrl('admin/visitors') ?>" class="<?= $currentPage === 'visitors' ? 'active' : '' ?>">
             <span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
             <span>Visitors</span>
         </a>
+        <?php endif; ?>
+        <?php if(hasPermission('bookings')): ?>
         <a href="<?= baseUrl('admin/bookings') ?>" class="<?= $currentPage === 'bookings' ? 'active' : '' ?>">
             <span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/><path d="M8 14h.01"/><path d="M12 14h.01"/><path d="M16 14h.01"/><path d="M8 18h.01"/><path d="M12 18h.01"/></svg></span>
             <span><?= t('admin_bookings') ?></span>
         </a>
+        <?php endif; ?>
 
         <!-- CRM Group -->
+        <?php if(hasPermission('crm')): ?>
         <div class="sidebar-section-label">CRM</div>
         <?php $crmActive = in_array($currentPage, ['contacts', 'marketing', 'invoices', 'crm_pipeline', 'crm_products', 'crm_payments']); ?>
         <div class="sidebar-group <?= $crmActive ? 'open' : '' ?>">
@@ -72,6 +79,7 @@
                 </a>
             </div>
         </div>
+        <?php endif; ?>
 
         <!-- Content Group -->
         <div class="sidebar-section-label">Content</div>
@@ -85,6 +93,7 @@
                 <span class="sidebar-chevron"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></span>
             </div>
             <div class="sidebar-group-items">
+                <?php if(hasPermission('content')): ?>
                 <a href="<?= baseUrl('admin/services') ?>" class="<?= $currentPage === 'services' ? 'active' : '' ?>">
                     <span class="nav-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></span>
                     <span>Services</span>
@@ -113,18 +122,26 @@
                     <span class="nav-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></span>
                     <span><?= t('admin_content') ?></span>
                 </a>
+                <?php endif; ?>
+                
+                <?php if(hasPermission('seo')): ?>
                 <a href="<?= baseUrl('admin/seo') ?>" class="<?= $currentPage === 'seo' ? 'active' : '' ?>">
                     <span class="nav-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span>
                     <span><?= t('admin_seo') ?></span>
                 </a>
+                <?php endif; ?>
+                
+                <?php if(hasPermission('blogs')): ?>
                 <a href="<?= baseUrl('admin/blogs') ?>" class="<?= $currentPage === 'blogs' ? 'active' : '' ?>">
                     <span class="nav-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg></span>
                     <span>Blogs</span>
                 </a>
+                <?php endif; ?>
             </div>
         </div>
 
         <!-- Configuration Group -->
+        <?php if(hasPermission('settings')): ?>
         <div class="sidebar-section-label">System</div>
         <?php $configActive = in_array($currentPage, ['booking_fields', 'settings', 'chatbot', 'translations', 'sitemap']); ?>
         <div class="sidebar-group <?= $configActive ? 'open' : '' ?>">
@@ -158,6 +175,36 @@
                 </a>
             </div>
         </div>
+        <?php endif; ?>
+
+        <?php if (($_SESSION['admin_role'] ?? 'standard') === 'super_admin'): ?>
+        <!-- Admin Group — super admins only -->
+        <div class="sidebar-section-label">Access Control</div>
+        <?php $adminSecActive = in_array($currentPage ?? '', ['users', 'activity_logs', 'notifications']); ?>
+        <div class="sidebar-group <?= $adminSecActive ? 'open' : '' ?>">
+            <div class="sidebar-group-toggle" onclick="this.parentElement.classList.toggle('open')">
+                <div class="sidebar-group-toggle-left">
+                    <span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></span>
+                    <span>User & Permissions</span>
+                </div>
+                <span class="sidebar-chevron"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></span>
+            </div>
+            <div class="sidebar-group-items">
+                <a href="<?= baseUrl('admin/users') ?>" class="<?= ($currentPage ?? '') === 'users' ? 'active' : '' ?>">
+                    <span class="nav-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
+                    <span>User Management</span>
+                </a>
+                <a href="<?= baseUrl('admin/activity_logs') ?>" class="<?= ($currentPage ?? '') === 'activity_logs' ? 'active' : '' ?>">
+                    <span class="nav-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg></span>
+                    <span>Activity Logs</span>
+                </a>
+                <a href="<?= baseUrl('admin/notifications') ?>" class="<?= ($currentPage ?? '') === 'notifications' ? 'active' : '' ?>">
+                    <span class="nav-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></span>
+                    <span>Notifications</span>
+                </a>
+            </div>
+        </div>
+        <?php endif; ?>
 
         <!-- View Live Site -->
         <div class="sidebar-divider"></div>
@@ -166,43 +213,6 @@
             <span>View Live Site</span>
         </a>
 
-        <!-- User Profile Section -->
-        <?php
-            $emoji = '👤';
-            $displayName = getAdminUser() ?? 'Admin';
-            try {
-                $db = getDB();
-                $adminStmt = $db->prepare('SELECT avatar_emoji, full_name FROM admins WHERE id = ?');
-                $adminStmt->execute([$_SESSION['admin_id'] ?? 0]);
-                $adminData = $adminStmt->fetch();
-                if ($adminData) {
-                    $emoji = $adminData['avatar_emoji'] ?? '👤';
-                    $displayName = $adminData['full_name'] ?? $displayName;
-                }
-            } catch (Exception $e) {
-                // Columns may not exist yet — use defaults
-            }
-        ?>
-        <div class="sidebar-user-card">
-            <div class="sidebar-user-info" onclick="document.getElementById('profile-menu').classList.toggle('show')">
-                <span class="sidebar-user-avatar"><?= $emoji ?></span>
-                <div class="sidebar-user-details">
-                    <div class="sidebar-user-name"><?= e($displayName) ?></div>
-                    <div class="sidebar-user-role">Administrator</div>
-                </div>
-                <span class="sidebar-user-chevron"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span>
-            </div>
-            <div id="profile-menu" class="sidebar-user-menu">
-                <a href="<?= baseUrl('admin/profile') ?>">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-                    Edit Profile
-                </a>
-                <a href="<?= baseUrl('admin/logout') ?>" class="sidebar-logout-link">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-                    Logout
-                </a>
-            </div>
-        </div>
     </nav>
 </div>
 

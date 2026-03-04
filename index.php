@@ -70,6 +70,12 @@ if ($path === '/' || $path === '/index.php' || $path === '') {
         adminInbox();
     } elseif ($path === '/admin/marketing') {
         adminEmailMarketing();
+    } elseif ($path === '/admin/notifications') {
+        adminNotifications();
+    } elseif ($path === '/admin/users') {
+        adminUsers();
+    } elseif ($path === '/admin/activity_logs') {
+        adminActivityLogs();
     } elseif ($path === '/admin/sitemap') {
         adminSitemap();
     } elseif ($path === '/admin/bookings') {

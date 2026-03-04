@@ -181,6 +181,27 @@ function e(?string $str): string {
     return htmlspecialchars($str ?? '', ENT_QUOTES, 'UTF-8');
 }
 
+/**
+ * Log admin activity
+ */
+function logAdminActivity($action, $details = null) {
+    try {
+        $db = getDB();
+        if (session_status() === PHP_SESSION_NONE) session_start();
+        $adminId = $_SESSION['admin_id'] ?? null;
+        $ip = $_SERVER['REMOTE_ADDR'] ?? null;
+        $stmt = $db->prepare('INSERT INTO admin_activity_logs (admin_id, action_type, details, ip_address) VALUES (?, ?, ?, ?)');
+        $stmt->execute([$adminId, $action, $details, $ip]);
+    } catch (Exception $e) {}
+}
+
+/**
+ * Add an admin notification (Legacy alias for addNotification)
+ */
+function addAdminNotification($type, $title, $message, $link_url = '') {
+    return addNotification($type, $title, $message, $link_url);
+}
+
 function baseUrl(string $path = ''): string {
     $base = rtrim(BASE_URL, '/');
     if ($path === '' || $path === '/') {
@@ -653,6 +674,10 @@ function trackVisit(): void {
                 'region' => $region,
                 'isp' => $isp,
             ];
+
+            if (!isBot($_SERVER['HTTP_USER_AGENT'] ?? '')) {
+                addNotification('visit', 'New Visitor', "A new visitor from {$city}, {$country} arrived on {$path}.", 'admin/visitors');
+            }
         }
 
         $userAgent = $_SERVER['HTTP_USER_AGENT'] ?? '';
@@ -667,3 +692,45 @@ function trackVisit(): void {
     }
 }
 
+
+/* ── Notifications ────────────────────────────────────────── */
+/**
+ * Add a new system notification
+ */
+function addNotification(string $type, string $title, string $content = '', string $link = ''): bool {
+    try {
+        $db = getDB();
+        $stmt = $db->prepare("INSERT INTO notifications (type, title, content, link) VALUES (?, ?, ?, ?)");
+        return $stmt->execute([$type, $title, $content, $link]);
+    } catch (Exception $e) {
+        error_log("Failed to add notification: " . $e->getMessage());
+        return false;
+    }
+}
+
+/**
+ * Get recent notifications
+ */
+function getRecentNotifications(int $limit = 10): array {
+    try {
+        $db = getDB();
+        $stmt = $db->prepare("SELECT * FROM notifications ORDER BY created_at DESC LIMIT ?");
+        $stmt->bindValue(1, $limit, PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->fetchAll();
+    } catch (Exception $e) {
+        return [];
+    }
+}
+
+/**
+ * Get unread notification count
+ */
+function getUnreadNotificationCount(): int {
+    try {
+        $db = getDB();
+        return (int)$db->query("SELECT COUNT(*) FROM notifications WHERE is_read = 0")->fetchColumn();
+    } catch (Exception $e) {
+        return 0;
+    }
+}

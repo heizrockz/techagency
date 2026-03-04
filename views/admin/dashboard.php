@@ -1,97 +1,156 @@
 <!DOCTYPE html>
 <html lang="<?= e(getCurrentLocale()) ?>" dir="<?= isRTL() ? 'rtl' : 'ltr' ?>">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= t('admin_dashboard') ?> — <?= APP_NAME ?></title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="<?= baseUrl('assets/css/style.css') ?>">
+    <?php require __DIR__ . '/partials/_head_assets.php'; ?>
 </head>
 <body dir="<?= isRTL() ? 'rtl' : 'ltr' ?>">
 
-<div class="admin-layout">
+<div class="admin-layout flex w-full h-screen overflow-hidden">
     <!-- Sidebar -->
     <?php $currentPage = 'dashboard'; require __DIR__ . '/partials/sidebar.php'; ?>
 
-    <!-- Main Content -->
-    <div class="admin-main">
-        <div class="admin-header">
-            <h1><?= t('admin_welcome') ?>, <?= e(getAdminUser()) ?> 👋</h1>
-        </div>
+    <div class="flex-1 flex flex-col min-w-0">
+        <header class="h-20 flex items-center justify-between px-8 bg-glass-bg border-b border-white/5 shrink-0 backdrop-blur-xl sticky top-0 z-[100]">
+            <div class="flex flex-col">
+                <div class="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em] mb-1 hidden sm:block">Command Center</div>
+                <h1 class="text-xl font-black text-white tracking-tight flex items-center gap-3 group">
+                    <span class="text-neon-cyan drop-shadow-[0_0_8px_rgba(6,182,212,0.4)]"><?= t('admin_welcome') ?></span>
+                    <span class="opacity-20 translate-y-px hidden sm:inline">/</span>
+                    <span class="text-sm tracking-widest text-slate-400 uppercase font-black hidden sm:inline-block"><?= e(getAdminUser()) ?></span>
+                </h1>
+            </div>
+            <?php require __DIR__ . '/partials/_topbar.php'; ?>
+        </header>
 
-        <!-- Stats -->
-        <div class="admin-stats">
-            <a href="<?= baseUrl('/admin/visitors') ?>" class="admin-stat-card group relative overflow-hidden block transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_20px_50px_rgba(59,130,246,0.15)] border-white/5 hover:border-primary/20 bg-[#1a2333]">
-                <!-- Premium Background Effect -->
-                <div class="absolute -right-4 -top-4 w-24 h-24 bg-primary/10 rounded-full blur-2xl group-hover:bg-primary/20 transition-all duration-500"></div>
-                
-                <div class="flex justify-between items-end relative z-10">
-                    <div>
-                        <div class="stat-title text-slate-400 text-sm font-medium mb-1 flex items-center gap-2">
-                            <i class="ph ph-chart-line-up text-primary animate-pulse"></i>
-                            <?= getCurrentLocale() === 'ar' ? 'إجمالي الزيارات' : 'Total Traffic' ?>
-                        </div>
-                        <div class="stat-value text-3xl font-bold text-white tracking-tight leading-none"><?= number_format((int)$visitCount) ?></div>
+        <!-- Futuristic Stats Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 p-8">
+            <!-- Total Traffic Card -->
+            <a href="<?= baseUrl('/admin/visitors') ?>" class="admin-stat-card !bg-glass-bg border border-white/5 p-8 rounded-3xl relative overflow-hidden group hover:border-neon-cyan/40 transition-all hover:-translate-y-1 shadow-premium">
+                <div class="absolute top-0 right-0 w-32 h-32 bg-neon-cyan/5 blur-[60px] rounded-full -mr-16 -mt-16 group-hover:bg-neon-cyan/10 transition-colors"></div>
+                <div class="flex items-center justify-between mb-6">
+                    <div class="w-14 h-14 rounded-2xl bg-neon-cyan/10 flex items-center justify-center border border-neon-cyan/20 group-hover:scale-110 transition-transform">
+                        <i class="ph-bold ph-chart-line-up text-3xl text-neon-cyan"></i>
                     </div>
-                    <div class="flex flex-col items-end gap-2">
-                        <div class="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center transition-all duration-300 group-hover:scale-110 group-hover:bg-primary group-hover:text-white shadow-lg shadow-primary/10">
-                            <i class="ph ph-users text-xl"></i>
-                        </div>
-                        <span class="text-[10px] font-bold uppercase tracking-widest text-primary opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-2 group-hover:translate-y-0">
-                            <?= getCurrentLocale() === 'ar' ? 'عرض التفاصيل' : 'View Details' ?>
-                        </span>
+                    <div class="text-right">
+                        <div class="text-[9px] font-black text-slate-600 uppercase tracking-[0.2em] mb-1">Global Reach</div>
+                        <div class="text-3xl font-black text-white tracking-tighter"><?= number_format((int)$visitCount) ?></div>
                     </div>
                 </div>
+                <div class="flex items-center justify-between">
+                    <span class="text-[10px] font-black uppercase tracking-widest text-slate-500 group-hover:text-neon-cyan transition-colors">Digital Pulse Analytics</span>
+                    <i class="ph ph-arrow-right text-neon-cyan opacity-0 group-hover:opacity-100 transition-all translate-x-2 group-hover:translate-x-0"></i>
+                </div>
             </a>
-            <div class="admin-stat-card">
-                <div class="stat-value"><?= (int)$totalBookings ?></div>
-                <div class="stat-title"><?= t('admin_total_bookings') ?></div>
+
+            <!-- Total Bookers -->
+            <div class="admin-stat-card !bg-glass-bg border border-white/5 p-8 rounded-3xl relative overflow-hidden group hover:border-neon-emerald/40 transition-all hover:-translate-y-1 shadow-premium">
+                <div class="absolute top-0 right-0 w-32 h-32 bg-neon-emerald/5 blur-[60px] rounded-full -mr-16 -mt-16 group-hover:bg-neon-emerald/10 transition-colors"></div>
+                <div class="flex items-center justify-between mb-6">
+                    <div class="w-14 h-14 rounded-2xl bg-neon-emerald/10 flex items-center justify-center border border-neon-emerald/20 group-hover:scale-110 transition-transform">
+                        <i class="ph-bold ph-calendar-check text-3xl text-neon-emerald"></i>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-[9px] font-black text-slate-600 uppercase tracking-[0.2em] mb-1">Registry Vol.</div>
+                        <div class="text-3xl font-black text-white tracking-tighter"><?= (int)$totalBookings ?></div>
+                    </div>
+                </div>
+                <div class="flex items-center">
+                    <span class="text-[10px] font-black uppercase tracking-widest text-slate-500">Confirmed Engagements</span>
+                </div>
             </div>
-            <div class="admin-stat-card">
-                <div class="stat-value"><?= (int)$newBookings ?></div>
-                <div class="stat-title"><?= t('admin_new_bookings') ?></div>
+
+            <!-- Active Alerts -->
+            <div class="admin-stat-card !bg-glass-bg border border-white/5 p-8 rounded-3xl relative overflow-hidden group hover:border-neon-rose/40 transition-all hover:-translate-y-1 shadow-premium">
+                <div class="absolute top-0 right-0 w-32 h-32 bg-neon-rose/5 blur-[60px] rounded-full -mr-16 -mt-16 group-hover:bg-neon-rose/10 transition-colors"></div>
+                <div class="flex items-center justify-between mb-6">
+                    <div class="w-14 h-14 rounded-2xl bg-neon-rose/10 flex items-center justify-center border border-neon-rose/20 group-hover:scale-110 transition-transform">
+                        <i class="ph-bold ph-bell-ringing text-3xl text-neon-rose"></i>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-[9px] font-black text-slate-600 uppercase tracking-[0.2em] mb-1">Urgent Signal</div>
+                        <div class="text-3xl font-black text-white tracking-tighter"><?= (int)$newBookings ?></div>
+                    </div>
+                </div>
+                <div class="flex items-center">
+                    <span class="text-[10px] font-black uppercase tracking-widest text-slate-500">Awaiting Verification</span>
+                </div>
             </div>
         </div>
 
-        <!-- Recent Bookings -->
-        <div class="admin-card">
-            <h2 style="font-size: 1.1rem; font-weight: 600; margin-bottom: 16px;">
-                <?= getCurrentLocale() === 'ar' ? 'أحدث الحجوزات' : 'Recent Bookings' ?>
-            </h2>
+        <!-- Recent Registrations Activity -->
+        <div class="px-8 pb-8">
+            <div class="admin-table-wrapper backdrop-blur-xl border border-white/5 rounded-3xl overflow-hidden shadow-premium flex flex-col">
+                <div class="px-8 py-6 border-b border-white/5 bg-white/[0.01] flex items-center justify-between">
+                    <h2 class="text-[11px] font-black text-white uppercase tracking-[0.3em] flex items-center gap-3">
+                        <i class="ph ph-broadcast text-neon-cyan animate-pulse"></i>
+                        Live Engagement Registry
+                    </h2>
+                    <a href="<?= baseUrl('/admin/bookings') ?>" class="text-[9px] font-black text-slate-500 hover:text-neon-cyan uppercase tracking-widest transition-all">
+                        Full Data Sequence →
+                    </a>
+                </div>
 
-            <?php if (empty($recentBookings)): ?>
-                <p style="color: var(--text-muted);">
-                    <?= getCurrentLocale() === 'ar' ? 'لا توجد حجوزات بعد.' : 'No bookings yet.' ?>
-                </p>
-            <?php else: ?>
-                <div style="overflow-x: auto;">
-                    <table class="admin-table">
+                <?php if (empty($recentBookings)): ?>
+                    <div class="p-12 text-center">
+                        <div class="text-slate-700 text-[10px] font-black uppercase tracking-widest">
+                            No Transmission Detected Yet.
+                        </div>
+                    </div>
+                <?php else: ?>
+                    <table class="admin-table w-full text-left border-collapse">
                         <thead>
-                            <tr>
-                                <th>#</th>
-                                <th><?= getCurrentLocale() === 'ar' ? 'الاسم' : 'Name' ?></th>
-                                <th><?= getCurrentLocale() === 'ar' ? 'الخدمة' : 'Service' ?></th>
-                                <th><?= getCurrentLocale() === 'ar' ? 'الحالة' : 'Status' ?></th>
-                                <th><?= getCurrentLocale() === 'ar' ? 'التاريخ' : 'Date' ?></th>
+                            <tr class="text-slate-600 text-[8px] font-black uppercase tracking-[0.4em] bg-white/[0.01]">
+                                <th class="py-5 px-8 w-32">Vector ID</th>
+                                <th class="py-5 px-6">Identity</th>
+                                <th class="py-5 px-6">Assigned Sector</th>
+                                <th class="py-5 px-6 text-center">Protocol Status</th>
+                                <th class="py-5 px-8 text-right font-mono tracking-normal">Temporal Record</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody class="divide-y divide-white/[0.02]">
                             <?php foreach ($recentBookings as $b): ?>
-                            <tr>
-                                <td><?= (int)$b['id'] ?></td>
-                                <td><?= e($b['name']) ?></td>
-                                <td><?= e($b['service']) ?></td>
-                                <td><span class="status-badge status-<?= e($b['status']) ?>"><?= e($b['status']) ?></span></td>
-                                <td><?= e($b['created_at']) ?></td>
+                            <tr class="hover:bg-white/[0.03] transition-all group/row border-b border-white/[0.03] last:border-0 relative">
+                                <td class="py-5 px-8 relative">
+                                    <div class="flex items-center gap-2 group-hover/row:translate-x-1 transition-transform">
+                                        <div class="w-1.5 h-1.5 rounded-full bg-neon-cyan/40 group-hover/row:bg-neon-cyan group-hover/row:animate-pulse transition-all"></div>
+                                        <span class="text-[9px] font-black font-mono text-slate-700 tracking-tighter uppercase whitespace-nowrap">REC_<?= str_pad($b['id'], 5, '0', STR_PAD_LEFT) ?></span>
+                                    </div>
+                                </td>
+                                <td class="py-5 px-6">
+                                    <div class="flex flex-col">
+                                        <span class="text-[11px] font-black text-white uppercase tracking-[0.1em] group-hover/row:text-neon-cyan transition-colors"><?= e($b['name']) ?></span>
+                                        <span class="text-[7px] text-slate-800 font-bold tracking-[0.2em] uppercase">Verified Entity</span>
+                                    </div>
+                                </td>
+                                <td class="py-5 px-6">
+                                    <span class="text-[10px] text-slate-500 font-black uppercase tracking-widest bg-white/5 px-2.5 py-1 rounded-lg border border-white/5"><?= e($b['service']) ?></span>
+                                </td>
+                                <td class="py-5 px-6 text-center">
+                                    <?php 
+                                        $meta = match($b['status']) {
+                                            'pending' => ['class' => 'text-neon-amber bg-neon-amber/10 border-neon-amber/20', 'label' => 'AWAITING_SIGNAL'],
+                                            'confirmed' => ['class' => 'text-neon-emerald bg-neon-emerald/10 border-neon-emerald/20', 'label' => 'ACTIVE_SYNC'],
+                                            'cancelled' => ['class' => 'text-neon-rose bg-neon-rose/10 border-neon-rose/20', 'label' => 'TERMINATED'],
+                                            default => ['class' => 'text-slate-600 bg-white/10 border-white/20', 'label' => 'UNKNOWN']
+                                        };
+                                    ?>
+                                    <span class="inline-flex items-center px-3 py-1 rounded-lg border <?= $meta['class'] ?> text-[8px] font-black uppercase tracking-[0.2em]">
+                                        <?= $meta['label'] ?>
+                                    </span>
+                                </td>
+                                <td class="py-5 px-8 text-right">
+                                    <div class="flex flex-col items-end">
+                                        <span class="text-[10px] text-white font-black font-mono tracking-tighter truncate"><?= date('H:i • d.m.y', strtotime($b['created_at'])) ?></span>
+                                        <span class="text-[7px] text-slate-800 font-bold tracking-[0.3em] uppercase mt-0.5">Transmission Sync</span>
+                                    </div>
+                                </td>
                             </tr>
                             <?php endforeach; ?>
                         </tbody>
                     </table>
-                </div>
-            <?php endif; ?>
+                <?php endif; ?>
+            </div>
         </div>
     </div>
 </div>

@@ -95,6 +95,8 @@ try {
         $stmt = $db->prepare('INSERT INTO chatbot_sessions (user_email, user_phone, session_uuid, user_ip, user_agent, status, is_read) VALUES (?, ?, ?, ?, ?, ?, 0)');
         $stmt->execute([$userEmail, $userPhone, $uuid, $ip, $userAgent, 'Open']);
         $sessionId = $db->lastInsertId();
+        
+        addNotification('chat', 'New Chat', "A visitor started a new chatbot conversation.", 'admin/inbox?id=' . $sessionId);
     }
 
     // Delete existing messages for this session to prevent duplicates from the array

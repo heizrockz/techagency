@@ -65,8 +65,13 @@ function closeDeleteConfirm() {
 function executeDelete() {
     if (!_deleteAction) return;
     if (typeof _deleteAction === 'string') {
-        // GET-based delete (redirect to URL)
-        window.location.href = _deleteAction;
+        const formEl = document.getElementById(_deleteAction);
+        if (formEl && formEl.tagName === 'FORM') {
+            formEl.submit();
+        } else {
+            // GET-based delete (redirect to URL)
+            window.location.href = _deleteAction;
+        }
     } else if (_deleteAction instanceof HTMLFormElement) {
         // POST-based delete (submit form)
         _deleteAction.submit();

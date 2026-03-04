@@ -1,24 +1,36 @@
 <!DOCTYPE html>
 <html lang="<?= e(getCurrentLocale()) ?>" dir="<?= isRTL() ? 'rtl' : 'ltr' ?>">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Booking Form Fields — <?= APP_NAME ?></title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="<?= baseUrl('assets/css/style.css') ?>">
+    <?php require __DIR__ . '/partials/_head_assets.php'; ?>
 </head>
 <body dir="<?= isRTL() ? 'rtl' : 'ltr' ?>">
-<div class="admin-layout">
+<div class="admin-layout flex w-full h-screen overflow-hidden">
     <?php $currentPage = 'booking_fields'; require __DIR__ . '/partials/sidebar.php'; ?>
-    <div class="admin-main">
-        <div class="admin-header">
-            <h1>📝 Booking Form Builder</h1>
-            <a href="<?= baseUrl('admin/booking-fields?action=new') ?>" class="btn-primary" style="padding: 8px 16px; font-size: 0.9rem;">+ Add Field</a>
-        </div>
-        
-        <?php if ($saved): ?>
-            <div class="alert alert-success">Saved successfully.</div>
-        <?php endif; ?>
+    <div class="flex-1 flex flex-col min-w-0">
+        <header class="h-20 flex items-center justify-between px-8 bg-glass-bg border-b border-white/5 shrink-0 backdrop-blur-xl sticky top-0 z-[100]">
+            <div class="flex flex-col">
+                <div class="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em] mb-1 hidden sm:block">Interactive Interfaces</div>
+                <h1 class="text-xl font-black text-white tracking-tight flex items-center gap-3 group">
+                    <span class="text-neon-cyan drop-shadow-[0_0_8px_rgba(6,182,212,0.4)]">Portal Architect</span>
+                    <span class="opacity-20 translate-y-px hidden sm:inline">/</span>
+                    <span class="text-sm tracking-widest text-slate-400 uppercase font-black hidden sm:inline">Booking Fields</span>
+                </h1>
+            </div>
+            <div class="flex items-center gap-6">
+                <a href="<?= baseUrl('admin/booking-fields?action=new') ?>" class="px-4 sm:px-6 py-2.5 bg-neon-cyan hover:bg-cyan-400 text-black text-[10px] font-black uppercase tracking-widest rounded-xl transition-all shadow-lg active:scale-95 flex items-center gap-2">
+                    <i class="ph-bold ph-plus-circle text-lg"></i> <span class="hidden sm:inline">Inject New Vector</span>
+                </a>
+                <?php require __DIR__ . '/partials/_topbar.php'; ?>
+            </div>
+        </header>
+
+        <main class="flex-1 overflow-y-auto p-8 crm-main-scroll bg-[#0b0e14]">
+            <?php if ($saved): ?>
+                <div class="mb-8 p-4 bg-neon-emerald/10 border border-neon-emerald/20 rounded-2xl text-neon-emerald text-[10px] font-black uppercase tracking-widest flex items-center gap-3">
+                    <i class="ph-bold ph-check-circle text-lg"></i> Parameters Committed Successfully
+                </div>
+            <?php endif; ?>
 
         <?php if ($action === 'edit' || $action === 'new'): ?>
             <div class="admin-card" style="margin-bottom: 30px;">
@@ -98,18 +110,20 @@
                     </thead>
                     <tbody>
                         <?php foreach ($fields as $f): ?>
-                        <tr>
-                            <td><strong><?= e($f['field_name']) ?></strong></td>
-                            <td><span style="padding:4px 8px;border-radius:4px;background:var(--glass-bg);font-size:0.75rem;"><?= e($f['field_type']) ?></span></td>
-                            <td><?= e($f['trans']) ?></td>
-                            <td><?= $f['is_required'] ? 'Yes' : 'No' ?></td>
-                            <td><?= $f['sort_order'] ?></td>
-                            <td><?= $f['is_active'] ? '<span style="color:var(--neon-emerald)">Active</span>' : '<span style="color:var(--text-muted)">Inactive</span>' ?></td>
-                            <td>
-                                <a href="<?= baseUrl('admin/booking-fields?action=edit&id='.$f['id']) ?>" style="color: var(--neon-cyan); margin-right: 10px;">Edit</a>
-                                <?php if (!in_array($f['field_name'], ['name','email','phone','service','date','message'])): ?>
-                                <a href="<?= baseUrl('admin/booking-fields?action=delete&id='.$f['id']) ?>" style="color: var(--neon-pink);" onclick="return confirm('Delete field? Data in bookings will be preserved in JSON but the field will be removed from form.');">Delete</a>
-                                <?php endif; ?>
+                        <tr class="hover:bg-white/[0.03] transition-all group/row border-b border-white/[0.03] last:border-0 relative">
+                            <td class="py-4" data-label="Handle"><strong><?= e($f['field_name']) ?></strong></td>
+                            <td class="py-4" data-label="Type"><span style="padding:4px 8px;border-radius:4px;background:var(--glass-bg);font-size:0.75rem;"><?= e($f['field_type']) ?></span></td>
+                            <td class="py-4" data-label="Trans"><?= e($f['trans']) ?></td>
+                            <td class="py-4" data-label="Required"><?= $f['is_required'] ? 'Yes' : 'No' ?></td>
+                            <td class="py-4" data-label="Sort"><?= $f['sort_order'] ?></td>
+                            <td class="py-4" data-label="Status"><?= $f['is_active'] ? '<span style="color:var(--neon-emerald)">Active</span>' : '<span style="color:var(--text-muted)">Inactive</span>' ?></td>
+                            <td class="py-4 text-right" data-label="Actions">
+                                <div class="flex justify-end gap-3">
+                                    <a href="<?= baseUrl('admin/booking-fields?action=edit&id='.$f['id']) ?>" style="color: var(--neon-cyan);">Edit</a>
+                                    <?php if (!in_array($f['field_name'], ['name','email','phone','service','date','message'])): ?>
+                                    <a href="javascript:void(0)" style="color: var(--neon-pink);" onclick="showDeleteModal('this field', '<?= baseUrl('admin/booking-fields?action=delete&id='.$f['id']) ?>')">Delete</a>
+                                    <?php endif; ?>
+                                </div>
                             </td>
                         </tr>
                         <?php endforeach; ?>
@@ -118,7 +132,66 @@
                 </div>
             </div>
         <?php endif; ?>
+        </main>
     </div>
 </div>
+<?php require __DIR__ . '/partials/_delete_modal.php'; ?>
+<style>
+<style>
+    /* Desktop-first: ensure table looks good on large screens */
+    @media screen and (min-width: 1025px) {
+        .admin-table { min-width: 1000px; }
+    }
+
+    /* Mobile-responsive card transformation */
+    @media (max-width: 1024px) {
+        .admin-table-wrapper { border-radius: 1.5rem !important; margin: -1rem !important; }
+        .admin-table thead { display: none !important; }
+        
+        .admin-table, 
+        .admin-table tbody, 
+        .admin-table tr, 
+        .admin-table td { 
+            display: block !important; 
+            width: 100% !important; 
+            min-width: 0 !important;
+        }
+        
+        .admin-table tr { 
+            margin-bottom: 20px !important; 
+            background: rgba(255,255,255,0.02) !important; 
+            border-radius: 1.5rem !important; 
+            padding: 20px !important;
+            border: 1px solid rgba(255,255,255,0.05) !important;
+        }
+        
+        .admin-table td { 
+            display: flex !important; 
+            justify-content: space-between !important; 
+            align-items: center !important; 
+            padding: 12px 0 !important; 
+            border-bottom: 1px solid rgba(255,255,255,0.03) !important;
+            text-align: right !important;
+            min-height: 44px !important;
+        }
+        
+        .admin-table td:last-child { border-bottom: none !important; }
+        
+        .admin-table td::before { 
+            content: attr(data-label) !important; 
+            font-weight: 900 !important; 
+            text-transform: uppercase !important; 
+            font-size: 0.65rem !important; 
+            color: #06b6d4 !important;
+            letter-spacing: 2px !important;
+            opacity: 0.6 !important;
+            text-align: left !important;
+            margin-right: 12px !important;
+        }
+        
+        .admin-card { padding: 1.5rem !important; }
+        .admin-grid-2 { grid-template-columns: 1fr !important; }
+    }
+</style>
 </body>
 </html>

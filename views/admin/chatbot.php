@@ -2,16 +2,13 @@
 <!DOCTYPE html>
 <html lang="<?= e(getCurrentLocale()) ?>" dir="<?= isRTL() ? 'rtl' : 'ltr' ?>">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chatbot Flow Builder — <?= APP_NAME ?></title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="<?= baseUrl('assets/css/style.css') ?>">
+    <?php require __DIR__ . '/partials/_head_assets.php'; ?>
     <style>
     * { box-sizing: border-box; }
 
     /* ═══ Layout ═══ */
-    .fb-wrap { display:flex; height:calc(100vh - 58px); overflow:hidden; background:#0a0c10; }
+    .fb-wrap { display:flex; height:100%; overflow:hidden; background:#0a0c10; }
 
     /* ═══ Canvas ═══ */
     .fb-canvas-area { flex:1; position:relative; overflow:auto; cursor:grab; background-image: radial-gradient(rgba(255,255,255,0.05) 1px, transparent 1px); background-size: 20px 20px; }
@@ -111,18 +108,31 @@
 </head>
 <body dir="<?= isRTL() ? 'rtl' : 'ltr' ?>">
 
-<div class="admin-layout">
+<div class="admin-layout flex w-full h-screen overflow-hidden">
     <?php require __DIR__ . '/partials/sidebar.php'; ?>
 
-    <div class="admin-main" style="padding:0; overflow:hidden;">
-        <!-- Top bar -->
-        <div style="padding:12px 20px; background:#0f1117; border-bottom:1px solid rgba(255,255,255,0.06); display:flex; align-items:center; justify-content:space-between; flex-shrink:0; flex-wrap: wrap; gap: 10px;">
-            <h1 style="color:var(--neon-cyan); margin:0; font-size:1.1rem; font-weight:700;">🤖 Flow Builder</h1>
-            <div style="display:flex; gap:8px;">
-                <button onclick="FB.centerView()" class="btn-secondary" style="padding:7px 16px; font-size:0.82rem;">Center View</button>
-                <button onclick="FB.addNode()" class="btn-primary" style="padding:7px 16px; font-size:0.82rem;">+ Node</button>
+    <div class="flex-1 flex flex-col min-w-0 bg-[#0b0e14]">
+        <header class="h-20 flex items-center justify-between px-8 bg-glass-bg border-b border-white/5 shrink-0 backdrop-blur-xl sticky top-0 z-[100]">
+            <div class="flex flex-col">
+                <div class="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em] mb-1 hidden sm:block">Intelligence Gathering</div>
+                <h1 class="text-xl font-black text-white tracking-tight flex items-center gap-3 group">
+                    <span class="text-neon-cyan drop-shadow-[0_0_8px_rgba(6,182,212,0.4)]">Synthetic Logic</span>
+                    <span class="opacity-20 translate-y-px hidden sm:inline">/</span>
+                    <span class="text-sm tracking-widest text-slate-400 uppercase font-black hidden sm:inline">Flow Builder</span>
+                </h1>
             </div>
-        </div>
+            <div class="flex items-center gap-4 flex-wrap justify-end">
+                <div class="flex items-center gap-2">
+                    <button onclick="FB.centerView()" class="px-4 py-2 bg-white/5 hover:bg-white/10 text-white text-[9px] font-black uppercase tracking-widest rounded-lg transition-all border border-white/10 flex items-center gap-1.5">
+                        <i class="ph ph-arrows-out"></i> <span class="hidden sm:inline">Center</span>
+                    </button>
+                    <button onclick="FB.addNode()" class="px-4 py-2 bg-neon-cyan hover:bg-cyan-400 text-black text-[9px] font-black uppercase tracking-widest rounded-lg transition-all shadow-lg active:scale-95 flex items-center gap-1.5">
+                        <i class="ph ph-plus-circle text-base"></i> <span class="hidden sm:inline">Provision</span>
+                    </button>
+                </div>
+                <?php require __DIR__ . '/partials/_topbar.php'; ?>
+            </div>
+        </header>
 
         <div class="fb-wrap">
             <div class="fb-canvas-area" id="canvasArea">
@@ -644,15 +654,16 @@ const FB = {
         if (r.success) { await this.loadAll(); this.selectNode(r.id); }
     },
 
-    async delNode(id) {
-        if (!confirm('Delete this node and all its options?')) return;
-        const el = document.querySelector(`.fb-node[data-id="${id}"]`);
-        if (el) el.style.opacity = '0.5';
-        const r = await this.api('delete_node', {node_id:id});
-        if (r.success) {
-            this.closeEditor();
-            await this.loadAll();
-        }
+    delNode(id) {
+        showDeleteModal('Node', async () => {
+            const el = document.querySelector(`.fb-node[data-id="${id}"]`);
+            if (el) el.style.opacity = '0.5';
+            const r = await this.api('delete_node', {node_id:id});
+            if (r.success) {
+                this.closeEditor();
+                await this.loadAll();
+            }
+        });
     },
 
     async saveOpt(oid, nid) {
@@ -683,15 +694,16 @@ const FB = {
         if (r.success) { await this.loadAll(); this.openEditor(nid); }
     },
 
-    async delOpt(oid) {
-        if (!confirm('Delete this option?')) return;
-        const btn = event.target;
-        btn.style.opacity = '0.3';
-        const r = await this.api('delete_option', {option_id:oid});
-        if (r.success && this.selId) { 
-            await this.loadAll(); 
-            this.openEditor(this.selId); 
-        }
+    delOpt(oid) {
+        const btn = document.querySelector(`.fb-opt-del[onclick="FB.delOpt(${oid})"]`);
+        showDeleteModal('Option', async () => {
+            if (btn) btn.style.opacity = '0.3';
+            const r = await this.api('delete_option', {option_id:oid});
+            if (r.success && this.selId) { 
+                await this.loadAll(); 
+                this.openEditor(this.selId); 
+            }
+        });
     },
     
     async breakLink(oid, nid) {
@@ -715,5 +727,6 @@ const FB = {
 
 document.addEventListener('DOMContentLoaded', ()=>FB.init());
 </script>
+<?php require __DIR__ . '/partials/_delete_modal.php'; ?>
 </body>
 </html>
