@@ -464,6 +464,15 @@ safeExec($db, "
 ", "Table `app_products`");
 
 // Ensure columns exist for older tables
+addColumn($db, 'app_categories', 'icon',           "varchar(100) DEFAULT 'ph-cube'");
+addColumn($db, 'app_categories', 'color',          "varchar(50) DEFAULT 'cyan'");
+addColumn($db, 'app_categories', 'description',    "text DEFAULT NULL");
+addColumn($db, 'app_categories', 'sort_order',     "int(11) DEFAULT 0");
+addColumn($db, 'app_categories', 'is_active',      "tinyint(1) DEFAULT 1");
+
+addColumn($db, 'app_products', 'category_id',      "int(11) DEFAULT NULL AFTER `id`");
+addColumn($db, 'app_products', 'version',          "varchar(50) DEFAULT '1.0.0' AFTER `slug`");
+addColumn($db, 'app_products', 'icon_url',         "varchar(500) DEFAULT NULL AFTER `version`");
 addColumn($db, 'app_products', 'header_image',     "varchar(500) DEFAULT NULL AFTER `icon_url`");
 addColumn($db, 'app_products', 'features',         "text DEFAULT NULL AFTER `description`");
 addColumn($db, 'app_products', 'download_url',     "varchar(500) DEFAULT NULL AFTER `price`");
