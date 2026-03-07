@@ -12,8 +12,8 @@ error_reporting(E_ALL);
 ini_set('display_errors', '1');
 
 $isCli = (php_sapi_name() === 'cli');
-$nl    = $isCli ? "\n" : "<br>";
-$hr    = $isCli ? str_repeat('─', 60) . "\n" : "<hr>";
+$nl = $isCli ? "\n" : "<br>";
+$hr = $isCli ? str_repeat('─', 60) . "\n" : "<hr>";
 
 require_once __DIR__ . '/config.php';
 require_once __DIR__ . '/includes/db.php';
@@ -23,56 +23,65 @@ require_once __DIR__ . '/includes/db.php';
 // ─────────────────────────────────────────────────────────────
 $results = ['ok' => 0, 'skip' => 0, 'fail' => 0];
 
-function out(string $msg, string $type = 'info') {
+function out(string $msg, string $type = 'info')
+{
     global $nl, $isCli;
-    $prefix = match($type) {
-        'ok'   => $isCli ? "  ✅ " : "  ✅ ",
-        'skip' => $isCli ? "  ⏭️  " : "  ⏭️  ",
-        'fail' => $isCli ? "  ❌ " : "  ❌ ",
-        'head' => $isCli ? "\n🔷 " : "<b>🔷 ",
-        default => "  ℹ️  ",
-    };
+    $prefix = match ($type) {
+            'ok' => $isCli ? "  ✅ " : "  ✅ ",
+            'skip' => $isCli ? "  ⏭️  " : "  ⏭️  ",
+            'fail' => $isCli ? "  ❌ " : "  ❌ ",
+            'head' => $isCli ? "\n🔷 " : "<b>🔷 ",
+            default => "  ℹ️  ",
+        };
     $suffix = ($type === 'head' && !$isCli) ? "</b>" : "";
     echo $prefix . $msg . $suffix . $nl;
 }
 
-function tableExists(PDO $db, string $table): bool {
+function tableExists(PDO $db, string $table): bool
+{
     $stmt = $db->query("SHOW TABLES LIKE '$table'");
     return $stmt->rowCount() > 0;
 }
 
-function columnExists(PDO $db, string $table, string $column): bool {
+function columnExists(PDO $db, string $table, string $column): bool
+{
     try {
         $stmt = $db->query("SHOW COLUMNS FROM `$table` LIKE '$column'");
         return $stmt->rowCount() > 0;
-    } catch (Exception $e) {
+    }
+    catch (Exception $e) {
         return false;
     }
 }
 
-function safeExec(PDO $db, string $sql, string $label): void {
+function safeExec(PDO $db, string $sql, string $label): void
+{
     global $results;
     try {
         $db->exec($sql);
         out($label, 'ok');
         $results['ok']++;
-    } catch (PDOException $e) {
+    }
+    catch (PDOException $e) {
         if (str_contains($e->getMessage(), 'already exists') || str_contains($e->getMessage(), 'Duplicate')) {
             out("$label (already exists, skipped)", 'skip');
             $results['skip']++;
-        } else {
+        }
+        else {
             out("$label — " . $e->getMessage(), 'fail');
             $results['fail']++;
         }
     }
 }
 
-function addColumn(PDO $db, string $table, string $column, string $definition): void {
+function addColumn(PDO $db, string $table, string $column, string $definition): void
+{
     global $results;
     if (columnExists($db, $table, $column)) {
         out("Column `$table`.`$column` already exists", 'skip');
         $results['skip']++;
-    } else {
+    }
+    else {
         safeExec($db, "ALTER TABLE `$table` ADD COLUMN `$column` $definition", "Added `$column` to `$table`");
     }
 }
@@ -85,7 +94,8 @@ echo $hr;
 try {
     $db = getDB();
     out("Database connection OK (" . DB_NAME . ")", 'ok');
-} catch (Exception $e) {
+}
+catch (Exception $e) {
     out("Cannot connect to database: " . $e->getMessage(), 'fail');
     exit(1);
 }
@@ -96,18 +106,20 @@ try {
 out("STEP 1 — Admin tables & columns", 'head');
 
 // admins columns
-addColumn($db, 'admins', 'role',           "varchar(50) NOT NULL DEFAULT 'standard' AFTER `password`");
-addColumn($db, 'admins', 'permissions',    "text DEFAULT NULL AFTER `role`");
+addColumn($db, 'admins', 'role', "varchar(50) NOT NULL DEFAULT 'standard' AFTER `password`");
+addColumn($db, 'admins', 'permissions', "text DEFAULT NULL AFTER `role`");
 addColumn($db, 'admins', 'is_salesperson', "tinyint(1) NOT NULL DEFAULT 0 AFTER `role`");
 addColumn($db, 'admins', 'recovery_email', "varchar(255) DEFAULT NULL");
 addColumn($db, 'admins', 'recovery_phone', "varchar(50) DEFAULT NULL");
-addColumn($db, 'admins', 'full_name',      "varchar(100) DEFAULT NULL");
-addColumn($db, 'admins', 'avatar_emoji',   "varchar(10) DEFAULT NULL");
+addColumn($db, 'admins', 'full_name', "varchar(100) DEFAULT NULL");
+addColumn($db, 'admins', 'avatar_emoji', "varchar(10) DEFAULT NULL");
 
 // Ensure first admin is super_admin
 try {
     $db->exec("UPDATE `admins` SET `role` = 'super_admin' WHERE `id` = 1 AND `role` = 'standard'");
-} catch (Exception $e) {}
+}
+catch (Exception $e) {
+}
 
 // admin_activity_logs
 safeExec($db, "
@@ -194,12 +206,12 @@ safeExec($db, "
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
 ", "Table `contacts`");
 
-addColumn($db, 'invoices', 'contact_id',          "int(11) DEFAULT NULL");
-addColumn($db, 'invoices', 'invoice_currency',     "varchar(10) DEFAULT 'USD'");
-addColumn($db, 'invoices', 'payment_terms',        "text DEFAULT NULL");
-addColumn($db, 'invoices', 'salesperson_id',       "int(11) DEFAULT NULL");
-addColumn($db, 'invoices', 'payment_receipt_url',  "varchar(500) DEFAULT NULL");
-addColumn($db, 'invoices', 'amount_paid',          "decimal(15,2) DEFAULT 0.00");
+addColumn($db, 'invoices', 'contact_id', "int(11) DEFAULT NULL");
+addColumn($db, 'invoices', 'invoice_currency', "varchar(10) DEFAULT 'USD'");
+addColumn($db, 'invoices', 'payment_terms', "text DEFAULT NULL");
+addColumn($db, 'invoices', 'salesperson_id', "int(11) DEFAULT NULL");
+addColumn($db, 'invoices', 'payment_receipt_url', "varchar(500) DEFAULT NULL");
+addColumn($db, 'invoices', 'amount_paid', "decimal(15,2) DEFAULT 0.00");
 
 safeExec($db, "
     CREATE TABLE IF NOT EXISTS `announcement_history` (
@@ -239,7 +251,7 @@ safeExec($db, "
 ", "Table `crm_opportunities`");
 
 addColumn($db, 'crm_opportunities', 'salesperson_id', "int(11) DEFAULT NULL AFTER `contact_id`");
-addColumn($db, 'crm_opportunities', 'color_code',     "varchar(20) DEFAULT '' AFTER `notes`");
+addColumn($db, 'crm_opportunities', 'color_code', "varchar(20) DEFAULT '' AFTER `notes`");
 
 safeExec($db, "
     CREATE TABLE IF NOT EXISTS `crm_log_notes` (
@@ -272,7 +284,8 @@ try {
     $db->exec("ALTER TABLE `crm_attachments` MODIFY COLUMN `linked_type` ENUM('opportunity', 'log_note', 'payment') NOT NULL");
     out("Fixed `crm_attachments`.`linked_type` enum", 'ok');
     $results['ok']++;
-} catch (Exception $e) {
+}
+catch (Exception $e) {
     $results['skip']++;
 }
 
@@ -338,13 +351,15 @@ if (tableExists($db, 'chatbot_sessions')) {
     try {
         $db->exec("ALTER TABLE `chatbot_sessions` MODIFY COLUMN `session_uuid` varchar(100) NULL");
         $db->exec("ALTER TABLE `chatbot_sessions` MODIFY COLUMN `status` ENUM('Open', 'Closed') DEFAULT 'Open'");
-    } catch (Exception $e) {}
+    }
+    catch (Exception $e) {
+    }
 }
 
 if (tableExists($db, 'chatbot_nodes')) {
-    addColumn($db, 'chatbot_nodes', 'pos_x',          "int DEFAULT 0");
-    addColumn($db, 'chatbot_nodes', 'pos_y',          "int DEFAULT 0");
-    addColumn($db, 'chatbot_nodes', 'reply_type',     "ENUM('preset','user_input') DEFAULT 'preset'");
+    addColumn($db, 'chatbot_nodes', 'pos_x', "int DEFAULT 0");
+    addColumn($db, 'chatbot_nodes', 'pos_y', "int DEFAULT 0");
+    addColumn($db, 'chatbot_nodes', 'reply_type', "ENUM('preset','user_input') DEFAULT 'preset'");
     addColumn($db, 'chatbot_nodes', 'input_var_name', "varchar(100) DEFAULT ''");
 }
 
@@ -396,12 +411,12 @@ out("STEP 9 — Seed success page content", 'head');
 
 if (tableExists($db, 'contents')) {
     $seeds = [
-        ['success_page_title',   'en', 'Success!'],
-        ['success_page_title',   'ar', 'تم بنجاح!'],
+        ['success_page_title', 'en', 'Success!'],
+        ['success_page_title', 'ar', 'تم بنجاح!'],
         ['success_page_message', 'en', 'Thank you! Your booking request has been submitted. Our team will contact you shortly.'],
         ['success_page_message', 'ar', 'شكراً لك! تم استلام الطلب وسنتواصل معك قريباً.'],
-        ['success_page_button',  'en', 'Return to Home'],
-        ['success_page_button',  'ar', 'العودة للرئيسية'],
+        ['success_page_button', 'en', 'Return to Home'],
+        ['success_page_button', 'ar', 'العودة للرئيسية'],
     ];
     $stmt = $db->prepare('INSERT IGNORE INTO contents (section_key, locale, value) VALUES (?, ?, ?)');
     foreach ($seeds as $s) {
@@ -464,25 +479,25 @@ safeExec($db, "
 ", "Table `app_products`");
 
 // Ensure columns exist for older tables
-addColumn($db, 'app_categories', 'icon',           "varchar(100) DEFAULT 'ph-cube'");
-addColumn($db, 'app_categories', 'color',          "varchar(50) DEFAULT 'cyan'");
-addColumn($db, 'app_categories', 'description',    "text DEFAULT NULL");
-addColumn($db, 'app_categories', 'sort_order',     "int(11) DEFAULT 0");
-addColumn($db, 'app_categories', 'is_active',      "tinyint(1) DEFAULT 1");
+addColumn($db, 'app_categories', 'icon', "varchar(100) DEFAULT 'ph-cube'");
+addColumn($db, 'app_categories', 'color', "varchar(50) DEFAULT 'cyan'");
+addColumn($db, 'app_categories', 'description', "text DEFAULT NULL");
+addColumn($db, 'app_categories', 'sort_order', "int(11) DEFAULT 0");
+addColumn($db, 'app_categories', 'is_active', "tinyint(1) DEFAULT 1");
 
-addColumn($db, 'app_products', 'category_id',      "int(11) DEFAULT NULL AFTER `id`");
-addColumn($db, 'app_products', 'version',          "varchar(50) DEFAULT '1.0.0' AFTER `slug`");
-addColumn($db, 'app_products', 'icon_url',         "varchar(500) DEFAULT NULL AFTER `version`");
-addColumn($db, 'app_products', 'header_image',     "varchar(500) DEFAULT NULL AFTER `icon_url`");
-addColumn($db, 'app_products', 'features',         "text DEFAULT NULL AFTER `description`");
-addColumn($db, 'app_products', 'download_url',     "varchar(500) DEFAULT NULL AFTER `price`");
-addColumn($db, 'app_products', 'show_buy_button',  "tinyint(1) DEFAULT 1 AFTER `download_url`");
-addColumn($db, 'app_products', 'buy_url',          "varchar(500) DEFAULT NULL AFTER `show_buy_button`");
-addColumn($db, 'app_products', 'is_public',        "tinyint(1) DEFAULT 1 AFTER `buy_url`");
-addColumn($db, 'app_products', 'show_price',       "tinyint(1) DEFAULT 1 AFTER `is_public`");
-addColumn($db, 'app_products', 'total_installs',   "int(11) DEFAULT 0 AFTER `is_active`");
+addColumn($db, 'app_products', 'category_id', "int(11) DEFAULT NULL AFTER `id`");
+addColumn($db, 'app_products', 'version', "varchar(50) DEFAULT '1.0.0' AFTER `slug`");
+addColumn($db, 'app_products', 'icon_url', "varchar(500) DEFAULT NULL AFTER `version`");
+addColumn($db, 'app_products', 'header_image', "varchar(500) DEFAULT NULL AFTER `icon_url`");
+addColumn($db, 'app_products', 'features', "text DEFAULT NULL AFTER `description`");
+addColumn($db, 'app_products', 'download_url', "varchar(500) DEFAULT NULL AFTER `price`");
+addColumn($db, 'app_products', 'show_buy_button', "tinyint(1) DEFAULT 1 AFTER `download_url`");
+addColumn($db, 'app_products', 'buy_url', "varchar(500) DEFAULT NULL AFTER `show_buy_button`");
+addColumn($db, 'app_products', 'is_public', "tinyint(1) DEFAULT 1 AFTER `buy_url`");
+addColumn($db, 'app_products', 'show_price', "tinyint(1) DEFAULT 1 AFTER `is_public`");
+addColumn($db, 'app_products', 'total_installs', "int(11) DEFAULT 0 AFTER `is_active`");
 addColumn($db, 'app_products', 'meta_description', "text DEFAULT NULL");
-addColumn($db, 'app_products', 'meta_keywords',    "text DEFAULT NULL");
+addColumn($db, 'app_products', 'meta_keywords', "text DEFAULT NULL");
 
 // Rename download_count if it was added by mistake in a previous partial update
 if (columnExists($db, 'app_products', 'download_count')) {
@@ -499,6 +514,8 @@ safeExec($db, "
         `type` enum('trial','standard','pro','enterprise') DEFAULT 'standard',
         `max_devices` int(11) DEFAULT 1,
         `activated_devices` int(11) DEFAULT 0,
+        `use_count` int(11) DEFAULT 0,
+        `max_use_count` int(11) DEFAULT 0,
         `expires_at` datetime DEFAULT NULL,
         `notes` text DEFAULT NULL,
         `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
@@ -508,6 +525,9 @@ safeExec($db, "
         KEY `product_id` (`product_id`)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
 ", "Table `app_licenses`");
+
+addColumn($db, 'app_licenses', 'use_count', "int(11) DEFAULT 0 AFTER `activated_devices`");
+addColumn($db, 'app_licenses', 'max_use_count', "int(11) DEFAULT 0 AFTER `use_count`");
 
 safeExec($db, "
     CREATE TABLE IF NOT EXISTS `app_license_features` (
@@ -556,7 +576,9 @@ safeExec($db, "
 // Update enum if 'download' is missing
 try {
     $db->exec("ALTER TABLE `app_device_logs` MODIFY COLUMN `event_type` enum('connect','disconnect','heartbeat','error','download') DEFAULT 'connect'");
-} catch (Exception $e) {}
+}
+catch (Exception $e) {
+}
 
 safeExec($db, "
     CREATE TABLE IF NOT EXISTS `app_product_images` (
@@ -648,11 +670,13 @@ foreach ($allFiles as $file) {
         if (@unlink($file)) {
             out("Deleted: " . basename($file), 'ok');
             $deleted++;
-        } else {
+        }
+        else {
             out("Cannot delete: " . basename($file) . " (check permissions)", 'fail');
             $results['fail']++;
         }
-    } else {
+    }
+    else {
         out("Already gone: " . basename($file), 'skip');
     }
 }
