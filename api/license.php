@@ -20,17 +20,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 require_once __DIR__ . '/../config.php';
 require_once __DIR__ . '/../includes/db.php';
 
-if ($_SERVER['REQUEST_METHOD'] === 'GET') {
-    echo json_encode(['status' => 'success', 'message' => 'License API v2 running. POST with license_key to verify.']);
-    exit;
-}
-
-if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    http_response_code(405);
-    echo json_encode(['error' => 'Method not allowed']);
-    exit;
-}
-
 $input = json_decode(file_get_contents('php://input'), true);
 
 require_once __DIR__ . '/../config.php';
