@@ -1,5 +1,5 @@
 <?php
-$url = 'http://localhost/api/v1/license'; // Local URL to test HTTP API
+$url = 'https://micosage.com/api/v1/license'; // Public URL to test HTTP API
 
 function testApi($payload, $label) {
     global $url;
