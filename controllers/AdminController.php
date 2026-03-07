@@ -9,13 +9,14 @@ require_once __DIR__ . '/../includes/sitemap_generator.php';
 require_once __DIR__ . '/../includes/smtp.php';
 
 /* ═══ Login ═══ */
-function adminLogin(): void {
+function adminLogin(): void
+{
     $error = '';
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $username = trim($_POST['username'] ?? '');
         $password = trim($_POST['password'] ?? '');
         $remember = isset($_POST['remember']) && $_POST['remember'] === '1';
-        
+
         if (attemptLogin($username, $password, $remember)) {
             header('Location: ' . baseUrl('/admin/dashboard'));
             exit;
@@ -26,18 +27,21 @@ function adminLogin(): void {
 }
 
 // ── Notifications ───────────────────────────────────────────
-function adminNotifications() {
+function adminNotifications()
+{
     $db = getDB();
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $action = $_POST['action'] ?? '';
         if ($action === 'mark_all_read') {
             $db->exec("UPDATE notifications SET is_read = 1 WHERE is_read = 0");
             setFlash('All notifications marked as read', 'success');
-        } elseif ($action === 'mark_read') {
+        }
+        elseif ($action === 'mark_read') {
             $id = (int)($_POST['id'] ?? 0);
             $stmt = $db->prepare("UPDATE notifications SET is_read = 1 WHERE id = ?");
             $stmt->execute([$id]);
-        } elseif ($action === 'delete') {
+        }
+        elseif ($action === 'delete') {
             $id = (int)($_POST['id'] ?? 0);
             $stmt = $db->prepare("DELETE FROM notifications WHERE id = ?");
             $stmt->execute([$id]);
@@ -46,26 +50,29 @@ function adminNotifications() {
         header('Location: ' . baseUrl('admin/notifications'));
         exit;
     }
-    
+
     $stmt = $db->query("SELECT * FROM notifications ORDER BY created_at DESC LIMIT 100");
     $allNotifications = $stmt->fetchAll();
-    
+
     require __DIR__ . '/../views/admin/notifications.php';
 }
 
 // ── User Management & Logs ─────────────────────────────────
-function adminUsers() {
+function adminUsers()
+{
     requireSuperAdmin();
     $db = getDB();
 
     // Auto-migrate ip_filter_enabled column if missing
     try {
         $db->exec("ALTER TABLE `admins` ADD COLUMN `ip_filter_enabled` TINYINT(1) NOT NULL DEFAULT 0 AFTER `is_salesperson` ");
-    } catch (Exception $e) {}
+    }
+    catch (Exception $e) {
+    }
 
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $action = $_POST['action'] ?? '';
-        
+
         if ($action === 'create') {
             $username = trim($_POST['username'] ?? '');
             $recovery_email = trim($_POST['email'] ?? '');
@@ -74,10 +81,11 @@ function adminUsers() {
             $fullName = trim($_POST['full_name'] ?? '');
             $isSalesperson = isset($_POST['is_salesperson']) ? 1 : 0;
             $permissions = isset($_POST['permissions']) ? json_encode($_POST['permissions']) : json_encode([]);
-            
+
             if (empty($username) || empty($password)) {
                 setFlash('Username and password are required', 'error');
-            } else {
+            }
+            else {
                 try {
                     $hash = password_hash($password, PASSWORD_DEFAULT);
                     $stmt = $db->prepare('INSERT INTO admins (username, password, recovery_email, role, full_name, is_salesperson, permissions) VALUES (?, ?, ?, ?, ?, ?, ?)');
@@ -85,61 +93,71 @@ function adminUsers() {
                         logAdminActivity('create_user', "Created admin user: {$username}" . ($isSalesperson ? ' (Sales)' : ''));
                         setFlash('Admin user created successfully', 'success');
                     }
-                } catch (Exception $e) {
+                }
+                catch (Exception $e) {
                     setFlash('Error creating user (username might be taken)', 'error');
                 }
             }
-        } elseif ($action === 'toggle_salesperson') {
+        }
+        elseif ($action === 'toggle_salesperson') {
             $id = (int)($_POST['id'] ?? 0);
             $val = (int)($_POST['is_salesperson'] ?? 0);
             $stmt = $db->prepare('UPDATE admins SET is_salesperson = ? WHERE id = ?');
             $stmt->execute([$val ? 0 : 1, $id]);
             logAdminActivity('toggle_salesperson', "Toggled salesperson for admin ID: {$id}");
             setFlash('Sales role updated', 'success');
-        } elseif ($action === 'toggle_ip_filter') {
+        }
+        elseif ($action === 'toggle_ip_filter') {
             $id = (int)($_POST['id'] ?? 0);
             $val = (int)($_POST['ip_filter_enabled'] ?? 0);
             $stmt = $db->prepare('UPDATE admins SET ip_filter_enabled = ? WHERE id = ?');
             $stmt->execute([$val ? 0 : 1, $id]);
             logAdminActivity('toggle_ip_filter', "Toggled IP filter for admin ID: {$id}");
             setFlash('Security lock updated', 'success');
-        } elseif ($action === 'delete') {
+        }
+        elseif ($action === 'delete') {
             $id = (int)($_POST['id'] ?? 0);
             if ($id === 1) {
                 setFlash('Cannot delete the primary Super Admin account', 'error');
-            } elseif ($id === $_SESSION['admin_id']) {
+            }
+            elseif ($id === $_SESSION['admin_id']) {
                 setFlash('Cannot delete yourself', 'error');
-            } else {
+            }
+            else {
                 $stmt = $db->prepare('DELETE FROM admins WHERE id = ?');
                 if ($stmt->execute([$id])) {
                     logAdminActivity('delete_user', "Deleted admin user ID: {$id}");
                     setFlash('Admin user deleted successfully', 'success');
                 }
             }
-        } elseif ($action === 'update_role') {
+        }
+        elseif ($action === 'update_role') {
             $id = (int)($_POST['id'] ?? 0);
             $role = $_POST['role'] ?? 'standard';
             if ($id === 1 && $role !== 'super_admin') {
                 setFlash('Cannot downgrade the primary Super Admin', 'error');
-            } else {
+            }
+            else {
                 $stmt = $db->prepare('UPDATE admins SET role = ? WHERE id = ?');
                 if ($stmt->execute([$role, $id])) {
                     logAdminActivity('update_user_role', "Updated role for admin ID {$id} to {$role}");
                     setFlash('Role updated successfully', 'success');
                 }
             }
-        } elseif ($action === 'add_ip') {
+        }
+        elseif ($action === 'add_ip') {
             $adminId = (int)($_POST['admin_id'] ?? 0);
             $ip = trim($_POST['ip_address'] ?? '');
             $expires = !empty($_POST['expires_at']) ? $_POST['expires_at'] : null;
-            
+
             if ($adminId && $ip) {
                 $stmt = $db->prepare("INSERT INTO admin_ip_whitelist (admin_id, ip_address, expires_at) VALUES (?, ?, ?)");
                 $stmt->execute([$adminId, $ip, $expires]);
                 logAdminActivity('add_ip_whitelist', "Added IP $ip to admin ID $adminId" . ($expires ? " (expires $expires)" : ""));
                 setFlash('IP added to whitelist', 'success');
             }
-        } elseif ($action === 'delete_ip') {
+        }
+        elseif ($action === 'delete_ip') {
             $id = (int)($_POST['id'] ?? 0);
             if ($id) {
                 $stmt = $db->prepare("DELETE FROM admin_ip_whitelist WHERE id = ?");
@@ -154,7 +172,7 @@ function adminUsers() {
 
     $stmt = $db->query("SELECT id, username, recovery_email, role, full_name, avatar_emoji, is_salesperson, ip_filter_enabled, created_at FROM admins ORDER BY id");
     $admins = $stmt->fetchAll();
-    
+
     // Fetch whitelists for each admin
     foreach ($admins as &$admin) {
         $stmtW = $db->prepare("SELECT * FROM admin_ip_whitelist WHERE admin_id = ? ORDER BY created_at DESC");
@@ -162,52 +180,55 @@ function adminUsers() {
         $admin['whitelisted_ips'] = $stmtW->fetchAll();
     }
     unset($admin);
-    
+
     require __DIR__ . '/../views/admin/users.php';
 }
 
-function adminActivityLogs() {
+function adminActivityLogs()
+{
     requireSuperAdmin();
     $db = getDB();
-    
+
     $stmt = $db->query("SELECT l.*, a.username, a.full_name FROM admin_activity_logs l LEFT JOIN admins a ON l.admin_id = a.id ORDER BY l.created_at DESC LIMIT 500");
     $logs = $stmt->fetchAll();
-    
+
     require __DIR__ . '/../views/admin/activity_logs.php';
 }
 
 /* ═══ Dashboard ═══ */
-function adminDashboard(): void {
+function adminDashboard(): void
+{
     $db = getDB();
     $totalBookings = $db->query('SELECT COUNT(*) FROM bookings')->fetchColumn();
-    $newBookings   = $db->query("SELECT COUNT(*) FROM bookings WHERE status = 'new'")->fetchColumn();
+    $newBookings = $db->query("SELECT COUNT(*) FROM bookings WHERE status = 'new'")->fetchColumn();
     $totalServices = $db->query('SELECT COUNT(*) FROM services WHERE is_active = 1')->fetchColumn();
-    $totalClients  = $db->query('SELECT COUNT(*) FROM clients WHERE is_active = 1')->fetchColumn();
-    
+    $totalClients = $db->query('SELECT COUNT(*) FROM clients WHERE is_active = 1')->fetchColumn();
+
     $visitsStmt = $db->query("SELECT setting_value FROM site_settings WHERE setting_key = 'visit_count'");
     $visitCount = $visitsStmt ? (int)$visitsStmt->fetchColumn() : 0;
-    
+
     // Traffic data for chart (Last 14 days)
     $trafficData = [];
     $trafficLabels = [];
     for ($i = 13; $i >= 0; $i--) {
         $date = date('Y-m-d', strtotime("-$i days"));
         $label = date('M d', strtotime("-$i days"));
-        
+
         $stmt = $db->prepare("SELECT COUNT(*) FROM site_visitors WHERE DATE(visited_at) = ?");
         $stmt->execute([$date]);
         $count = $stmt->fetchColumn() ?: 0;
-        
+
         $trafficLabels[] = $label;
         $trafficData[] = $count;
     }
-    
+
     $recentBookings = $db->query('SELECT * FROM bookings ORDER BY created_at DESC LIMIT 5')->fetchAll();
     require __DIR__ . '/../views/admin/dashboard.php';
 }
 
 /* ═══ Visitor Analytics ═══ */
-function adminVisitors(): void {
+function adminVisitors(): void
+{
     requireAdmin();
     requirePermission('visitors');
     $db = getDB();
@@ -219,17 +240,17 @@ function adminVisitors(): void {
         $stmt = $db->prepare("SELECT * FROM site_visitors WHERE ip_address = ? ORDER BY visited_at DESC");
         $stmt->execute([$ip]);
         $ipVisits = $stmt->fetchAll();
-        
+
         // Get summary info from first record
         $ipInfo = !empty($ipVisits) ? $ipVisits[0] : null;
         $ipIsBot = $ipInfo ? isBot($ipInfo['user_agent']) : false;
         $ipPageCount = count($ipVisits);
         $ipUniquePages = count(array_unique(array_column($ipVisits, 'page_url')));
-        
+
         require __DIR__ . '/../views/admin/visitor_ip_detail.php';
         return;
     }
-    
+
     // Summary logic
     $totalVisits = $db->query("SELECT setting_value FROM site_settings WHERE setting_key = 'visit_count'")->fetchColumn() ?: 0;
     $uniqueIps = $db->query("SELECT COUNT(DISTINCT ip_address) FROM site_visitors")->fetchColumn() ?: 0;
@@ -241,8 +262,10 @@ function adminVisitors(): void {
     $botIpCount = 0;
     $humanIpCount = 0;
     foreach ($allUserAgents as $ua) {
-        if (isBot($ua)) $botIpCount++;
-        else $humanIpCount++;
+        if (isBot($ua))
+            $botIpCount++;
+        else
+            $humanIpCount++;
     }
 
     // Countries group by
@@ -266,7 +289,8 @@ function adminVisitors(): void {
 }
 
 /* ═══ Bookings ═══ */
-function adminBookings(): void {
+function adminBookings(): void
+{
     requireAdmin();
     requirePermission('bookings');
     $db = getDB();
@@ -274,18 +298,20 @@ function adminBookings(): void {
     if ($statusFilter !== 'all') {
         $stmt = $db->prepare('SELECT * FROM bookings WHERE status = ? ORDER BY created_at DESC');
         $stmt->execute([$statusFilter]);
-    } else {
+    }
+    else {
         $stmt = $db->query('SELECT * FROM bookings ORDER BY created_at DESC');
     }
     $bookings = $stmt->fetchAll();
     require __DIR__ . '/../views/admin/bookings.php';
 }
 
-function adminUpdateBookingStatus(): void {
+function adminUpdateBookingStatus(): void
+{
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $id = intval($_POST['id'] ?? 0);
         $status = $_POST['status'] ?? '';
-        $valid = ['new','viewed','contacted','completed','cancelled'];
+        $valid = ['new', 'viewed', 'contacted', 'completed', 'cancelled'];
         if ($id > 0 && in_array($status, $valid)) {
             $db = getDB();
             $stmt = $db->prepare('UPDATE bookings SET status = ? WHERE id = ?');
@@ -297,7 +323,8 @@ function adminUpdateBookingStatus(): void {
 }
 
 /* ═══ Services CRUD ═══ */
-function adminServices(): void {
+function adminServices(): void
+{
     requireAdmin();
     requirePermission('content');
     $db = getDB();
@@ -321,20 +348,21 @@ function adminServices(): void {
 
         if ($id > 0) {
             $db->prepare('UPDATE services SET icon=?, color=?, sort_order=?, is_active=? WHERE id=?')
-               ->execute([$icon, $color, $sortOrder, $isActive, $id]);
-        } else {
+                ->execute([$icon, $color, $sortOrder, $isActive, $id]);
+        }
+        else {
             $db->prepare('INSERT INTO services (icon, color, sort_order, is_active) VALUES (?, ?, ?, ?)')
-               ->execute([$icon, $color, $sortOrder, $isActive]);
+                ->execute([$icon, $color, $sortOrder, $isActive]);
             $id = $db->lastInsertId();
         }
 
         // Save translations
         foreach (SUPPORTED_LOCALES as $loc) {
             $title = trim($_POST['title_' . $loc] ?? '');
-            $desc  = trim($_POST['desc_' . $loc] ?? '');
+            $desc = trim($_POST['desc_' . $loc] ?? '');
             $db->prepare('INSERT INTO service_translations (service_id, locale, title, description)
                 VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE title = VALUES(title), description = VALUES(description)')
-               ->execute([$id, $loc, $title, $desc]);
+                ->execute([$id, $loc, $title, $desc]);
         }
         $saved = true;
         $action = 'list';
@@ -365,7 +393,8 @@ function adminServices(): void {
 }
 
 /* ═══ Clients CRUD ═══ */
-function adminClients(): void {
+function adminClients(): void
+{
     requireAdmin();
     requirePermission('content');
     $db = getDB();
@@ -388,10 +417,11 @@ function adminClients(): void {
 
         if ($id > 0) {
             $db->prepare('UPDATE clients SET name=?, logo_url=?, website_url=?, sort_order=?, is_active=? WHERE id=?')
-               ->execute([$name, $logoUrl, $websiteUrl, $sortOrder, $isActive, $id]);
-        } else {
+                ->execute([$name, $logoUrl, $websiteUrl, $sortOrder, $isActive, $id]);
+        }
+        else {
             $db->prepare('INSERT INTO clients (name, logo_url, website_url, sort_order, is_active) VALUES (?, ?, ?, ?, ?)')
-               ->execute([$name, $logoUrl, $websiteUrl, $sortOrder, $isActive]);
+                ->execute([$name, $logoUrl, $websiteUrl, $sortOrder, $isActive]);
         }
         $saved = true;
     }
@@ -408,7 +438,8 @@ function adminClients(): void {
 }
 
 /* ═══ Products CRUD ═══ */
-function adminProducts(): void {
+function adminProducts(): void
+{
     requireAdmin();
     requirePermission('content');
     $db = getDB();
@@ -431,19 +462,20 @@ function adminProducts(): void {
 
         if ($id > 0) {
             $db->prepare('UPDATE products SET icon=?, category=?, color=?, sort_order=?, is_active=? WHERE id=?')
-               ->execute([$icon, $category, $color, $sortOrder, $isActive, $id]);
-        } else {
+                ->execute([$icon, $category, $color, $sortOrder, $isActive, $id]);
+        }
+        else {
             $db->prepare('INSERT INTO products (icon, category, color, sort_order, is_active) VALUES (?, ?, ?, ?, ?)')
-               ->execute([$icon, $category, $color, $sortOrder, $isActive]);
+                ->execute([$icon, $category, $color, $sortOrder, $isActive]);
             $id = $db->lastInsertId();
         }
 
         foreach (SUPPORTED_LOCALES as $loc) {
             $title = trim($_POST['title_' . $loc] ?? '');
-            $desc  = trim($_POST['desc_' . $loc] ?? '');
+            $desc = trim($_POST['desc_' . $loc] ?? '');
             $db->prepare('INSERT INTO product_translations (product_id, locale, title, description)
                 VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE title = VALUES(title), description = VALUES(description)')
-               ->execute([$id, $loc, $title, $desc]);
+                ->execute([$id, $loc, $title, $desc]);
         }
         $saved = true;
         $action = 'list';
@@ -471,7 +503,8 @@ function adminProducts(): void {
 }
 
 /* ═══ Booking Fields CRUD ═══ */
-function adminBookingFields(): void {
+function adminBookingFields(): void
+{
     requireAdmin();
     requirePermission('settings');
     $db = getDB();
@@ -495,10 +528,11 @@ function adminBookingFields(): void {
 
         if ($id > 0) {
             $db->prepare('UPDATE booking_fields SET field_name=?, field_type=?, options=?, is_required=?, sort_order=?, is_active=? WHERE id=?')
-               ->execute([$fieldName, $fieldType, $options, $isRequired, $sortOrder, $isActive, $id]);
-        } else {
+                ->execute([$fieldName, $fieldType, $options, $isRequired, $sortOrder, $isActive, $id]);
+        }
+        else {
             $db->prepare('INSERT INTO booking_fields (field_name, field_type, options, is_required, sort_order, is_active) VALUES (?, ?, ?, ?, ?, ?)')
-               ->execute([$fieldName, $fieldType, $options, $isRequired, $sortOrder, $isActive]);
+                ->execute([$fieldName, $fieldType, $options, $isRequired, $sortOrder, $isActive]);
             $id = $db->lastInsertId();
         }
 
@@ -507,7 +541,7 @@ function adminBookingFields(): void {
             $placeholder = trim($_POST['placeholder_' . $loc] ?? '');
             $db->prepare('INSERT INTO booking_field_translations (field_id, locale, label, placeholder)
                 VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE label = VALUES(label), placeholder = VALUES(placeholder)')
-               ->execute([$id, $loc, $label, $placeholder]);
+                ->execute([$id, $loc, $label, $placeholder]);
         }
         $saved = true;
         $action = 'list';
@@ -535,7 +569,8 @@ function adminBookingFields(): void {
 }
 
 /* ═══ Site Settings ═══ */
-function adminSettings(): void {
+function adminSettings(): void
+{
     requirePermission('settings');
     $db = getDB();
     $saved = false;
@@ -550,12 +585,12 @@ function adminSettings(): void {
 
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $settings = $_POST['settings'] ?? [];
-        
+
         // Check if announcement changed to log history
         $oldMsgEn = getSetting('announcement_message', '');
         $oldMsgAr = getSetting('announcement_message_ar', '');
         $oldActive = getSetting('announcement_active', '0');
-        
+
         $newMsgEn = trim($settings['announcement_message'] ?? '');
         $newMsgAr = trim($settings['announcement_message_ar'] ?? '');
         $newActive = isset($_POST['settings']['announcement_active']) ? '1' : '0';
@@ -571,11 +606,11 @@ function adminSettings(): void {
         foreach ($settings as $key => $value) {
             $db->prepare('INSERT INTO site_settings (setting_key, setting_value) VALUES (?, ?)
                 ON DUPLICATE KEY UPDATE setting_value = VALUES(setting_value)')
-               ->execute([$key, $value]);
+                ->execute([$key, $value]);
         }
         // Handle checkboxes (sections toggles)
         $toggles = [
-            'show_clients_section', 'show_products_section', 'show_stats_section', 
+            'show_clients_section', 'show_products_section', 'show_stats_section',
             'show_marketing_section', 'show_team', 'show_testimonials',
             'show_tagline_section', 'show_process_section', 'show_blog_section',
             'show_booking_section', 'show_contact_section', 'announcement_active'
@@ -584,33 +619,34 @@ function adminSettings(): void {
             $val = isset($_POST['settings'][$toggle]) ? '1' : '0';
             $db->prepare('INSERT INTO site_settings (setting_key, setting_value) VALUES (?, ?)
                 ON DUPLICATE KEY UPDATE setting_value = VALUES(setting_value)')
-               ->execute([$toggle, $val]);
+                ->execute([$toggle, $val]);
         }
 
         // Handle File Uploads (Logo)
         $uploadFields = ['site_logo'];
         $uploadDir = __DIR__ . '/../assets/uploads/';
-        
+
         foreach ($uploadFields as $field) {
             if (!empty($_FILES[$field]['name'])) {
-                if (!is_dir($uploadDir)) mkdir($uploadDir, 0777, true);
-                
+                if (!is_dir($uploadDir))
+                    mkdir($uploadDir, 0777, true);
+
                 $fileInfo = pathinfo($_FILES[$field]['name']);
                 $ext = strtolower($fileInfo['extension'] ?? '');
                 if (in_array($ext, ['jpg', 'jpeg', 'png', 'svg', 'webp', 'gif', 'ico'])) {
                     $filename = $field . '_' . time() . '.' . $ext;
                     $targetFile = $uploadDir . $filename;
-                    
+
                     if (move_uploaded_file($_FILES[$field]['tmp_name'], $targetFile)) {
                         $fileUrl = 'assets/uploads/' . $filename;
                         $db->prepare('INSERT INTO site_settings (setting_key, setting_value) VALUES (?, ?)
                             ON DUPLICATE KEY UPDATE setting_value = VALUES(setting_value)')
-                           ->execute([$field, $fileUrl]);
+                            ->execute([$field, $fileUrl]);
                     }
                 }
             }
         }
-        
+
         $saved = true;
     }
 
@@ -628,7 +664,8 @@ function adminSettings(): void {
 }
 
 /* ═══ Content Editor ═══ */
-function adminContent(): void {
+function adminContent(): void
+{
     requireAdmin();
     requirePermission('content');
     $db = getDB();
@@ -640,7 +677,7 @@ function adminContent(): void {
             foreach ($locales as $locale => $value) {
                 $db->prepare('INSERT INTO contents (section_key, locale, value) VALUES (?, ?, ?)
                     ON DUPLICATE KEY UPDATE value = VALUES(value)')
-                   ->execute([$key, $locale, $value]);
+                    ->execute([$key, $locale, $value]);
             }
         }
         $saved = true;
@@ -685,7 +722,8 @@ function adminContent(): void {
             foreach (SUPPORTED_LOCALES as $loc) {
                 $contents[$key][$loc] = '';
             }
-        } else {
+        }
+        else {
             foreach (SUPPORTED_LOCALES as $loc) {
                 if (!isset($contents[$key][$loc])) {
                     $contents[$key][$loc] = '';
@@ -697,7 +735,8 @@ function adminContent(): void {
 }
 
 /* ═══ SEO Editor ═══ */
-function adminSeo(): void {
+function adminSeo(): void
+{
     requirePermission('seo');
     $db = getDB();
     $saved = false;
@@ -708,34 +747,35 @@ function adminSeo(): void {
             foreach ($locales as $locale => $fields) {
                 $db->prepare('INSERT INTO seo_meta (page, locale, title, description, keywords, canonical_link) VALUES (?, ?, ?, ?, ?, ?)
                     ON DUPLICATE KEY UPDATE title = VALUES(title), description = VALUES(description), keywords = VALUES(keywords), canonical_link = VALUES(canonical_link)')
-                   ->execute([$page, $locale, $fields['title'] ?? '', $fields['description'] ?? '', $fields['keywords'] ?? '', $fields['canonical_link'] ?? '']);
+                    ->execute([$page, $locale, $fields['title'] ?? '', $fields['description'] ?? '', $fields['keywords'] ?? '', $fields['canonical_link'] ?? '']);
             }
         }
-        
+
         // Handle global SEO files and string values into site_settings
         $uploadFields = ['seo_favicon', 'seo_og_image'];
         $uploadDir = __DIR__ . '/../assets/uploads/';
-        
+
         foreach ($uploadFields as $field) {
             if (!empty($_FILES[$field]['name'])) {
-                if (!is_dir($uploadDir)) mkdir($uploadDir, 0777, true);
-                
+                if (!is_dir($uploadDir))
+                    mkdir($uploadDir, 0777, true);
+
                 $fileInfo = pathinfo($_FILES[$field]['name']);
                 $ext = strtolower($fileInfo['extension'] ?? '');
                 if (in_array($ext, ['jpg', 'jpeg', 'png', 'svg', 'webp', 'gif', 'ico'])) {
                     $filename = $field . '_' . time() . '.' . $ext;
                     $targetFile = $uploadDir . $filename;
-                    
+
                     if (move_uploaded_file($_FILES[$field]['tmp_name'], $targetFile)) {
                         $fileUrl = 'assets/uploads/' . $filename;
                         $db->prepare('INSERT INTO site_settings (setting_key, setting_value) VALUES (?, ?)
                             ON DUPLICATE KEY UPDATE setting_value = VALUES(setting_value)')
-                           ->execute([$field, $fileUrl]);
+                            ->execute([$field, $fileUrl]);
                     }
                 }
             }
         }
-        
+
         $saved = true;
     }
 
@@ -744,7 +784,7 @@ function adminSeo(): void {
     foreach ($rows as $row) {
         $seoData[$row['page']][$row['locale']] = $row;
     }
-    
+
     // Ensure critical pages always show up
     $expectedPages = ['home', 'portfolio', 'contact'];
     foreach ($expectedPages as $page) {
@@ -753,19 +793,20 @@ function adminSeo(): void {
             foreach (SUPPORTED_LOCALES as $loc) {
                 $seoData[$page][$loc] = ['title' => '', 'description' => '', 'keywords' => '', 'canonical_link' => ''];
             }
-        } else {
+        }
+        else {
             foreach (SUPPORTED_LOCALES as $loc) {
                 if (!isset($seoData[$page][$loc])) {
                     $seoData[$page][$loc] = ['title' => '', 'description' => '', 'keywords' => '', 'canonical_link' => ''];
                 }
                 // Ensure canonical link exists
-                if(!isset($seoData[$page][$loc]['canonical_link'])) {
+                if (!isset($seoData[$page][$loc]['canonical_link'])) {
                     $seoData[$page][$loc]['canonical_link'] = '';
                 }
             }
         }
     }
-    
+
     // Also fetch global seo settings to display
     $globalSeoStmt = $db->query("SELECT setting_key, setting_value FROM site_settings WHERE setting_key IN ('seo_favicon', 'seo_og_image')");
     $globalSeo = [];
@@ -776,7 +817,8 @@ function adminSeo(): void {
 }
 
 /* ═══ Translations Editor ═══ */
-function adminTranslations(): void {
+function adminTranslations(): void
+{
     requireAdmin();
     requirePermission('settings');
     $db = getDB();
@@ -788,14 +830,15 @@ function adminTranslations(): void {
         if ($action === 'delete' && isset($_POST['trans_key'])) {
             $db->prepare('DELETE FROM translations WHERE trans_key = ?')->execute([$_POST['trans_key']]);
             $saved = true;
-        } elseif ($action === 'save') {
+        }
+        elseif ($action === 'save') {
             $items = $_POST['trans'] ?? [];
             foreach ($items as $key => $locales) {
                 $group = $_POST['groups'][$key] ?? 'general';
                 foreach ($locales as $locale => $value) {
                     $db->prepare('INSERT INTO translations (trans_key, locale, trans_value, trans_group) VALUES (?, ?, ?, ?)
                         ON DUPLICATE KEY UPDATE trans_value = VALUES(trans_value), trans_group = VALUES(trans_group)')
-                       ->execute([$key, $locale, $value, $group]);
+                        ->execute([$key, $locale, $value, $group]);
                 }
             }
             $saved = true;
@@ -809,7 +852,7 @@ function adminTranslations(): void {
                 $newVal = trim($_POST['new_value_' . $loc] ?? '');
                 $db->prepare('INSERT INTO translations (trans_key, locale, trans_value, trans_group) VALUES (?, ?, ?, ?)
                     ON DUPLICATE KEY UPDATE trans_value = VALUES(trans_value)')
-                   ->execute([$newKey, $loc, $newVal, $newGroup]);
+                    ->execute([$newKey, $loc, $newVal, $newGroup]);
             }
             $saved = true;
         }
@@ -824,7 +867,8 @@ function adminTranslations(): void {
 }
 
 /* ═══ Portfolio CRUD ═══ */
-function adminPortfolio(): void {
+function adminPortfolio(): void
+{
     requireAdmin();
     requirePermission('content');
     $db = getDB();
@@ -852,22 +896,23 @@ function adminPortfolio(): void {
 
         if ($id > 0) {
             $db->prepare('UPDATE portfolio_projects SET slug=?, image_url=?, demo_url=?, category=?, color=?, sort_order=?, is_active=?, is_featured=? WHERE id=?')
-               ->execute([$slug, $imageUrl, $demoUrl, $category, $color, $sortOrder, $isActive, $isFeatured, $id]);
-        } else {
+                ->execute([$slug, $imageUrl, $demoUrl, $category, $color, $sortOrder, $isActive, $isFeatured, $id]);
+        }
+        else {
             $db->prepare('INSERT INTO portfolio_projects (slug, image_url, demo_url, category, color, sort_order, is_active, is_featured) VALUES (?, ?, ?, ?, ?, ?, ?, ?)')
-               ->execute([$slug, $imageUrl, $demoUrl, $category, $color, $sortOrder, $isActive, $isFeatured]);
+                ->execute([$slug, $imageUrl, $demoUrl, $category, $color, $sortOrder, $isActive, $isFeatured]);
             $id = $db->lastInsertId();
         }
 
         // Save translations
         foreach (SUPPORTED_LOCALES as $loc) {
             $title = trim($_POST['title_' . $loc] ?? '');
-            $desc  = trim($_POST['desc_' . $loc] ?? '');
+            $desc = trim($_POST['desc_' . $loc] ?? '');
             $clientName = trim($_POST['client_' . $loc] ?? '');
             $tags = trim($_POST['tags_' . $loc] ?? '');
             $db->prepare('INSERT INTO portfolio_project_translations (project_id, locale, title, description, client_name, tags)
                 VALUES (?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE title = VALUES(title), description = VALUES(description), client_name = VALUES(client_name), tags = VALUES(tags)')
-               ->execute([$id, $loc, $title, $desc, $clientName, $tags]);
+                ->execute([$id, $loc, $title, $desc, $clientName, $tags]);
         }
         $saved = true;
         $action = 'list';
@@ -898,7 +943,8 @@ function adminPortfolio(): void {
 }
 
 /* ═══ Blogs CRUD ═══ */
-function adminBlogs(): void {
+function adminBlogs(): void
+{
     requireAdmin();
     requirePermission('blogs');
     $db = getDB();
@@ -916,7 +962,9 @@ function adminBlogs(): void {
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (blog_id) REFERENCES blogs(id) ON DELETE CASCADE
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
-    } catch (Exception $e) { /* ignore if already exists or other issues */ }
+    }
+    catch (Exception $e) { /* ignore if already exists or other issues */
+    }
 
     if ($action === 'delete' && isset($_GET['id'])) {
         $db->prepare('DELETE FROM blogs WHERE id = ?')->execute([intval($_GET['id'])]);
@@ -935,8 +983,9 @@ function adminBlogs(): void {
         // Handle file upload
         if (isset($_FILES['media_file']) && $_FILES['media_file']['error'] === UPLOAD_ERR_OK) {
             $uploadDir = __DIR__ . '/../assets/uploads/';
-            if (!is_dir($uploadDir)) mkdir($uploadDir, 0777, true);
-            
+            if (!is_dir($uploadDir))
+                mkdir($uploadDir, 0777, true);
+
             $fileInfo = pathinfo($_FILES['media_file']['name']);
             $ext = strtolower($fileInfo['extension']);
             if (in_array($ext, ['jpg', 'jpeg', 'png', 'svg', 'webp', 'gif', 'mp4', 'webm'])) {
@@ -954,30 +1003,32 @@ function adminBlogs(): void {
 
         if ($id > 0) {
             $db->prepare('UPDATE blogs SET slug=?, media_type=?, media_url=?, sort_order=?, is_active=? WHERE id=?')
-               ->execute([$slug, $mediaType, $mediaUrl, $sortOrder, $isActive, $id]);
-        } else {
+                ->execute([$slug, $mediaType, $mediaUrl, $sortOrder, $isActive, $id]);
+        }
+        else {
             $db->prepare('INSERT INTO blogs (slug, media_type, media_url, sort_order, is_active) VALUES (?, ?, ?, ?, ?)')
-               ->execute([$slug, $mediaType, $mediaUrl, $sortOrder, $isActive]);
+                ->execute([$slug, $mediaType, $mediaUrl, $sortOrder, $isActive]);
             $id = $db->lastInsertId();
         }
 
         foreach (SUPPORTED_LOCALES as $loc) {
-            $title   = trim($_POST['title_' . $loc] ?? '');
-            $desc    = trim($_POST['desc_' . $loc] ?? '');
+            $title = trim($_POST['title_' . $loc] ?? '');
+            $desc = trim($_POST['desc_' . $loc] ?? '');
             $content = $_POST['content_' . $loc] ?? '';
             $db->prepare('INSERT INTO blog_translations (blog_id, locale, title, description, content)
                 VALUES (?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE title = VALUES(title), description = VALUES(description), content = VALUES(content)')
-               ->execute([$id, $loc, $title, $desc, $content]);
+                ->execute([$id, $loc, $title, $desc, $content]);
         }
 
         // Handle Additional Media
         $db->prepare('DELETE FROM blog_media WHERE blog_id = ?')->execute([$id]);
-        
+
         // Save primary media to gallery too if it's the first time or if it's explicitly wanted
         // Actually, let's just save whatever is in the multi-media inputs
         if (isset($_POST['media_items']) && is_array($_POST['media_items'])) {
             $uploadDir = __DIR__ . '/../assets/uploads/';
-            if (!is_dir($uploadDir)) mkdir($uploadDir, 0777, true);
+            if (!is_dir($uploadDir))
+                mkdir($uploadDir, 0777, true);
 
             foreach ($_POST['media_items'] as $index => $item) {
                 $mType = $item['type'] ?? 'image';
@@ -998,12 +1049,12 @@ function adminBlogs(): void {
 
                 if (!empty($mUrl)) {
                     $db->prepare('INSERT INTO blog_media (blog_id, media_type, media_url, sort_order) VALUES (?, ?, ?, ?)')
-                       ->execute([$id, $mType, $mUrl, $mSort]);
-                    
+                        ->execute([$id, $mType, $mUrl, $mSort]);
+
                     // Update main blog media_url if this is the first item (thumb)
                     if ($index === 0) {
                         $db->prepare('UPDATE blogs SET media_type = ?, media_url = ? WHERE id = ?')
-                           ->execute([$mType, $mUrl, $id]);
+                            ->execute([$mType, $mUrl, $id]);
                     }
                 }
             }
@@ -1043,7 +1094,8 @@ function adminBlogs(): void {
 }
 
 /* ═══ Team Members CRUD ═══ */
-function adminTeam(): void {
+function adminTeam(): void
+{
     requireAdmin();
     requirePermission('content');
     $db = getDB();
@@ -1066,10 +1118,11 @@ function adminTeam(): void {
 
         if ($id > 0) {
             $db->prepare('UPDATE team_members SET image_url=?, sort_order=?, is_active=? WHERE id=?')
-               ->execute([$imageUrl, $sortOrder, $isActive, $id]);
-        } else {
+                ->execute([$imageUrl, $sortOrder, $isActive, $id]);
+        }
+        else {
             $db->prepare('INSERT INTO team_members (image_url, sort_order, is_active) VALUES (?, ?, ?)')
-               ->execute([$imageUrl, $sortOrder, $isActive]);
+                ->execute([$imageUrl, $sortOrder, $isActive]);
             $id = $db->lastInsertId();
         }
 
@@ -1077,10 +1130,10 @@ function adminTeam(): void {
         foreach (SUPPORTED_LOCALES as $loc) {
             $name = trim($_POST['name_' . $loc] ?? '');
             $role = trim($_POST['role_' . $loc] ?? '');
-            $bio  = trim($_POST['bio_'  . $loc] ?? '');
+            $bio = trim($_POST['bio_' . $loc] ?? '');
             $db->prepare('INSERT INTO team_member_translations (member_id, locale, name, role, bio)
                 VALUES (?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE name=VALUES(name), role=VALUES(role), bio=VALUES(bio)')
-               ->execute([$id, $loc, $name, $role, $bio]);
+                ->execute([$id, $loc, $name, $role, $bio]);
         }
         $saved = true;
         $action = 'list';
@@ -1111,7 +1164,8 @@ function adminTeam(): void {
 }
 
 /* ═══ Testimonials CRUD ═══ */
-function adminTestimonials(): void {
+function adminTestimonials(): void
+{
     requireAdmin();
     requirePermission('content');
     $db = getDB();
@@ -1135,21 +1189,22 @@ function adminTestimonials(): void {
 
         if ($id > 0) {
             $db->prepare('UPDATE testimonials SET client_image_url=?, rating=?, sort_order=?, is_active=? WHERE id=?')
-               ->execute([$clientImageUrl, $rating, $sortOrder, $isActive, $id]);
-        } else {
+                ->execute([$clientImageUrl, $rating, $sortOrder, $isActive, $id]);
+        }
+        else {
             $db->prepare('INSERT INTO testimonials (client_image_url, rating, sort_order, is_active) VALUES (?, ?, ?, ?)')
-               ->execute([$clientImageUrl, $rating, $sortOrder, $isActive]);
+                ->execute([$clientImageUrl, $rating, $sortOrder, $isActive]);
             $id = $db->lastInsertId();
         }
 
         // Save translations
         foreach (SUPPORTED_LOCALES as $loc) {
-            $name    = trim($_POST['client_name_' . $loc] ?? '');
+            $name = trim($_POST['client_name_' . $loc] ?? '');
             $company = trim($_POST['client_company_' . $loc] ?? '');
             $content = trim($_POST['content_' . $loc] ?? '');
             $db->prepare('INSERT INTO testimonial_translations (testimonial_id, locale, client_name, client_company, content)
                 VALUES (?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE client_name=VALUES(client_name), client_company=VALUES(client_company), content=VALUES(content)')
-               ->execute([$id, $loc, $name, $company, $content]);
+                ->execute([$id, $loc, $name, $company, $content]);
         }
         $saved = true;
         $action = 'list';
@@ -1180,7 +1235,8 @@ function adminTestimonials(): void {
 }
 
 /* ═══ Chatbot Editor ═══ */
-function adminChatbot(): void {
+function adminChatbot(): void
+{
     requireAdmin();
     requirePermission('settings');
     $db = getDB();
@@ -1220,7 +1276,8 @@ function adminChatbot(): void {
                 echo json_encode(['success' => true, 'nodes' => $result]);
                 exit;
 
-            } elseif ($apiAction === 'save_node') {
+            }
+            elseif ($apiAction === 'save_node') {
                 $id = intval($_POST['node_id'] ?? 0);
                 $name = trim($_POST['name'] ?? 'New Node');
                 $isRoot = intval($_POST['is_root'] ?? 0);
@@ -1235,10 +1292,11 @@ function adminChatbot(): void {
 
                 if ($id > 0) {
                     $db->prepare('UPDATE chatbot_nodes SET name=?, is_root=?, pos_x=?, pos_y=?, reply_type=?, input_var_name=? WHERE id=?')
-                       ->execute([$name, $isRoot, $posX, $posY, $replyType, $inputVarName, $id]);
-                } else {
+                        ->execute([$name, $isRoot, $posX, $posY, $replyType, $inputVarName, $id]);
+                }
+                else {
                     $db->prepare('INSERT INTO chatbot_nodes (name, is_root, pos_x, pos_y, reply_type, input_var_name) VALUES (?,?,?,?,?,?)')
-                       ->execute([$name, $isRoot, $posX, $posY, $replyType, $inputVarName]);
+                        ->execute([$name, $isRoot, $posX, $posY, $replyType, $inputVarName]);
                     $id = $db->lastInsertId();
                 }
 
@@ -1247,12 +1305,13 @@ function adminChatbot(): void {
                     $message = trim($_POST['message_' . $loc] ?? '');
                     $db->prepare('INSERT INTO chatbot_node_translations (node_id, locale, message) VALUES (?, ?, ?)
                         ON DUPLICATE KEY UPDATE message = VALUES(message)')
-                       ->execute([$id, $loc, $message]);
+                        ->execute([$id, $loc, $message]);
                 }
                 echo json_encode(['success' => true, 'id' => $id]);
                 exit;
 
-            } elseif ($apiAction === 'save_option') {
+            }
+            elseif ($apiAction === 'save_option') {
                 $id = intval($_POST['option_id'] ?? 0);
                 $nodeId = intval($_POST['node_id'] ?? 0);
                 $actionType = $_POST['action_type'] ?? 'goto_node';
@@ -1262,10 +1321,11 @@ function adminChatbot(): void {
 
                 if ($id > 0) {
                     $db->prepare('UPDATE chatbot_options SET action_type=?, next_node_id=?, action_value=?, sort_order=? WHERE id=?')
-                       ->execute([$actionType, $nextId, $actionVal, $sort, $id]);
-                } else {
+                        ->execute([$actionType, $nextId, $actionVal, $sort, $id]);
+                }
+                else {
                     $db->prepare('INSERT INTO chatbot_options (node_id, action_type, next_node_id, action_value, sort_order) VALUES (?,?,?,?,?)')
-                       ->execute([$nodeId, $actionType, $nextId, $actionVal, $sort]);
+                        ->execute([$nodeId, $actionType, $nextId, $actionVal, $sort]);
                     $id = $db->lastInsertId();
                 }
 
@@ -1273,19 +1333,20 @@ function adminChatbot(): void {
                     $label = trim($_POST['label_' . $loc] ?? '');
                     $db->prepare('INSERT INTO chatbot_option_translations (option_id, locale, label) VALUES (?, ?, ?)
                         ON DUPLICATE KEY UPDATE label = VALUES(label)')
-                       ->execute([$id, $loc, $label]);
+                        ->execute([$id, $loc, $label]);
                 }
                 echo json_encode(['success' => true, 'id' => $id]);
                 exit;
 
-            } elseif ($apiAction === 'delete_node') {
+            }
+            elseif ($apiAction === 'delete_node') {
                 $nodeId = intval($_POST['node_id'] ?? 0);
                 if ($nodeId > 0) {
                     $db->beginTransaction();
                     try {
                         // Delete node translations
                         $db->prepare('DELETE FROM chatbot_node_translations WHERE node_id = ?')->execute([$nodeId]);
-                        
+
                         // Find all options of this node and delete their translations
                         $opts = $db->prepare('SELECT id FROM chatbot_options WHERE node_id = ?');
                         $opts->execute([$nodeId]);
@@ -1294,28 +1355,31 @@ function adminChatbot(): void {
                             $placeholders = implode(',', array_fill(0, count($optIds), '?'));
                             $db->prepare("DELETE FROM chatbot_option_translations WHERE option_id IN ($placeholders)")->execute($optIds);
                         }
-                        
+
                         // Delete the options
                         $db->prepare('DELETE FROM chatbot_options WHERE node_id = ?')->execute([$nodeId]);
-                        
+
                         // Break incoming connections from other nodes
                         $db->prepare('UPDATE chatbot_options SET next_node_id = NULL WHERE next_node_id = ?')->execute([$nodeId]);
-                        
+
                         // Finally delete the node
                         $db->prepare('DELETE FROM chatbot_nodes WHERE id = ?')->execute([$nodeId]);
-                        
+
                         $db->commit();
                         echo json_encode(['success' => true]);
-                    } catch (Exception $e) {
+                    }
+                    catch (Exception $e) {
                         $db->rollBack();
                         throw $e;
                     }
-                } else {
+                }
+                else {
                     echo json_encode(['success' => true]);
                 }
                 exit;
 
-            } elseif ($apiAction === 'delete_option') {
+            }
+            elseif ($apiAction === 'delete_option') {
                 $optId = intval($_POST['option_id'] ?? 0);
                 if ($optId > 0) {
                     $db->prepare('DELETE FROM chatbot_option_translations WHERE option_id = ?')->execute([$optId]);
@@ -1324,7 +1388,8 @@ function adminChatbot(): void {
                 echo json_encode(['success' => true]);
                 exit;
 
-            } elseif ($apiAction === 'save_positions') {
+            }
+            elseif ($apiAction === 'save_positions') {
                 $positions = json_decode($_POST['positions'] ?? '[]', true);
                 if (is_array($positions)) {
                     $stmt = $db->prepare('UPDATE chatbot_nodes SET pos_x = ?, pos_y = ? WHERE id = ?');
@@ -1335,7 +1400,8 @@ function adminChatbot(): void {
                 echo json_encode(['success' => true]);
                 exit;
             }
-        } catch (Exception $e) {
+        }
+        catch (Exception $e) {
             echo json_encode(['success' => false, 'error' => $e->getMessage()]);
             exit;
         }
@@ -1346,7 +1412,8 @@ function adminChatbot(): void {
 }
 
 /* ═══ Chatbot Inbox ═══ */
-function adminInbox(): void {
+function adminInbox(): void
+{
     requireAdmin();
     requirePermission('inbox');
     $db = getDB();
@@ -1387,7 +1454,8 @@ function adminInbox(): void {
 }
 
 /* ═══ Invoices & Quotes ═══ */
-function adminInvoices(): void {
+function adminInvoices(): void
+{
     requireAdmin();
     requirePermission('crm');
     $db = getDB();
@@ -1397,7 +1465,8 @@ function adminInvoices(): void {
         try {
             $db->prepare('DELETE FROM invoices WHERE id = ?')->execute([intval($_GET['id'])]);
             setFlash('Invoice deleted successfully.', 'success');
-        } catch (PDOException $e) {
+        }
+        catch (PDOException $e) {
             setFlash('Cannot delete invoice because it contains items or payments.', 'error');
         }
         header('Location: ' . baseUrl('admin/invoices'));
@@ -1432,10 +1501,11 @@ function adminInvoices(): void {
 
         if ($id > 0) {
             $db->prepare('UPDATE invoices SET type=?, invoice_number=?, client_name=?, client_email=?, client_phone=?, client_address=?, discount=?, vat_rate=?, status=?, notes=?, terms=?, contact_id=?, invoice_currency=?, payment_terms=?, amount_paid=?, salesperson_id=? WHERE id=?')
-               ->execute([$type, $invoiceNumber, $clientName, $clientEmail, $clientPhone, $clientAddress, $discount, $vatRate, $status, $notes, $terms, $contactId ?: null, $invoiceCurrency, $paymentTerms, $amountPaid, $salespersonId ?: null, $id]);
-        } else {
+                ->execute([$type, $invoiceNumber, $clientName, $clientEmail, $clientPhone, $clientAddress, $discount, $vatRate, $status, $notes, $terms, $contactId ?: null, $invoiceCurrency, $paymentTerms, $amountPaid, $salespersonId ?: null, $id]);
+        }
+        else {
             $db->prepare('INSERT INTO invoices (type, invoice_number, client_name, client_email, client_phone, client_address, discount, vat_rate, status, notes, terms, contact_id, invoice_currency, payment_terms, amount_paid, salesperson_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')
-               ->execute([$type, $invoiceNumber, $clientName, $clientEmail, $clientPhone, $clientAddress, $discount, $vatRate, $status, $notes, $terms, $contactId ?: null, $invoiceCurrency, $paymentTerms, $amountPaid, $salespersonId ?: null]);
+                ->execute([$type, $invoiceNumber, $clientName, $clientEmail, $clientPhone, $clientAddress, $discount, $vatRate, $status, $notes, $terms, $contactId ?: null, $invoiceCurrency, $paymentTerms, $amountPaid, $salespersonId ?: null]);
             $id = $db->lastInsertId();
         }
 
@@ -1444,7 +1514,8 @@ function adminInvoices(): void {
         if (isset($_POST['extra_salesperson_ids']) && is_array($_POST['extra_salesperson_ids'])) {
             $stmtExtra = $db->prepare('INSERT INTO crm_invoice_salespeople (invoice_id, admin_id) VALUES (?, ?)');
             foreach ($_POST['extra_salesperson_ids'] as $extraId) {
-                if ($extraId == $salespersonId) continue; // Skip if same as primary
+                if ($extraId == $salespersonId)
+                    continue; // Skip if same as primary
                 $stmtExtra->execute([$id, intval($extraId)]);
             }
         }
@@ -1452,7 +1523,8 @@ function adminInvoices(): void {
         // Log salesperson change if applicable
         if (isset($invoice) && $invoice['salesperson_id'] != $salespersonId) {
             logActivity('Invoice Update', "Changed primary salesperson for invoice #{$invoiceNumber}");
-        } elseif (!isset($invoice) && $salespersonId) {
+        }
+        elseif (!isset($invoice) && $salespersonId) {
             logActivity('Invoice Create', "Assigned primary salesperson to invoice #{$invoiceNumber}");
         }
 
@@ -1461,10 +1533,11 @@ function adminInvoices(): void {
         if (isset($_POST['items']) && is_array($_POST['items'])) {
             $stmt = $db->prepare('INSERT INTO invoice_items (invoice_id, service_name, description, qty, unit_price, vat_rate) VALUES (?, ?, ?, ?, ?, ?)');
             foreach ($_POST['items'] as $item) {
-                if (empty(trim($item['service_name']))) continue;
+                if (empty(trim($item['service_name'])))
+                    continue;
                 $stmt->execute([
-                    $id, 
-                    trim($item['service_name']), 
+                    $id,
+                    trim($item['service_name']),
                     trim($item['description'] ?? ''),
                     floatval($item['qty'] ?? 1),
                     floatval($item['unit_price'] ?? 0),
@@ -1501,7 +1574,7 @@ function adminInvoices(): void {
             setFlash('Access denied or invoice not found.', 'error');
             redirect('admin/invoices');
         }
-        
+
         $itemsStmt = $db->prepare('SELECT * FROM invoice_items WHERE invoice_id = ? ORDER BY id ASC');
         $itemsStmt->execute([$id]);
         $items = $itemsStmt->fetchAll();
@@ -1521,7 +1594,8 @@ function adminInvoices(): void {
         if ($lastNum) {
             $numPart = intval(substr($lastNum, 1));
             $invoiceNumber = 'S' . str_pad($numPart + 1, 7, '0', STR_PAD_LEFT);
-        } else {
+        }
+        else {
             $invoiceNumber = 'S0000001';
         }
         $defaultTerms = getSetting('invoice_terms', 'Payment is due within 15 days of issue.');
@@ -1542,7 +1616,8 @@ function adminInvoices(): void {
         $stmt = $db->prepare($sql);
         $stmt->execute($params);
         $invoice = $stmt->fetch();
-        if (!$invoice) die('Access denied or invoice not found.');
+        if (!$invoice)
+            die('Access denied or invoice not found.');
 
         $itemsStmt = $db->prepare('SELECT * FROM invoice_items WHERE invoice_id = ? ORDER BY id ASC');
         $itemsStmt->execute([$id]);
@@ -1565,7 +1640,8 @@ function adminInvoices(): void {
         $stmt = $db->prepare($sql);
         $stmt->execute($params);
         $invoice = $stmt->fetch();
-        if (!$invoice) die('Access denied or invoice not found.');
+        if (!$invoice)
+            die('Access denied or invoice not found.');
 
         $itemsStmt = $db->prepare('SELECT * FROM invoice_items WHERE invoice_id = ? ORDER BY id ASC');
         $itemsStmt->execute([$id]);
@@ -1592,7 +1668,8 @@ function adminInvoices(): void {
 }
 
 /* ═══ Contacts / CRM ═══ */
-function adminContacts(): void {
+function adminContacts(): void
+{
     requireAdmin();
     requirePermission('crm');
     $db = getDB();
@@ -1602,7 +1679,8 @@ function adminContacts(): void {
         try {
             $db->prepare('DELETE FROM contacts WHERE id = ?')->execute([intval($_GET['id'])]);
             setFlash('Contact deleted successfully.', 'success');
-        } catch (PDOException $e) {
+        }
+        catch (PDOException $e) {
             setFlash('Cannot delete contact because it is linked to invoices or opportunities.', 'error');
         }
         header('Location: ' . baseUrl('admin/contacts'));
@@ -1626,10 +1704,11 @@ function adminContacts(): void {
 
         if ($id > 0) {
             $db->prepare('UPDATE contacts SET name=?, type=?, phone=?, email=?, vat_number=?, website=?, location=?, country=?, poc_details=?, source=? WHERE id=?')
-               ->execute(array_merge($data, [$id]));
-        } else {
+                ->execute(array_merge($data, [$id]));
+        }
+        else {
             $db->prepare('INSERT INTO contacts (name, type, phone, email, vat_number, website, location, country, poc_details, source) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')
-               ->execute($data);
+                ->execute($data);
             $id = $db->lastInsertId();
         }
         header('Location: ' . baseUrl('admin/contacts?action=edit&id=' . $id . '&saved=1'));
@@ -1656,7 +1735,8 @@ function adminContacts(): void {
 }
 
 /* ═══ Admin Profile ═══ */
-function adminProfile(): void {
+function adminProfile(): void
+{
     $db = getDB();
     $saved = false;
     $error = '';
@@ -1673,7 +1753,7 @@ function adminProfile(): void {
         $avatarEmoji = trim($_POST['avatar_emoji'] ?? '👤');
 
         $db->prepare('UPDATE admins SET full_name=?, recovery_email=?, recovery_phone=?, avatar_emoji=? WHERE id=?')
-           ->execute([$fullName, $recoveryEmail, $recoveryPhone, $avatarEmoji, $adminId]);
+            ->execute([$fullName, $recoveryEmail, $recoveryPhone, $avatarEmoji, $adminId]);
 
         // Handle password change
         $newPass = $_POST['new_password'] ?? '';
@@ -1682,7 +1762,8 @@ function adminProfile(): void {
             if ($newPass === $confirmPass) {
                 $hashed = password_hash($newPass, PASSWORD_DEFAULT);
                 $db->prepare('UPDATE admins SET password=? WHERE id=?')->execute([$hashed, $adminId]);
-            } else {
+            }
+            else {
                 $error = 'Passwords do not match.';
             }
         }
@@ -1692,13 +1773,15 @@ function adminProfile(): void {
         $stmt->execute([$adminId]);
         $admin = $stmt->fetch();
 
-        if (empty($error)) $saved = true;
+        if (empty($error))
+            $saved = true;
     }
 
     require __DIR__ . '/../views/admin/profile.php';
 }
 /* ═══ Sitemap Editor ═══ */
-function adminSitemap(): void {
+function adminSitemap(): void
+{
     requireAdmin();
     requirePermission('settings');
     $db = getDB();
@@ -1707,12 +1790,13 @@ function adminSitemap(): void {
 
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $action = $_POST['action'] ?? 'save';
-        
+
         if ($action === 'regenerate') {
             $xml = generateDynamicSitemap();
             file_put_contents($sitemapPath, $xml);
             $saved = true;
-        } elseif ($action === 'save') {
+        }
+        elseif ($action === 'save') {
             $content = $_POST['sitemap_content'] ?? '';
             file_put_contents($sitemapPath, $content);
             $saved = true;
@@ -1724,7 +1808,8 @@ function adminSitemap(): void {
 }
 
 /* ═══ Email Marketing ═══ */
-function adminEmailMarketing(): void {
+function adminEmailMarketing(): void
+{
     requireAdmin();
     requirePermission('crm');
     $db = getDB();
@@ -1737,7 +1822,8 @@ function adminEmailMarketing(): void {
         $db->query("SELECT 1 FROM email_settings LIMIT 1");
         $db->query("SELECT 1 FROM marketing_campaigns LIMIT 1");
         $db->query("SELECT 1 FROM marketing_recipients LIMIT 1");
-    } catch (Exception $e) {
+    }
+    catch (Exception $e) {
         // Tables missing - try to apply schema
         $schemaFile = __DIR__ . '/../migrations/email_schema.sql';
         if (file_exists($schemaFile)) {
@@ -1749,7 +1835,8 @@ function adminEmailMarketing(): void {
                     $db->exec($stmt);
                 }
             }
-        } else {
+        }
+        else {
             die("Marketing tables missing and schema file not found.");
         }
     }
@@ -1769,13 +1856,15 @@ function adminEmailMarketing(): void {
             $smtpPort = intval($_POST['smtp_port'] ?? 587);
             $smtpUser = $_POST['smtp_user'] ?? '';
             $smtpPass = $_POST['smtp_pass'] ?? '';
-            
+
             // Auto-detect encryption based on standard ports
             if ($smtpPort === 465) {
                 $smtpEnc = 'ssl';
-            } elseif ($smtpPort === 587) {
+            }
+            elseif ($smtpPort === 587) {
                 $smtpEnc = 'tls';
-            } else {
+            }
+            else {
                 $smtpEnc = 'none';
             }
 
@@ -1787,22 +1876,23 @@ function adminEmailMarketing(): void {
                 $db->prepare('UPDATE email_settings SET 
                     smtp_host=?, smtp_port=?, smtp_user=?, smtp_pass=?, smtp_encryption=?, 
                     from_email=?, from_name=?, imap_host=?, imap_port=?, signature_html=? WHERE id=1')
-                   ->execute([
-                       $smtpHost,
-                       $smtpPort,
-                       $smtpUser,
-                       $smtpPass,
-                       $smtpEnc,
-                       $_POST['from_email'] ?? '',
-                       $_POST['from_name'] ?? '',
-                       $_POST['imap_host'] ?? '',
-                       intval($_POST['imap_port'] ?? 993),
-                       $_POST['signature_html'] ?? ''
-                   ]);
+                    ->execute([
+                    $smtpHost,
+                    $smtpPort,
+                    $smtpUser,
+                    $smtpPass,
+                    $smtpEnc,
+                    $_POST['from_email'] ?? '',
+                    $_POST['from_name'] ?? '',
+                    $_POST['imap_host'] ?? '',
+                    intval($_POST['imap_port'] ?? 993),
+                    $_POST['signature_html'] ?? ''
+                ]);
                 $saved = true;
                 // Re-fetch
                 $settings = $db->query('SELECT * FROM email_settings LIMIT 1')->fetch();
-            } else {
+            }
+            else {
                 $error = "SMTP Verification Failed: " . $testRes;
             }
         }
@@ -1811,7 +1901,7 @@ function adminEmailMarketing(): void {
             $subject = trim($_POST['subject'] ?? '');
             $body = trim($_POST['body'] ?? '');
             $type = $_POST['send_type'] ?? 'bulk';
-            
+
             $emails = [];
             if ($type === 'single') {
                 $rawEmails = $_POST['single_recipients'] ?? '';
@@ -1822,8 +1912,10 @@ function adminEmailMarketing(): void {
                         $emails[] = $email;
                     }
                 }
-                if (empty($emails)) $error = "No valid recipient emails provided.";
-            } else {
+                if (empty($emails))
+                    $error = "No valid recipient emails provided.";
+            }
+            else {
                 // Bulk / CSV Upload
                 if (!empty($_FILES['email_list']['tmp_name'])) {
                     if (($handle = fopen($_FILES['email_list']['tmp_name'], "r")) !== FALSE) {
@@ -1835,13 +1927,14 @@ function adminEmailMarketing(): void {
                         fclose($handle);
                     }
                 }
-                if (empty($emails)) $error = "No valid emails found in the uploaded CSV.";
+                if (empty($emails))
+                    $error = "No valid emails found in the uploaded CSV.";
             }
 
             if (empty($error) && !empty($emails)) {
                 // Register campaign in DB
                 $db->prepare('INSERT INTO marketing_campaigns (subject, body, total_emails, status) VALUES (?, ?, ?, ?)')
-                   ->execute([$subject, $body, count($emails), 'sending']);
+                    ->execute([$subject, $body, count($emails), 'sending']);
                 $campaignId = $db->lastInsertId();
 
                 // Initialize SMTP
@@ -1851,24 +1944,27 @@ function adminEmailMarketing(): void {
                     $settings['smtp_user'],
                     $settings['smtp_pass'],
                     $settings['smtp_encryption']
-                );
+                    );
 
                 $successCount = 0;
                 $failCount = 0;
 
                 foreach ($emails as $email) {
                     $res = $mailer->send($email, $settings['from_email'], $settings['from_name'], $subject, $body, $settings['signature_html']);
-                    
+
                     $status = $res ? 'sent' : 'failed';
-                    if ($res) $successCount++; else $failCount++;
+                    if ($res)
+                        $successCount++;
+                    else
+                        $failCount++;
 
                     $db->prepare('INSERT INTO marketing_recipients (campaign_id, email, status, sent_at) VALUES (?, ?, ?, NOW())')
-                       ->execute([$campaignId, $email, $status]);
+                        ->execute([$campaignId, $email, $status]);
                 }
 
                 $db->prepare('UPDATE marketing_campaigns SET sent_count=?, failed_count=?, status=? WHERE id=?')
-                   ->execute([$successCount, $failCount, 'completed', $campaignId]);
-                
+                    ->execute([$successCount, $failCount, 'completed', $campaignId]);
+
                 $sent = true;
             }
         }
@@ -1897,7 +1993,7 @@ function adminAppManager(): void
 
     $categoryStats = $db->query("SELECT c.name, c.icon, c.color, (SELECT COUNT(*) FROM app_products p WHERE p.category_id = c.id) as product_count FROM app_categories c ORDER BY c.sort_order")->fetchAll();
     $licenseStatusDist = $db->query("SELECT status, COUNT(*) as cnt FROM app_licenses GROUP BY status")->fetchAll();
-    
+
     // Unified Feed: Heartbeats + Downloads
     $recentConnections = $db->query("SELECT l.*, d.hostname, d.ip_address, d.app_version, lic.license_key, p.name as product_name 
         FROM app_device_logs l 
@@ -1928,7 +2024,8 @@ function adminAppCategories(): void
         $id = intval($_POST['id'] ?? 0);
         $name = trim($_POST['name'] ?? '');
         $slug = trim($_POST['slug'] ?? '');
-        if (empty($slug)) $slug = strtolower(str_replace(' ', '-', $name));
+        if (empty($slug))
+            $slug = strtolower(str_replace(' ', '-', $name));
         $icon = trim($_POST['icon'] ?? 'ph-cube');
         $color = trim($_POST['color'] ?? 'cyan');
         $desc = trim($_POST['description'] ?? '');
@@ -1938,7 +2035,8 @@ function adminAppCategories(): void
         if ($id > 0) {
             $db->prepare('UPDATE app_categories SET name=?, slug=?, icon=?, color=?, description=?, sort_order=?, is_active=? WHERE id=?')
                 ->execute([$name, $slug, $icon, $color, $desc, $sort, $active, $id]);
-        } else {
+        }
+        else {
             $db->prepare('INSERT INTO app_categories (name, slug, icon, color, description, sort_order, is_active) VALUES (?,?,?,?,?,?,?)')
                 ->execute([$name, $slug, $icon, $color, $desc, $sort, $active]);
         }
@@ -1971,7 +2069,8 @@ function adminAppProducts(): void
         $catId = intval($_POST['category_id'] ?? 0);
         $name = trim($_POST['name'] ?? '');
         $slug = trim($_POST['slug'] ?? '');
-        if (empty($slug)) $slug = strtolower(str_replace(' ', '-', $name));
+        if (empty($slug))
+            $slug = strtolower(str_replace(' ', '-', $name));
         $version = trim($_POST['version'] ?? '1.0.0');
         $iconUrl = trim($_POST['icon_url'] ?? '');
         $headerImage = trim($_POST['header_image'] ?? '');
@@ -1990,7 +2089,8 @@ function adminAppProducts(): void
 
         // Handle Uploads
         $uploadDir = __DIR__ . '/../uploads/apps/';
-        if (!is_dir($uploadDir)) mkdir($uploadDir, 0755, true);
+        if (!is_dir($uploadDir))
+            mkdir($uploadDir, 0755, true);
 
         $uploadFields = [
             'icon_file' => 'iconUrl',
@@ -2011,7 +2111,8 @@ function adminAppProducts(): void
         if ($id > 0) {
             $db->prepare('UPDATE app_products SET category_id=?, name=?, slug=?, version=?, icon_url=?, header_image=?, description=?, features=?, download_url=?, buy_url=?, show_buy_button=?, pricing_model=?, price=?, is_active=?, is_public=?, show_price=?, meta_description=?, meta_keywords=? WHERE id=?')
                 ->execute([$catId, $name, $slug, $version, $iconUrl, $headerImage, $desc, $features, $downloadUrl, $buyUrl, $showBuy, $model, $price, $active, $isPublic, $showPrice, $metaDesc, $metaKeys, $id]);
-        } else {
+        }
+        else {
             $db->prepare('INSERT INTO app_products (category_id, name, slug, version, icon_url, header_image, description, features, download_url, buy_url, show_buy_button, pricing_model, price, is_active, is_public, show_price, meta_description, meta_keywords) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)')
                 ->execute([$catId, $name, $slug, $version, $iconUrl, $headerImage, $desc, $features, $downloadUrl, $buyUrl, $showBuy, $model, $price, $active, $isPublic, $showPrice, $metaDesc, $metaKeys]);
             $id = $db->lastInsertId();
@@ -2025,7 +2126,7 @@ function adminAppProducts(): void
                     $newName = $slug . '_gallery_' . uniqid() . '.' . $ext;
                     if (move_uploaded_file($tmpName, $uploadDir . $newName)) {
                         $db->prepare("INSERT INTO app_product_images (product_id, image_path) VALUES (?, ?)")
-                           ->execute([$id, 'uploads/apps/' . $newName]);
+                            ->execute([$id, 'uploads/apps/' . $newName]);
                     }
                 }
             }
@@ -2051,14 +2152,15 @@ function adminAppDownloadTrack(): void
     requireAdmin();
     $db = getDB();
     $id = intval($_GET['id'] ?? 0);
-    if ($id <= 0) die('Invalid ID');
+    if ($id <= 0)
+        die('Invalid ID');
 
     $db->prepare("UPDATE app_products SET download_count = download_count + 1, total_installs = total_installs + 1 WHERE id = ?")->execute([$id]);
-    
+
     // Add a log entry for notification
     $product = $db->query("SELECT name FROM app_products WHERE id = $id")->fetch();
     $db->prepare("INSERT INTO app_device_logs (device_id, event_type, details) VALUES (1, 'download', ?)")
-       ->execute(["Download started: " . ($product['name'] ?? 'Unknown App')]);
+        ->execute(["Download started: " . ($product['name'] ?? 'Unknown App')]);
 
     setFlash('Download tracking updated.', 'success');
     header('Location: ' . baseUrl('admin/app-manager'));
@@ -2098,7 +2200,8 @@ function adminAppLicenses(): void
         $id = intval($_POST['id'] ?? 0);
         $productId = intval($_POST['product_id'] ?? 0);
         $licenseKey = trim($_POST['license_key'] ?? '');
-        if (empty($licenseKey)) $licenseKey = _generateLicenseKey();
+        if (empty($licenseKey))
+            $licenseKey = _generateLicenseKey();
         $label = trim($_POST['label'] ?? '');
         $status = $_POST['status'] ?? 'active';
         $type = $_POST['type'] ?? 'standard';
@@ -2107,13 +2210,16 @@ function adminAppLicenses(): void
         $notes = trim($_POST['notes'] ?? '');
 
         $aboutText = trim($_POST['about_text'] ?? '');
+        $useCount = intval($_POST['use_count'] ?? 0);
+        $maxUseCount = intval($_POST['max_use_count'] ?? 0);
 
         if ($id > 0) {
-            $db->prepare('UPDATE app_licenses SET product_id=?, license_key=?, label=?, status=?, type=?, max_devices=?, expires_at=?, notes=?, about_text=? WHERE id=?')
-                ->execute([$productId, $licenseKey, $label, $status, $type, $maxDevices, $expiresAt, $notes, $aboutText, $id]);
-        } else {
-            $db->prepare('INSERT INTO app_licenses (product_id, license_key, label, status, type, max_devices, expires_at, notes, about_text) VALUES (?,?,?,?,?,?,?,?,?)')
-                ->execute([$productId, $licenseKey, $label, $status, $type, $maxDevices, $expiresAt, $notes, $aboutText]);
+            $db->prepare('UPDATE app_licenses SET product_id=?, license_key=?, label=?, status=?, type=?, max_devices=?, expires_at=?, notes=?, about_text=?, use_count=?, max_use_count=? WHERE id=?')
+                ->execute([$productId, $licenseKey, $label, $status, $type, $maxDevices, $expiresAt, $notes, $aboutText, $useCount, $maxUseCount, $id]);
+        }
+        else {
+            $db->prepare('INSERT INTO app_licenses (product_id, license_key, label, status, type, max_devices, expires_at, notes, about_text, use_count, max_use_count) VALUES (?,?,?,?,?,?,?,?,?,?,?)')
+                ->execute([$productId, $licenseKey, $label, $status, $type, $maxDevices, $expiresAt, $notes, $aboutText, $useCount, $maxUseCount]);
             $id = $db->lastInsertId();
         }
 
@@ -2123,15 +2229,17 @@ function adminAppLicenses(): void
             foreach ($_POST['feature_keys'] as $i => $fk) {
                 $fk = trim($fk);
                 $fv = trim($_POST['feature_values'][$i] ?? '');
-                if (!empty($fk)) $fStmt->execute([$id, $fk, $fv]);
+                if (!empty($fk))
+                    $fStmt->execute([$id, $fk, $fv]);
             }
         }
-        
+
         $boundHardwareId = trim($_POST['bound_hardware_id'] ?? '');
         if (!empty($boundHardwareId)) {
             $db->prepare('INSERT INTO app_license_features (license_id, feature_key, feature_value) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE feature_value = VALUES(feature_value)')
-               ->execute([$id, 'bound_hardware_id', $boundHardwareId]);
-        } else {
+                ->execute([$id, 'bound_hardware_id', $boundHardwareId]);
+        }
+        else {
             $db->prepare("DELETE FROM app_license_features WHERE license_id = ? AND feature_key = 'bound_hardware_id'")->execute([$id]);
         }
 
@@ -2147,7 +2255,7 @@ function adminAppLicenses(): void
         ORDER BY l.created_at DESC")->fetchAll();
 
     $allProducts = $db->query("SELECT id, name FROM app_products WHERE is_active=1 ORDER BY name")->fetchAll();
-    
+
     $editLicense = null;
     $editFeatures = [];
     if ($action === 'edit' && isset($_GET['id'])) {
@@ -2155,14 +2263,14 @@ function adminAppLicenses(): void
         $stmt = $db->prepare("SELECT * FROM app_licenses WHERE id = ?");
         $stmt->execute([$editId]);
         $editLicense = $stmt->fetch();
-        
+
         $fStmt = $db->prepare('SELECT feature_key, feature_value FROM app_license_features WHERE license_id = ?');
         $fStmt->execute([$editId]);
         foreach ($fStmt->fetchAll() as $f) {
             $editFeatures[$f['feature_key']] = $f;
         }
     }
-    
+
     require __DIR__ . '/../views/admin/app_licenses.php';
 }
 
@@ -2223,7 +2331,8 @@ function adminAppSections(): void
         if ($id > 0) {
             $db->prepare("UPDATE app_sections SET title=?, sort_order=?, is_active=? WHERE id=?")
                 ->execute([$title, $sortOrder, $isActive, $id]);
-        } else {
+        }
+        else {
             $db->prepare("INSERT INTO app_sections (title, sort_order, is_active) VALUES (?, ?, ?)")
                 ->execute([$title, $sortOrder, $isActive]);
             $id = $db->lastInsertId();
@@ -2254,7 +2363,7 @@ function adminAppSections(): void
     foreach ($sections as &$sec) {
         $sec['products'] = $db->query("SELECT p.id, p.name FROM app_products p JOIN app_section_products sp ON p.id = sp.product_id WHERE sp.section_id = " . $sec['id'] . " ORDER BY sp.sort_order")->fetchAll();
     }
-    
+
     $allProducts = $db->query("SELECT id, name FROM app_products WHERE is_active=1 ORDER BY name")->fetchAll();
     require __DIR__ . '/../views/admin/app_sections.php';
 }
@@ -2273,7 +2382,7 @@ function adminAppReviews(): void
 
         $db->prepare("UPDATE app_reviews SET admin_reply=?, status=? WHERE id=?")
             ->execute([$reply, $status, $id]);
-        
+
         setFlash('Review updated.', 'success');
         header('Location: ' . baseUrl('admin/app-reviews'));
         exit;
@@ -2297,7 +2406,7 @@ function _ensureAppTables()
     $db = getDB();
     try {
         $db->prepare("ALTER TABLE app_licenses ADD COLUMN IF NOT EXISTS about_text TEXT NULL AFTER notes")->execute();
-        
+
         $db->exec("CREATE TABLE IF NOT EXISTS app_devices (
             id INT AUTO_INCREMENT PRIMARY KEY,
             license_id INT NOT NULL,
@@ -2317,13 +2426,15 @@ function _ensureAppTables()
             details TEXT,
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP
         )");
-    } catch (Exception $e) {}
+    }
+    catch (Exception $e) {
+    }
 }
 
 function _generateLicenseKey()
 {
-    return strtoupper(substr(md5(uniqid(mt_rand(), true)), 0, 4) . '-' . 
-                     substr(md5(uniqid(mt_rand(), true)), 0, 4) . '-' . 
-                     substr(md5(uniqid(mt_rand(), true)), 0, 4) . '-' . 
-                     substr(md5(uniqid(mt_rand(), true)), 0, 4));
+    return strtoupper(substr(md5(uniqid(mt_rand(), true)), 0, 4) . '-' .
+        substr(md5(uniqid(mt_rand(), true)), 0, 4) . '-' .
+        substr(md5(uniqid(mt_rand(), true)), 0, 4) . '-' .
+        substr(md5(uniqid(mt_rand(), true)), 0, 4));
 }

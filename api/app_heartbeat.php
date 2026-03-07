@@ -38,6 +38,7 @@ $hostname = trim($input['hostname'] ?? '');
 $osInfo = trim($input['os_info'] ?? '');
 $appVersion = trim($input['app_version'] ?? '');
 $clientIp = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'] ?? '';
+$useCount = isset($input['use_count']) ? (int)$input['use_count'] : (isset($input['scans_used']) ? (int)$input['scans_used'] : null);
 
 if (empty($licenseKey) || empty($hardwareId)) {
     http_response_code(400);
@@ -115,6 +116,15 @@ try {
         if ($wasOffline) {
             $db->prepare("INSERT INTO app_device_logs (device_id, event_type, ip_address, details) VALUES (?, 'connect', ?, ?)")
                 ->execute([$deviceId, $clientIp, "Reconnected: $hostname"]);
+        }
+    }
+
+    // Sync use_count if provided
+    if ($useCount !== null) {
+        $currentUseCount = (int)($license['use_count'] ?? 0);
+        if ($useCount > $currentUseCount) {
+            $db->prepare('UPDATE app_licenses SET use_count = ? WHERE id = ?')
+                ->execute([$useCount, $license['id']]);
         }
     }
 

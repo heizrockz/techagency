@@ -38,7 +38,8 @@ $productCode = trim($input['product_code'] ?? $_GET['product_code'] ?? '');
 if (empty($licenseKey) && !empty($productCode)) {
     // If we only have product_code, it MUST be the license key (legacy)
     $licenseKey = $productCode;
-} elseif (!empty($productCode) && empty($hardwareId)) {
+}
+elseif (!empty($productCode) && empty($hardwareId)) {
     // If we have both, and hardware_id is missing, product_code is the hardware_id
     $hardwareId = $productCode;
 }
@@ -137,7 +138,7 @@ try {
             $ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
             $hostname = $input['hostname'] ?? $_GET['hostname'] ?? null;
             $appVer = $input['app_version'] ?? $_GET['app_version'] ?? null;
-            
+
             $db->prepare("INSERT INTO app_devices (license_id, hardware_id, ip_address, hostname, app_version, is_online, last_heartbeat) 
                 VALUES (?, ?, ?, ?, ?, 1, NOW()) 
                 ON DUPLICATE KEY UPDATE license_id=VALUES(license_id), ip_address=VALUES(ip_address), 
@@ -159,7 +160,10 @@ try {
             'about_text' => $aboutText,
             'features' => $features,
             'max_devices' => (int)$license['max_devices'],
-            'expires_at' => $license['expires_at']
+            'expires_at' => $license['expires_at'],
+            'use_count' => (int)$license['use_count'],
+            'max_use_count' => (int)$license['max_use_count'],
+            'label' => $license['label']
         ]);
 
     }
