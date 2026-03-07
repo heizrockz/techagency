@@ -44,8 +44,8 @@ try {
 
 // Extract the license key and the hardware ID
 // Depending on how the client sends it, we handle common permutations
-$licenseKey = trim($input['license_key'] ?? $input['key'] ?? '');
-$hardwareId = trim($input['hardware_id'] ?? $input['product_code'] ?? $input['machine_id'] ?? '');
+$licenseKey = trim($input['license_key'] ?? $input['key'] ?? $_GET['key'] ?? $_GET['license_key'] ?? '');
+$hardwareId = trim($input['hardware_id'] ?? $input['product_code'] ?? $input['machine_id'] ?? $_GET['hardware_id'] ?? $_GET['product_code'] ?? '');
 
 // Fallback for legacy clients that only sent "product_code" as the license key itself
 if (empty($licenseKey) && !empty($hardwareId)) {

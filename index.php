@@ -9,19 +9,6 @@ require_once __DIR__ . '/config.php';
 require_once __DIR__ . '/includes/helpers.php';
 require_once __DIR__ . '/includes/auth.php';
 
-// Global logger to catch the Java app request regardless of the URI
-if (strpos($_SERVER['REQUEST_URI'], '/api/') !== false) {
-    $db = getDB();
-    try {
-        $uri = $_SERVER['REQUEST_URI'] ?? 'unknown';
-        $method = $_SERVER['REQUEST_METHOD'] ?? 'unknown';
-        $payload = file_get_contents('php://input');
-        $query = json_encode($_GET);
-        $db->prepare("INSERT INTO app_device_logs (device_id, event_type, details) VALUES (?, 'error', ?)")
-           ->execute([0, "Method: $method | URI: $uri | Payload: $payload | Query: $query"]);
-    } catch (\Exception $e) {}
-}
-
 // ── Language Handling ─────────────────────────────────────
 if (isset($_GET['lang'])) {
     appSetLocale($_GET['lang']);
@@ -70,7 +57,7 @@ elseif ($path === '/booking/success') {
     require_once __DIR__ . '/controllers/BookingController.php';
     showBookingSuccess();
 }
-elseif ($path === '/api/v1/license') {
+elseif ($path === '/api/v1/license' || $path === '/api/check-license') {
     require_once __DIR__ . '/api/license.php';
 }
 elseif ($path === '/api/v1/heartbeat') {
