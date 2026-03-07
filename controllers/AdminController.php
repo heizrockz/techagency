@@ -2406,6 +2406,8 @@ function _ensureAppTables()
     $db = getDB();
     try {
         $db->prepare("ALTER TABLE app_licenses ADD COLUMN IF NOT EXISTS about_text TEXT NULL AFTER notes")->execute();
+        $db->prepare("ALTER TABLE app_licenses ADD COLUMN IF NOT EXISTS use_count INT NOT NULL DEFAULT 0 AFTER about_text")->execute();
+        $db->prepare("ALTER TABLE app_licenses ADD COLUMN IF NOT EXISTS max_use_count INT NOT NULL DEFAULT 0 AFTER use_count")->execute();
 
         $db->exec("CREATE TABLE IF NOT EXISTS app_devices (
             id INT AUTO_INCREMENT PRIMARY KEY,

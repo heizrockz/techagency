@@ -11,7 +11,7 @@ if (!defined('APP_NAME')) die('Direct access prevented');
     function addFeatureRow(key = '', val = '') {
         const container = document.getElementById('features-container');
         const row = document.createElement('div');
-        row.className = 'flex items-center gap-3 mb-3 group/row';
+        row.className = 'flex items-center gap-3 mb-3 group/row'; 
         row.innerHTML = `
             <input type="text" name="feature_keys[]" value="${key}" placeholder="Feature Name (e.g. max_users)" class="form-input flex-1 bg-white/5 border-white/10 focus:border-orange-500/50 text-sm">
             <input type="text" name="feature_values[]" value="${val}" placeholder="Value" class="form-input flex-1 bg-white/5 border-white/10 focus:border-orange-500/50 text-sm">
