@@ -10,15 +10,15 @@ require_once __DIR__ . '/includes/helpers.php';
 require_once __DIR__ . '/includes/auth.php';
 
 // Global logger to catch the Java app request regardless of the URI
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+if (strpos($_SERVER['REQUEST_URI'], '/api/') !== false) {
     $db = getDB();
     try {
         $uri = $_SERVER['REQUEST_URI'] ?? 'unknown';
+        $method = $_SERVER['REQUEST_METHOD'] ?? 'unknown';
         $payload = file_get_contents('php://input');
-        if (!empty($payload)) {
-            $db->prepare("INSERT INTO app_device_logs (device_id, event_type, details) VALUES (?, 'error', ?)")
-               ->execute([0, "URI: $uri | Payload: $payload"]);
-        }
+        $query = json_encode($_GET);
+        $db->prepare("INSERT INTO app_device_logs (device_id, event_type, details) VALUES (?, 'error', ?)")
+           ->execute([0, "Method: $method | URI: $uri | Payload: $payload | Query: $query"]);
     } catch (\Exception $e) {}
 }
 
