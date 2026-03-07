@@ -24,7 +24,7 @@ if (!defined('APP_NAME')) die('Direct access prevented');
                 </div>
             </div>
             <div class="relative flex items-center gap-4">
-                <button onclick="document.getElementById('add-category-modal').classList.remove('hidden')" class="group flex items-center gap-2 px-3 sm:px-5 py-2.5 bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-500/20 hover:border-cyan-500/40 rounded-xl transition-all duration-300">
+                <button onclick="openNewCategoryModal()" class="group flex items-center gap-2 px-3 sm:px-5 py-2.5 bg-cyan-500/10 hover:bg-cyan-500/20 border border-cyan-500/20 hover:border-cyan-500/40 rounded-xl transition-all duration-300">
                     <i class="ph ph-plus-circle text-lg text-cyan-500 group-hover:rotate-90 transition-transform duration-500"></i>
                     <span class="text-sm font-semibold text-cyan-500 hidden sm:inline">New Category</span>
                 </button>
@@ -238,6 +238,27 @@ if (!defined('APP_NAME')) die('Direct access prevented');
         document.getElementById('cat-sort').value = cat.sort_order;
         document.getElementById('cat-desc').value = cat.description;
         document.getElementById('cat-active').checked = cat.is_active == 1;
+
+        const modal = document.getElementById('add-category-modal');
+        const content = document.getElementById('add-category-content');
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        setTimeout(() => {
+            content.classList.remove('scale-95', 'opacity-0');
+            content.classList.add('scale-100', 'opacity-100');
+        }, 10);
+    }
+
+    function openNewCategoryModal() {
+        document.getElementById('modal-title').innerText = 'Add New Category';
+        document.getElementById('cat-id').value = '0';
+        document.getElementById('cat-name').value = '';
+        document.getElementById('cat-slug').value = '';
+        document.getElementById('cat-icon').value = 'ph-cube';
+        document.getElementById('cat-color').value = 'cyan';
+        document.getElementById('cat-sort').value = '0';
+        document.getElementById('cat-desc').value = '';
+        document.getElementById('cat-active').checked = true;
 
         const modal = document.getElementById('add-category-modal');
         const content = document.getElementById('add-category-content');
