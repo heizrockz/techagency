@@ -70,96 +70,96 @@ $action = $action ?? 'list';
             <?php endif; ?>
 
         <?php if ($action === 'edit' || $action === 'new'): ?>
-            <form method="POST" action="<?= baseUrl('admin/contacts') ?>" class="admin-stat-card !bg-glass-bg !p-6 lg:!p-12 border border-white/5 shadow-premium space-y-8 lg:space-y-12 max-w-6xl mx-auto rounded-[2rem] lg:rounded-[2.5rem] relative overflow-hidden backdrop-blur-3xl">
+            <form method="POST" action="<?= baseUrl('admin/contacts') ?>" class="admin-stat-card !bg-glass-bg !p-4 lg:!p-8 border border-white/5 shadow-premium space-y-4 lg:space-y-6 max-w-4xl mx-auto rounded-3xl relative overflow-hidden backdrop-blur-3xl">
                 <!-- Atmospheric Decor -->
                 <div class="absolute -right-24 -top-24 w-64 h-64 bg-neon-cyan/5 rounded-full blur-[100px] pointer-events-none"></div>
                 <div class="absolute -left-24 -bottom-24 w-64 h-64 bg-neon-purple/5 rounded-full blur-[100px] pointer-events-none"></div>
 
                 <input type="hidden" name="id" value="<?= $contact['id'] ?? 0 ?>">
                 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-10 relative z-10">
-                    <div class="space-y-4">
-                        <label class="block text-[10px] font-black text-slate-500 uppercase tracking-[0.3em] ml-2">Entity Designation *</label>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-6 relative z-10">
+                    <div class="space-y-2">
+                        <label class="block text-[8px] font-black text-slate-500 uppercase tracking-[0.3em] ml-2">Entity Designation *</label>
                         <div class="relative group">
-                            <i class="ph-bold ph-identification-card absolute left-5 top-1/2 -translate-y-1/2 text-slate-600 group-focus-within:text-neon-cyan transition-colors"></i>
-                            <input type="text" name="name" value="<?= e($contact['name'] ?? '') ?>" class="w-full bg-black/40 border border-white/10 rounded-2xl py-5 pl-14 pr-6 text-sm font-black text-white focus:outline-none focus:border-neon-cyan placeholder-slate-800 transition-all font-mono shadow-inner" required placeholder="NEXUS_ID_001">
+                            <i class="ph-bold ph-identification-card absolute left-4 top-1/2 -translate-y-1/2 text-slate-700 text-[10px] group-focus-within:text-neon-cyan transition-colors"></i>
+                            <input type="text" name="name" value="<?= e($contact['name'] ?? '') ?>" class="w-full bg-black/40 border border-white/10 rounded-xl py-2 pl-10 pr-4 text-[11px] font-black text-white focus:outline-none focus:border-neon-cyan placeholder-slate-900 transition-all font-mono shadow-inner" required placeholder="NEXUS_ID_001">
                         </div>
                     </div>
-                    <div class="space-y-4">
-                        <label class="block text-[10px] font-black text-slate-500 uppercase tracking-[0.3em] ml-2">Metabolic Class</label>
+                    <div class="space-y-2">
+                        <label class="block text-[8px] font-black text-slate-500 uppercase tracking-[0.3em] ml-2">Metabolic Class</label>
                         <div class="relative">
-                            <select name="type" class="w-full bg-black/40 border border-white/10 rounded-2xl py-5 px-6 text-[11px] font-black uppercase tracking-widest text-white focus:outline-none focus:border-neon-cyan appearance-none cursor-pointer transition-all shadow-inner">
+                            <select name="type" class="w-full bg-black/40 border border-white/10 rounded-xl py-2 px-4 text-[9px] font-black uppercase tracking-widest text-white focus:outline-none focus:border-neon-cyan appearance-none cursor-pointer transition-all shadow-inner">
                                 <option value="company" <?= ($contact['type'] ?? 'company') === 'company' ? 'selected' : '' ?>>🏢 Corporate Infrastructure</option>
                                 <option value="individual" <?= ($contact['type'] ?? '') === 'individual' ? 'selected' : '' ?>>👤 Biological Unit</option>
                             </select>
-                            <i class="ph-bold ph-caret-down absolute right-6 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none"></i>
+                            <i class="ph-bold ph-caret-down absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 text-[10px] pointer-events-none"></i>
                         </div>
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-10 relative z-10">
-                    <div class="space-y-4">
-                        <label class="block text-[10px] font-black text-slate-500 uppercase tracking-[0.3em] ml-2">Vocal Frequency (Phone)</label>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-6 relative z-10">
+                    <div class="space-y-2">
+                        <label class="block text-[8px] font-black text-slate-500 uppercase tracking-[0.3em] ml-2">Vocal Frequency (Phone)</label>
                         <div class="relative group">
-                            <i class="ph-bold ph-phone absolute left-5 top-1/2 -translate-y-1/2 text-slate-600 group-focus-within:text-neon-cyan transition-colors"></i>
-                            <input type="text" name="phone" value="<?= e($contact['phone'] ?? '') ?>" class="w-full bg-black/40 border border-white/10 rounded-2xl py-5 pl-14 pr-6 text-sm font-black text-white focus:outline-none focus:border-neon-cyan placeholder-slate-800 transition-all font-mono" placeholder="+00 000 000">
+                            <i class="ph-bold ph-phone absolute left-4 top-1/2 -translate-y-1/2 text-slate-700 text-[10px] group-focus-within:text-neon-cyan transition-colors"></i>
+                            <input type="text" name="phone" value="<?= e($contact['phone'] ?? '') ?>" class="w-full bg-black/40 border border-white/10 rounded-xl py-2 pl-10 pr-4 text-[11px] font-black text-white focus:outline-none focus:border-neon-cyan placeholder-slate-900 transition-all font-mono" placeholder="+00 000 000">
                         </div>
                     </div>
-                    <div class="space-y-4">
-                        <label class="block text-[10px] font-black text-slate-500 uppercase tracking-[0.3em] ml-2">Digital Uplink (Email)</label>
+                    <div class="space-y-2">
+                        <label class="block text-[8px] font-black text-slate-500 uppercase tracking-[0.3em] ml-2">Digital Uplink (Email)</label>
                         <div class="relative group">
-                            <i class="ph-bold ph-envelope-simple absolute left-5 top-1/2 -translate-y-1/2 text-slate-600 group-focus-within:text-neon-cyan transition-colors"></i>
-                            <input type="email" name="email" value="<?= e($contact['email'] ?? '') ?>" class="w-full bg-black/40 border border-white/10 rounded-2xl py-5 pl-14 pr-6 text-sm font-black text-white focus:outline-none focus:border-neon-cyan placeholder-slate-800 transition-all font-mono lowercase" placeholder="uplink@domain.io">
-                        </div>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-10 relative z-10">
-                    <div class="space-y-4">
-                        <label class="block text-[10px] font-black text-slate-500 uppercase tracking-[0.3em] ml-2">Tax Matrix Identification</label>
-                        <div class="relative group">
-                            <i class="ph-bold ph-hash absolute left-5 top-1/2 -translate-y-1/2 text-slate-600 group-focus-within:text-neon-amber transition-colors"></i>
-                            <input type="text" name="vat_number" value="<?= e($contact['vat_number'] ?? '') ?>" class="w-full bg-black/40 border border-white/10 rounded-2xl py-5 pl-14 pr-6 text-sm font-black text-white focus:outline-none focus:border-neon-amber placeholder-slate-800 transition-all font-mono uppercase" placeholder="TRN_ARCH_001">
-                        </div>
-                    </div>
-                    <div class="space-y-4">
-                        <label class="block text-[10px] font-black text-slate-500 uppercase tracking-[0.3em] ml-2">Virtual Construct (URL)</label>
-                        <div class="relative group">
-                            <i class="ph-bold ph-globe absolute left-5 top-1/2 -translate-y-1/2 text-slate-600 group-focus-within:text-neon-cyan transition-colors"></i>
-                            <input type="url" name="website" value="<?= e($contact['website'] ?? '') ?>" class="w-full bg-black/40 border border-white/10 rounded-2xl py-5 pl-14 pr-6 text-[11px] font-black text-white focus:outline-none focus:border-neon-cyan placeholder-slate-800 transition-all font-mono" placeholder="https://nexus.io">
+                            <i class="ph-bold ph-envelope-simple absolute left-4 top-1/2 -translate-y-1/2 text-slate-700 text-[10px] group-focus-within:text-neon-cyan transition-colors"></i>
+                            <input type="email" name="email" value="<?= e($contact['email'] ?? '') ?>" class="w-full bg-black/40 border border-white/10 rounded-xl py-2 pl-10 pr-4 text-[11px] font-black text-white focus:outline-none focus:border-neon-cyan placeholder-slate-900 transition-all font-mono lowercase" placeholder="uplink@domain.io">
                         </div>
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-10 relative z-10">
-                    <div class="space-y-4">
-                        <label class="block text-[10px] font-black text-slate-500 uppercase tracking-[0.3em] ml-2">Geospatial Coordinates</label>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-6 relative z-10">
+                    <div class="space-y-2">
+                        <label class="block text-[8px] font-black text-slate-500 uppercase tracking-[0.3em] ml-2">Tax Matrix Identification</label>
                         <div class="relative group">
-                            <i class="ph-bold ph-map-pin absolute left-5 top-1/2 -translate-y-1/2 text-slate-600 group-focus-within:text-neon-purple transition-colors"></i>
-                            <input type="text" name="location" value="<?= e($contact['location'] ?? '') ?>" class="w-full bg-black/40 border border-white/10 rounded-2xl py-5 pl-14 pr-6 text-sm font-black text-white focus:outline-none focus:border-neon-purple placeholder-slate-800 transition-all" placeholder="Neo-Dune Sector">
+                            <i class="ph-bold ph-hash absolute left-4 top-1/2 -translate-y-1/2 text-slate-700 text-[10px] group-focus-within:text-neon-amber transition-colors"></i>
+                            <input type="text" name="vat_number" value="<?= e($contact['vat_number'] ?? '') ?>" class="w-full bg-black/40 border border-white/10 rounded-xl py-2 pl-10 pr-4 text-[11px] font-black text-white focus:outline-none focus:border-neon-amber placeholder-slate-900 transition-all font-mono uppercase" placeholder="TRN_ARCH_001">
                         </div>
                     </div>
-                    <div class="space-y-4">
-                        <label class="block text-[10px] font-black text-slate-500 uppercase tracking-[0.3em] ml-2">Jurisdictional Domain</label>
+                    <div class="space-y-2">
+                        <label class="block text-[8px] font-black text-slate-500 uppercase tracking-[0.3em] ml-2">Virtual Construct (URL)</label>
                         <div class="relative group">
-                            <i class="ph-bold ph-flag absolute left-5 top-1/2 -translate-y-1/2 text-slate-600 group-focus-within:text-neon-purple transition-colors"></i>
-                            <input type="text" name="country" value="<?= e($contact['country'] ?? '') ?>" class="w-full bg-black/40 border border-white/10 rounded-2xl py-5 pl-14 pr-6 text-sm font-black text-white focus:outline-none focus:border-neon-purple placeholder-slate-800 transition-all uppercase tracking-widest" placeholder="Territories">
+                            <i class="ph-bold ph-globe absolute left-4 top-1/2 -translate-y-1/2 text-slate-700 text-[10px] group-focus-within:text-neon-cyan transition-colors"></i>
+                            <input type="url" name="website" value="<?= e($contact['website'] ?? '') ?>" class="w-full bg-black/40 border border-white/10 rounded-xl py-2 pl-10 pr-4 text-[10px] font-black text-white focus:outline-none focus:border-neon-cyan placeholder-slate-900 transition-all font-mono" placeholder="https://nexus.io">
                         </div>
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-10 relative z-10">
-                    <div class="space-y-4">
-                        <label class="block text-[10px] font-black text-slate-500 uppercase tracking-[0.3em] ml-2">Personnel Intelligence (POC)</label>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-6 relative z-10">
+                    <div class="space-y-2">
+                        <label class="block text-[8px] font-black text-slate-500 uppercase tracking-[0.3em] ml-2">Geospatial Coordinates</label>
                         <div class="relative group">
-                            <i class="ph-bold ph-user-focus absolute left-5 top-6 text-slate-600 group-focus-within:text-neon-emerald transition-colors"></i>
-                            <textarea name="poc_details" class="w-full bg-black/40 border border-white/10 rounded-[2rem] py-6 pl-14 pr-6 text-xs font-bold text-white focus:outline-none focus:border-neon-emerald transition-all min-h-[160px] crm-main-scroll placeholder-slate-800 leading-relaxed shadow-inner" placeholder="Personnel Identifiers, Rank, Direct Neural Link..."><?= e($contact['poc_details'] ?? '') ?></textarea>
+                            <i class="ph-bold ph-map-pin absolute left-4 top-1/2 -translate-y-1/2 text-slate-700 text-[10px] group-focus-within:text-neon-purple transition-colors"></i>
+                            <input type="text" name="location" value="<?= e($contact['location'] ?? '') ?>" class="w-full bg-black/40 border border-white/10 rounded-xl py-2 pl-10 pr-4 text-[11px] font-black text-white focus:outline-none focus:border-neon-purple placeholder-slate-900 transition-all" placeholder="Neo-Dune Sector">
                         </div>
                     </div>
-                    <div class="space-y-4">
-                        <label class="block text-[10px] font-black text-slate-500 uppercase tracking-[0.3em] ml-2">Acquisition Pipeline</label>
+                    <div class="space-y-2">
+                        <label class="block text-[8px] font-black text-slate-500 uppercase tracking-[0.3em] ml-2">Jurisdictional Domain</label>
+                        <div class="relative group">
+                            <i class="ph-bold ph-flag absolute left-4 top-1/2 -translate-y-1/2 text-slate-700 text-[10px] group-focus-within:text-neon-purple transition-colors"></i>
+                            <input type="text" name="country" value="<?= e($contact['country'] ?? '') ?>" class="w-full bg-black/40 border border-white/10 rounded-xl py-2 pl-10 pr-4 text-[11px] font-black text-white focus:outline-none focus:border-neon-purple placeholder-slate-900 transition-all uppercase tracking-widest" placeholder="Territories">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-6 relative z-10">
+                    <div class="space-y-2">
+                        <label class="block text-[8px] font-black text-slate-500 uppercase tracking-[0.3em] ml-2">Personnel Intelligence (POC)</label>
+                        <div class="relative group">
+                            <i class="ph-bold ph-user-focus absolute left-4 top-4 text-slate-700 text-[10px] group-focus-within:text-neon-emerald transition-colors"></i>
+                            <textarea name="poc_details" class="w-full bg-black/40 border border-white/10 rounded-2xl py-3 pl-10 pr-4 text-[10px] font-bold text-white focus:outline-none focus:border-neon-emerald transition-all min-h-[100px] crm-main-scroll placeholder-slate-900 leading-relaxed shadow-inner" placeholder="Personnel Identifiers..."><?= e($contact['poc_details'] ?? '') ?></textarea>
+                        </div>
+                    </div>
+                    <div class="space-y-2">
+                        <label class="block text-[8px] font-black text-slate-500 uppercase tracking-[0.3em] ml-2">Acquisition Pipeline</label>
                         <div class="relative">
-                            <select name="source" class="w-full bg-black/40 border border-white/10 rounded-2xl py-5 px-6 text-[10px] font-black uppercase tracking-widest text-white focus:outline-none focus:border-neon-emerald appearance-none cursor-pointer transition-all shadow-inner">
+                            <select name="source" class="w-full bg-black/40 border border-white/10 rounded-xl py-2 px-4 text-[9px] font-black uppercase tracking-widest text-white focus:outline-none focus:border-neon-emerald appearance-none cursor-pointer transition-all shadow-inner">
                                 <?php $src = $contact['source'] ?? ''; ?>
                                 <option value="" <?= empty($src) ? 'selected' : '' ?>>— Unspecified Vector —</option>
                                 <option value="direct_enquiry" <?= $src === 'direct_enquiry' ? 'selected' : '' ?>>Direct Transmission</option>
@@ -171,23 +171,23 @@ $action = $action ?? 'list';
                                 <option value="linkedin" <?= $src === 'linkedin' ? 'selected' : '' ?>>Professional Network</option>
                                 <option value="other" <?= $src === 'other' ? 'selected' : '' ?>>Classified Source</option>
                             </select>
-                            <i class="ph-bold ph-caret-down absolute right-6 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none"></i>
+                            <i class="ph-bold ph-caret-down absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 text-[10px] pointer-events-none"></i>
                         </div>
-                        <div class="mt-6 p-6 bg-neon-emerald/5 border border-neon-emerald/10 rounded-[1.5rem] flex items-start gap-4 transform border-dashed group/note">
-                            <i class="ph-bold ph-info text-neon-emerald mt-0.5 group-hover:scale-110 transition-transform"></i>
-                            <p class="text-[9px] text-slate-500 font-bold uppercase tracking-[0.1em] leading-relaxed italic">
-                                Information integrity is mandatory for CRM predictive modeling and sector expansion protocols.
+                        <div class="mt-2 p-3 bg-neon-emerald/5 border border-neon-emerald/10 rounded-xl flex items-start gap-3 transform border-dashed group/note">
+                            <i class="ph-bold ph-info text-neon-emerald mt-0.5 text-[10px] group-hover:scale-110 transition-transform"></i>
+                            <p class="text-[8px] text-slate-600 font-bold uppercase tracking-[0.1em] leading-relaxed italic">
+                                Information integrity is mandatory for CRM predictive modeling.
                             </p>
                         </div>
                     </div>
                 </div>
 
-                <div class="pt-10 flex justify-end gap-6 border-t border-white/5 relative z-10">
-                    <a href="<?= baseUrl('admin/contacts') ?>" class="px-10 py-4 bg-white/5 text-slate-600 font-extrabold uppercase tracking-widest text-[9px] rounded-2xl hover:bg-white/10 transition-all border border-white/5 flex items-center gap-2">
+                <div class="pt-6 flex justify-end gap-4 border-t border-white/5 relative z-10">
+                    <a href="<?= baseUrl('admin/contacts') ?>" class="px-6 py-2 bg-white/5 text-slate-600 font-extrabold uppercase tracking-widest text-[8px] rounded-xl hover:bg-white/10 transition-all border border-white/5 flex items-center gap-2">
                         <i class="ph-bold ph-x"></i> Abort Refinement
                     </a>
-                    <button type="submit" class="px-12 py-4 bg-neon-emerald hover:bg-emerald-400 text-black text-[10px] font-black uppercase tracking-[0.3em] rounded-2xl transition-all shadow-lg active:scale-95 group flex items-center gap-3">
-                        <i class="ph-bold ph-check-circle text-xl group-hover:scale-110 transition-transform"></i> Commit Identity
+                    <button type="submit" class="px-10 py-2 bg-neon-emerald hover:bg-emerald-400 text-black text-[9px] font-black uppercase tracking-[0.3em] rounded-xl transition-all shadow-lg active:scale-95 group flex items-center gap-3">
+                        <i class="ph-bold ph-check-circle text-lg group-hover:scale-110 transition-transform"></i> Commit Identity
                     </button>
                 </div>
             </form>

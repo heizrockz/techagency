@@ -16,7 +16,8 @@
     <?php endif; ?>
 
     <?php 
-        $currentUrl = fullUrl($_SERVER['REQUEST_URI']);
+        $requestUri = $_SERVER['REQUEST_URI'] ?? $_SERVER['PHP_SELF'] ?? '/';
+        $currentUrl = fullUrl($requestUri);
         $canonicalUrl = !empty($seo['canonical_link']) ? (preg_match('~^https?://~', $seo['canonical_link']) ? $seo['canonical_link'] : fullUrl($seo['canonical_link'])) : $currentUrl;
         // Strip query params for a cleaner canonical if they aren't part of the core content
         $canonicalUrl = strtok($canonicalUrl, '?');

@@ -17,11 +17,11 @@ $currentPage = 'marketing';
         <header class="h-auto lg:h-20 flex flex-col lg:flex-row items-center justify-between px-4 lg:px-8 bg-glass-bg border-b border-white/5 shrink-0 backdrop-blur-xl sticky top-0 z-[100] py-4 lg:py-0 gap-4 lg:gap-0">
             <div class="flex items-center justify-between w-full lg:w-auto">
                 <div class="flex flex-col">
-                    <div class="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em] mb-1 hidden sm:block">Communication Matrix</div>
+                    <div class="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em] mb-1 hidden sm:block">Marketing</div>
                     <h1 class="text-xl font-black text-white tracking-tight flex items-center gap-3 group">
                         <span class="text-neon-cyan drop-shadow-[0_0_8px_rgba(6,182,212,0.4)]">Email Marketing</span>
                         <span class="opacity-20 translate-y-px hidden sm:inline">/</span>
-                        <span class="text-[10px] tracking-widest text-slate-400 uppercase font-black hidden sm:inline-block">Broadcast Engine</span>
+                        <span class="text-[10px] tracking-widest text-slate-400 uppercase font-black hidden sm:inline-block">Campaigns</span>
                     </h1>
                 </div>
                 <div class="lg:hidden">
@@ -34,9 +34,12 @@ $currentPage = 'marketing';
             </div>
         </header>
 
+        <div class="flex-1 overflow-y-auto p-4 lg:p-6 crm-main-scroll">
+
         <?php if ($saved): ?>
             <div class="alert alert-success" style="background:rgba(16,185,129,0.1); border:1px solid rgba(16,185,129,0.2); color:var(--neon-emerald); padding:15px; border-radius:10px; margin-bottom:20px;">Email settings saved and verified successfully.</div>
         <?php endif; ?>
+
 
         <?php if ($sent): ?>
             <div class="alert alert-success" style="background:rgba(16,185,129,0.1); border:1px solid rgba(16,185,129,0.2); color:var(--neon-emerald); padding:15px; border-radius:10px; margin-bottom:20px;">Campaign executed. Check the history below.</div>
@@ -243,6 +246,7 @@ $currentPage = 'marketing';
                 </div>
             </div>
         </div>
+        </div><!-- end scroll wrapper -->
     </div>
 </div>
 

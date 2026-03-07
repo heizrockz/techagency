@@ -187,6 +187,21 @@ function adminDashboard(): void {
     $visitsStmt = $db->query("SELECT setting_value FROM site_settings WHERE setting_key = 'visit_count'");
     $visitCount = $visitsStmt ? (int)$visitsStmt->fetchColumn() : 0;
     
+    // Traffic data for chart (Last 14 days)
+    $trafficData = [];
+    $trafficLabels = [];
+    for ($i = 13; $i >= 0; $i--) {
+        $date = date('Y-m-d', strtotime("-$i days"));
+        $label = date('M d', strtotime("-$i days"));
+        
+        $stmt = $db->prepare("SELECT COUNT(*) FROM site_visitors WHERE DATE(visited_at) = ?");
+        $stmt->execute([$date]);
+        $count = $stmt->fetchColumn() ?: 0;
+        
+        $trafficLabels[] = $label;
+        $trafficData[] = $count;
+    }
+    
     $recentBookings = $db->query('SELECT * FROM bookings ORDER BY created_at DESC LIMIT 5')->fetchAll();
     require __DIR__ . '/../views/admin/dashboard.php';
 }

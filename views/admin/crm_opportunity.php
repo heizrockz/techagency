@@ -7,101 +7,111 @@ $currentPage = 'crm_pipeline';
 <head>
     <title><?= e($pageTitle) ?> — <?= APP_NAME ?></title>
     <?php require __DIR__ . '/partials/_head_assets.php'; ?>
+    <style>
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
 </head>
 <body class="bg-[#0b0e14]">
 <div class="admin-layout flex w-full h-screen overflow-hidden">
     <?php require __DIR__ . '/partials/sidebar.php'; ?>
     <div class="flex-1 flex flex-col min-w-0">
-    <!-- Top Navigation / Breadcrumbs -->
-    <header class="h-20 flex items-center justify-between px-8 bg-glass-bg border-b border-white/5 shrink-0 backdrop-blur-xl sticky top-0 z-[100]">
-        <div class="flex items-center gap-6">
-            <a href="<?= htmlspecialchars(BASE_URL) ?>/admin/crm_pipeline" class="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center text-slate-500 hover:text-neon-cyan hover:bg-neon-cyan/10 transition-all border border-white/5 hover:border-neon-cyan/30 group active:scale-90">
-                <i class="ph-bold ph-arrow-left text-xl group-hover:-translate-x-1 transition-transform"></i>
+    <!-- Consolidated Mission Control Header -->
+    <header class="bg-[#0b0e14] border-b border-white/5 px-6 py-3 flex items-center justify-between gap-6 shrink-0 backdrop-blur-3xl sticky top-0 z-[100] shadow-2xl">
+        <div class="flex items-center gap-5 shrink-0">
+            <a href="<?= htmlspecialchars(BASE_URL) ?>/admin/crm_pipeline" class="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-slate-500 hover:text-neon-cyan hover:bg-neon-cyan/10 transition-all border border-white/5 hover:border-neon-cyan/30 group active:scale-90 shadow-inner">
+                <i class="ph ph-arrow-left text-lg group-hover:-translate-x-1 transition-transform"></i>
             </a>
             <div class="flex flex-col">
-                <div class="flex items-center gap-3 text-[10px] font-black text-slate-600 uppercase tracking-[0.3em] mb-1 hidden sm:flex">
-                    <span class="hover:text-neon-cyan transition-colors cursor-pointer">Pipeline Matrix</span>
-                    <i class="ph ph-caret-right text-[8px] opacity-30"></i>
-                    <span class="text-slate-400">Opportunity Sequence</span>
+                <div class="flex items-center gap-2 text-[8px] font-black text-slate-600 uppercase tracking-[0.4em] mb-1">
+                    <span class="hover:text-neon-cyan transition-colors cursor-pointer">CRM DASHBOARD</span>
+                    <i class="ph ph-caret-right text-[6px] opacity-20"></i>
+                    <span class="text-slate-500">OPPORTUNITY</span>
                 </div>
-                <h1 class="text-lg font-black text-white tracking-tight flex items-center gap-2">
-                    <span class="text-neon-cyan drop-shadow-[0_0_8px_rgba(6,182,212,0.4)]"><?= $opportunity ? 'REP: ' . str_pad($opportunity['id'], 4, '0', STR_PAD_LEFT) : 'NEW IDENTITY' ?></span>
-                    <span class="opacity-20 hidden sm:inline">/</span>
-                    <span class="truncate max-w-[150px] sm:max-w-[400px] uppercase tracking-wider text-[11px]"><?= $opportunity ? htmlspecialchars($opportunity['title']) : 'UNINITIALIZED OBJECTIVE' ?></span>
+                <h1 class="text-sm font-black text-white tracking-tight flex items-center gap-2">
+                    <span class="text-neon-cyan drop-shadow-[0_0_8px_rgba(6,182,212,0.4)]"><?= $opportunity ? 'ID: ' . str_pad($opportunity['id'], 3, '0', STR_PAD_LEFT) : 'NEW RECORD' ?></span>
+                    <span class="opacity-10 translate-y-px">/</span>
+                    <span class="truncate max-w-[120px] sm:max-w-[200px] uppercase tracking-widest text-[10px] text-slate-400 font-bold"><?= $opportunity ? htmlspecialchars($opportunity['title']) : 'UNNAMED' ?></span>
                 </h1>
             </div>
         </div>
-        <div class="flex items-center gap-4">
-            <?php require __DIR__ . '/partials/_topbar.php'; ?>
+
+        <!-- Pathfinder Stage Sequence -->
+        <div class="hidden lg:flex flex-1 items-center justify-center px-2">
+            <div class="flex items-center justify-between w-full bg-black/40 py-1.5 px-2 rounded-full border border-white/5 shadow-inner">
+                <?php 
+                $allStages = ['New Lead', 'Know Your Client', 'Post Casting', 'Quote & Proposal', 'LPO', 'Casting & Production', 'Won'];
+                $currentStage = $opportunity ? $opportunity['stage'] : 'New Lead';
+                if ($currentStage === 'Lost') $allStages[] = 'Lost';
+                
+                $foundCurrent = false;
+                foreach ($allStages as $s): 
+                    $isActive = ($currentStage === $s);
+                    if ($isActive) $foundCurrent = true;
+                    $isCompleted = !$isActive && !$foundCurrent;
+                ?>
+                    <div class="flex items-center flex-1">
+                        <div class="flex-1 flex flex-col items-center px-2 py-2 relative group/step">
+                            <span class="text-[7.5px] uppercase font-black tracking-wider transition-all whitespace-nowrap <?= $isActive ? 'text-neon-cyan' : ($isCompleted ? 'text-neon-cyan/40' : 'text-slate-700') ?>">
+                                <?= htmlspecialchars($s) ?>
+                            </span>
+                            <?php if ($isActive): ?>
+                                <div class="absolute -bottom-[2px] left-1/2 -translate-x-1/2 w-5 h-[2px] bg-neon-cyan shadow-[0_0_10px_#06b6d4] rounded-full"></div>
+                            <?php endif; ?>
+                        </div>
+                        <?php if ($s !== end($allStages)): ?>
+                            <div class="w-3 h-px shrink-0 <?= $isCompleted ? 'bg-neon-cyan/20' : 'bg-white/5' ?>"></div>
+                        <?php endif; ?>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+        </div>
+
+        <!-- Outcome Protocol Buttons -->
+        <div class="flex items-center gap-3">
+            <div class="flex items-center bg-black/40 p-1 rounded-xl border border-white/5 shadow-inner">
+                <?php if ($opportunity): ?>
+                    <form action="<?= htmlspecialchars(BASE_URL) ?>/admin/crm_pipeline" method="POST" class="inline">
+                        <input type="hidden" name="action" value="update_stage">
+                        <input type="hidden" name="id" value="<?= $opportunity['id'] ?>">
+                        <input type="hidden" name="stage" value="Won">
+                        <button type="submit" title="Mark Won" class="w-8 h-8 flex items-center justify-center rounded-lg bg-neon-emerald/5 text-neon-emerald hover:bg-neon-emerald hover:text-black transition-all border border-neon-emerald/20 group/won">
+                            <i class="ph ph-check-circle text-lg"></i>
+                        </button>
+                    </form>
+                    <div class="w-px h-4 bg-white/5 mx-1"></div>
+                    <form action="<?= htmlspecialchars(BASE_URL) ?>/admin/crm_pipeline" method="POST" class="inline">
+                        <input type="hidden" name="action" value="update_stage">
+                        <input type="hidden" name="id" value="<?= $opportunity['id'] ?>">
+                        <input type="hidden" name="stage" value="Lost">
+                        <button type="submit" title="Mark Lost" class="w-8 h-8 flex items-center justify-center rounded-lg bg-neon-rose/5 text-neon-rose hover:bg-neon-rose hover:text-white transition-all border border-neon-rose/20 group/lost">
+                            <i class="ph ph-skull text-lg"></i>
+                        </button>
+                    </form>
+                <?php endif; ?>
+            </div>
+            
+            <div class="h-8 w-px bg-white/5"></div>
+            
+            <div class="flex items-center gap-2">
+                <button type="button" id="editBtn" onclick="toggleEditMode()" class="w-10 h-10 rounded-xl bg-white/5 text-slate-500 hover:text-neon-cyan hover:bg-neon-cyan/5 transition-all border border-white/5 flex items-center justify-center group active:scale-95" title="Edit Opportunity">
+                    <i class="ph ph-pencil-simple text-xl"></i>
+                </button>
+                <button type="submit" form="oppForm" id="saveBtn" class="hidden px-6 py-3 rounded-xl bg-neon-cyan text-black text-[10px] font-black uppercase tracking-widest transition-all shadow-lg hover:bg-cyan-400 active:scale-95">
+                    Save Changes
+                </button>
+            </div>
+
+            <div class="hidden sm:block">
+                <?php require __DIR__ . '/partials/_topbar.php'; ?>
+            </div>
         </div>
     </header>
 
-    <!-- Action Bar / Stages -->
-    <div class="bg-[#0b0e14] border-b border-white/5 px-8 py-5 flex flex-wrap items-center justify-between gap-8 shrink-0 relative z-50">
-        <div class="flex items-center gap-4">
-            <?php if ($opportunity): ?>
-                <button type="button" id="editBtn" onclick="toggleEditMode()" class="px-3 sm:px-5 py-2.5 rounded-xl bg-white/5 text-slate-400 hover:text-white text-[10px] font-black uppercase tracking-widest transition-all border border-white/10 flex items-center gap-2 hover:bg-white/10 active:scale-95">
-                    <i class="ph-bold ph-pencil-simple text-base text-neon-cyan"></i> <span class="hidden sm:inline">Refine Identity</span>
-                </button>
-                <button type="submit" form="oppForm" id="saveBtn" class="hidden px-3 sm:px-6 py-2.5 rounded-xl bg-neon-cyan text-black text-[10px] font-black uppercase tracking-widest transition-all shadow-lg hover:bg-cyan-400 active:scale-95">
-                    <span class="hidden sm:inline">Sync changes</span>
-                    <i class="ph-bold ph-floppy-disk text-base sm:hidden"></i>
-                </button>
-                <div class="h-6 w-px bg-white/5 mx-2"></div>
-                
-                <form action="<?= htmlspecialchars(BASE_URL) ?>/admin/crm_pipeline" method="POST" class="inline">
-                    <input type="hidden" name="action" value="update_stage">
-                    <input type="hidden" name="id" value="<?= $opportunity['id'] ?>">
-                    <input type="hidden" name="stage" value="Won">
-                    <button type="submit" class="px-5 py-2.5 rounded-xl bg-neon-emerald/5 text-neon-emerald hover:bg-neon-emerald hover:text-black text-[9px] font-black uppercase tracking-widest transition-all border border-neon-emerald/20 hover:shadow-[0_0_20px_rgba(16,185,129,0.3)] active:scale-95">Mark Won</button>
-                </form>
-                <form action="<?= htmlspecialchars(BASE_URL) ?>/admin/crm_pipeline" method="POST" class="inline">
-                    <input type="hidden" name="action" value="update_stage">
-                    <input type="hidden" name="id" value="<?= $opportunity['id'] ?>">
-                    <input type="hidden" name="stage" value="Lost">
-                    <button type="submit" class="px-5 py-2.5 rounded-xl bg-neon-rose/5 text-neon-rose hover:bg-neon-rose hover:text-white text-[9px] font-black uppercase tracking-widest transition-all border border-neon-rose/20 hover:shadow-[0_0_20px_rgba(244,63,94,0.3)] active:scale-95">Mark Lost</button>
-                </form>
-            <?php endif; ?>
-        </div>
-        
-        <!-- Premium Stage Sequence -->
-        <div class="flex items-center bg-black/40 p-1.5 rounded-2xl border border-white/5 overflow-x-auto crm-main-scroll max-w-full lg:max-w-none shadow-inner group/seq">
-            <?php 
-            $allStages = ['New Lead', 'Know Your Client', 'Post Casting', 'Quote & Proposal', 'LPO', 'Casting & Production', 'Won'];
-            $currentStage = $opportunity ? $opportunity['stage'] : 'New Lead';
-            if ($currentStage === 'Lost') $allStages[] = 'Lost';
-            
-            $foundCurrent = false;
-            foreach ($allStages as $s): 
-                $isActive = ($currentStage === $s);
-                if ($isActive) $foundCurrent = true;
-                $isCompleted = !$isActive && !$foundCurrent;
-            ?>
-                <div class="flex items-center shrink-0">
-                    <div class="px-4 py-2 group/step relative flex flex-col items-center">
-                        <span class="text-[9px] uppercase font-black tracking-widest transition-all <?= $isActive ? 'text-white' : ($isCompleted ? 'text-neon-cyan/60' : 'text-slate-700') ?>">
-                            <?= htmlspecialchars($s) ?>
-                        </span>
-                        <?php if ($isActive): ?>
-                            <div class="absolute -bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-neon-cyan shadow-[0_0_8px_#06b6d4]"></div>
-                        <?php endif; ?>
-                    </div>
-                    <?php if ($s !== end($allStages)): ?>
-                        <div class="w-8 h-px bg-white/5 mx-1 relative overflow-hidden">
-                            <?php if ($isCompleted): ?>
-                                <div class="absolute inset-0 bg-neon-cyan/20"></div>
-                            <?php endif; ?>
-                        </div>
-                    <?php endif; ?>
-                </div>
-            <?php endforeach; ?>
-        </div>
-    </div>
-
     <main class="flex-1 overflow-hidden flex flex-col lg:flex-row bg-[#0b0e14]">
         <!-- Scrollable Form Container -->
-        <div class="flex-1 overflow-y-auto p-4 lg:p-8 border-r border-white/5 crm-main-scroll">
-            <div class="max-w-4xl mx-auto">
+        <div class="flex-1 overflow-y-auto p-4 lg:p-6 crm-main-scroll">
+            <div class="max-w-3xl mx-auto">
                 <?php if ($flash = getFlash()): ?>
                     <div class="mb-8 p-4 rounded-2xl border border-emerald-500/20 bg-emerald-500/10 text-emerald-400 text-sm flex items-center gap-3">
                         <i class="ph ph-check-circle text-xl"></i>
@@ -112,143 +122,115 @@ $currentPage = 'crm_pipeline';
                 <form action="<?= htmlspecialchars(BASE_URL) ?>/admin/crm_opportunity<?= $opportunity ? '?id='.$opportunity['id'] : '' ?>" method="POST" id="oppForm" class="opp-read-only space-y-8">
                     <input type="hidden" name="action" value="save_opportunity">
                     
-                    <div class="admin-stat-card !p-6 lg:!p-10 border border-white/5 shadow-premium !bg-glass-bg relative overflow-hidden group/form">
-                        <div class="absolute -right-10 -top-10 w-40 h-40 bg-neon-cyan/5 rounded-full blur-3xl group-hover/form:bg-neon-cyan/10 transition-all duration-700"></div>
-                        
-                        <!-- Opportunity Title Header -->
-                        <div class="mb-8 relative z-10">
+                    <div class="space-y-6 group/form">
+                        <!-- Opportunity Title & Priority -->
+                        <div class="mb-5 relative z-10">
+                            <label class="block text-[8px] font-black text-slate-600 uppercase tracking-[0.4em] mb-2 ml-1">OPPORTUNITY TITLE *</label>
                             <input type="text" name="title" required 
                                    value="<?= $opportunity ? htmlspecialchars($opportunity['title']) : '' ?>" 
-                                   placeholder="Opportunity Title..."
-                                   class="w-full bg-transparent border-none text-2xl lg:text-4xl font-black text-white placeholder:text-slate-800 focus:ring-0 p-0 mb-4 tracking-tight">
-                            <div class="flex items-center gap-6">
-                                 <div class="flex items-center gap-2 bg-black/40 px-4 py-2 rounded-xl border border-white/5 shadow-inner">
+                                   placeholder="Project Name..."
+                                   class="w-full bg-black/20 border border-white/5 rounded-lg text-sm font-black text-white placeholder:text-slate-800 focus:ring-1 focus:ring-neon-cyan/20 p-3 tracking-widest">
+                            
+                            <div class="flex items-center gap-4 mt-3">
+                                 <div class="flex items-center gap-1.5 bg-black/40 px-3 py-1 rounded-lg border border-white/5 shadow-inner">
                                     <?php for($i=1; $i<=3; $i++): ?>
-                                        <i class="ph-fill ph-star text-xl <?= ($opportunity && $opportunity['priority'] >= $i) ? 'text-neon-amber shadow-[0_0_10px_rgba(251,191,36,0.5)]' : 'text-slate-800' ?> cursor-pointer hover:text-neon-amber/80 transition-all"></i>
+                                        <i class="ph-fill ph-star text-sm <?= ($opportunity && $opportunity['priority'] >= $i) ? 'text-neon-amber' : 'text-slate-800' ?> cursor-pointer hover:text-neon-amber/80 transition-all"></i>
                                     <?php endfor; ?>
                                  </div>
-                                 <div class="h-8 w-px bg-white/10"></div>
-                                 <div class="flex items-center gap-2 bg-black/40 px-3 py-1.5 rounded-xl border border-white/5 shadow-inner">
+                                 <div class="h-6 w-px bg-white/10"></div>
+                                 <div class="flex items-center gap-1.5 bg-black/40 px-2 py-1 rounded-lg border border-white/5 shadow-inner">
                                     <?php $colors = ['red', 'orange', 'yellow', 'green', 'blue', 'purple', 'teal', 'pink']; ?>
                                     <?php foreach($colors as $c): ?>
-                                        <label class="w-4 h-4 rounded-full bg-<?= $c ?>-500 cursor-pointer border border-white/20 transition-all hover:scale-125 block relative">
+                                        <label class="w-3 h-3 rounded-full bg-<?= $c ?>-500 cursor-pointer border border-white/20 transition-all hover:scale-125 block relative">
                                             <input type="radio" name="color_code" value="<?= $c ?>" class="hidden peer" <?= ($opportunity && $opportunity['color_code'] === $c) ? 'checked' : '' ?>>
-                                            <div class="w-full h-full rounded-full ring-neon-cyan ring-offset-4 ring-offset-[#0b0e14] peer-checked:ring-2"></div>
+                                            <div class="w-full h-full rounded-full ring-neon-cyan ring-offset-2 ring-offset-[#0b0e14] peer-checked:ring-1"></div>
                                         </label>
                                     <?php endforeach; ?>
                                  </div>
                             </div>
                         </div>
 
-                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-x-12 gap-y-10 relative z-10">
-                            <div class="space-y-10">
-                                <div>
-                                    <label class="block text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-4 flex items-center gap-2">
-                                        Expected Revenue 
-                                        <i class="ph ph-info text-slate-600 cursor-help" title="Potential income from this deal"></i>
-                                    </label>
-                                    <div class="flex items-end gap-3 group pb-2 border-b border-white/10 focus-within:border-neon-cyan transition-all">
-                                        <span class="text-slate-500 font-black text-xs pb-0.5 uppercase">AED</span>
-                                        <input type="number" step="0.01" name="expected_revenue" value="<?= $opportunity ? htmlspecialchars($opportunity['expected_revenue']) : '0.00' ?>" 
-                                               class="bg-transparent border-none w-full p-0 text-2xl text-white font-bold focus:ring-0">
-                                    </div>
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-x-6 gap-y-4 relative z-10">
+                            <!-- Row 1: Revenue & Probability -->
+                            <div>
+                                <label class="block text-[9px] font-black text-slate-600 uppercase tracking-[0.4em] mb-2 ml-1">EXPECTED REVENUE</label>
+                                <div class="flex items-center gap-2 group px-3 py-2 bg-white/[0.01] border border-white/5 rounded-lg focus-within:border-neon-cyan/20 transition-all">
+                                    <i class="ph ph-hash text-[10px] text-slate-700"></i>
+                                     <input type="number" step="0.01" name="expected_revenue" value="<?= $opportunity ? htmlspecialchars($opportunity['expected_revenue']) : '0' ?>" 
+                                           class="bg-transparent border-none w-full p-0 text-sm text-white font-mono focus:ring-0">
                                 </div>
-                                
-                                <div>
-                                    <label class="block text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-4">Probability</label>
-                                    <div class="flex items-end gap-3 group pb-2 border-b border-white/10 focus-within:border-neon-cyan transition-all">
-                                        <input type="number" step="0.1" name="probability" value="<?= $opportunity ? htmlspecialchars($opportunity['probability']) : '0' ?>" 
-                                               class="bg-transparent border-none w-24 p-0 text-2xl text-white font-bold focus:ring-0 text-center">
-                                        <span class="text-slate-500 font-black text-xs pb-0.5">%</span>
-                                    </div>
-                                </div>
+                            </div>
 
-                                <div>
-                                    <label class="block text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-4">Customer Lead</label>
-                                    <div class="relative group pb-3 border-b border-white/10 focus-within:border-neon-cyan transition-all">
-                                        <select name="contact_id" class="bg-transparent border-none w-full p-0 text-xl text-white font-bold focus:ring-0 appearance-none cursor-pointer">
-                                            <option value="" class="bg-[#1a2333]">-- Select Contact --</option>
-                                            <?php foreach ($contacts as $c): ?>
-                                                <option value="<?= $c['id'] ?>" <?= ($opportunity && $opportunity['contact_id'] == $c['id']) ? 'selected' : '' ?> class="bg-[#1a2333]">
-                                                    <?= htmlspecialchars($c['name']) ?>
-                                                </option>
-                                            <?php endforeach; ?>
-                                        </select>
-                                        <i class="ph ph-caret-down absolute right-0 bottom-4 text-slate-600"></i>
+                            <div>
+                                <label class="block text-[9px] font-black text-slate-600 uppercase tracking-[0.4em] mb-2 ml-1">PROBABILITY (%)</label>
+                                <div class="flex items-center gap-2 group px-3 py-2 bg-white/[0.01] border border-white/5 rounded-lg focus-within:border-neon-cyan/20 transition-all">
+                                    <i class="ph ph-trend-up text-[10px] text-slate-700"></i>
+                                     <input type="number" step="0.1" name="probability" value="<?= $opportunity ? htmlspecialchars($opportunity['probability']) : '0' ?>" 
+                                           class="bg-transparent border-none w-full p-0 text-sm text-white font-black focus:ring-0">
+                                </div>
+                            </div>
+
+                            <!-- Row 2: Phone & Email -->
+                            <div>
+                                <label class="block text-[9px] font-black text-slate-600 uppercase tracking-[0.4em] mb-2 ml-1">PHONE</label>
+                                <div class="relative group px-3 py-2 bg-white/[0.01] border border-white/5 rounded-lg focus-within:border-neon-cyan/20 transition-all">
+                                    <i class="ph ph-phone absolute left-3 top-1/2 -translate-y-1/2 text-slate-700 text-[10px]"></i>
+                                     <input type="text" name="phone" value="<?= $opportunity ? htmlspecialchars($opportunity['phone']) : '' ?>" 
+                                           class="bg-transparent border-none w-full pl-6 p-0 text-sm text-white font-mono focus:ring-0" placeholder="+00 000 000">
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-[9px] font-black text-slate-600 uppercase tracking-[0.4em] mb-2 ml-1">EMAIL</label>
+                                <div class="relative group px-3 py-2 bg-white/[0.01] border border-white/5 rounded-lg focus-within:border-neon-cyan/20 transition-all">
+                                    <i class="ph ph-envelope-simple absolute left-3 top-1/2 -translate-y-1/2 text-slate-700 text-[10px]"></i>
+                                     <input type="email" name="email" value="<?= $opportunity ? htmlspecialchars($opportunity['email']) : '' ?>" 
+                                           class="bg-transparent border-none w-full pl-6 p-0 text-sm text-white font-mono focus:ring-0" placeholder="contact@domain.io">
+                                </div>
+                            </div>
+
+                            <!-- Row 3: Account Manager & Collaborators -->
+                            <div>
+                                <label class="block text-[9px] font-black text-slate-600 uppercase tracking-[0.4em] mb-2 ml-1">ACCOUNT MANAGER</label>
+                                <div class="relative group px-3 py-2 bg-white/[0.01] border border-white/5 rounded-lg focus-within:border-neon-cyan/20 transition-all">
+                                    <select name="salesperson_id" class="bg-transparent border-none w-full p-0 text-xs text-white font-black uppercase tracking-widest focus:ring-0 appearance-none cursor-pointer">
+                                        <option value="" class="bg-[#0b0e14]">-- Select Manager --</option>
+                                        <?php foreach ($salespersons as $s): ?>
+                                            <option value="<?= $s['id'] ?>" <?= ($opportunity && $opportunity['salesperson_id'] == $s['id']) ? 'selected' : '' ?> class="bg-[#0b0e14]">
+                                                <?= strtoupper(htmlspecialchars($s['full_name'] ?: $s['username'])) ?>
+                                            </option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                    <i class="ph ph-caret-down absolute right-3 top-1/2 -translate-y-1/2 text-slate-700 text-[10px] pointer-events-none"></i>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-[9px] font-black text-slate-600 uppercase tracking-[0.4em] mb-2 ml-1">COLLABORATORS</label>
+                                <div class="relative group px-3 py-2 bg-white/[0.01] border border-white/5 rounded-lg focus-within:border-neon-cyan/20 transition-all h-[40px] overflow-hidden">
+                                    <i class="ph ph-users absolute left-3 top-3 text-slate-700 text-[10px]"></i>
+                                    <div class="pl-6 pt-0.5">
+                                        <div class="text-xs text-white/50 font-mono uppercase truncate">Unspecified</div>
                                     </div>
                                 </div>
                             </div>
 
-                            <div class="space-y-10">
-                                <div>
-                                    <label class="block text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-4">Account Manager</label>
-                                    <div class="relative group pb-3 border-b border-white/10 focus-within:border-neon-cyan transition-all">
-                                        <select name="salesperson_id" class="bg-transparent border-none w-full p-0 text-xl text-white font-bold focus:ring-0 appearance-none cursor-pointer">
-                                            <option value="" class="bg-[#1a2333]">-- No Salesperson --</option>
-                                            <?php foreach ($salespersons as $s): ?>
-                                                <option value="<?= $s['id'] ?>" <?= ($opportunity && $opportunity['salesperson_id'] == $s['id']) ? 'selected' : '' ?> class="bg-[#1a2333]">
-                                                    <?= htmlspecialchars($s['full_name'] ?: $s['username']) ?>
-                                                </option>
-                                            <?php endforeach; ?>
-                                        </select>
-                                        <i class="ph ph-caret-down absolute right-0 bottom-4 text-slate-600"></i>
-                                    </div>
-                                </div>
-
-                                <div>
-                                    <label class="block text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-4">Collaborators</label>
-                                    <div class="p-5 bg-black/40 rounded-2xl border border-white/5 shadow-inner space-y-4">
-                                        <div class="flex flex-wrap gap-2 mb-2" id="extraSalespeopleBadges">
-                                            <?php 
-                                            $hasExtra = false;
-                                            if (isset($extra_salesperson_ids) && !empty($extra_salesperson_ids)): 
-                                                foreach ($salespersons as $s):
-                                                    if (in_array($s['id'], $extra_salesperson_ids)):
-                                                        $hasExtra = true;
-                                            ?>
-                                                <div class="px-3 py-1.5 bg-white/5 border border-white/10 rounded-xl text-[10px] font-black uppercase tracking-widest text-white flex items-center gap-2 shadow-sm">
-                                                    <span class="w-1.5 h-1.5 rounded-full bg-neon-cyan animate-pulse"></span>
-                                                    <span><?= htmlspecialchars($s['full_name'] ?: $s['username']) ?></span>
-                                                </div>
-                                            <?php 
-                                                    endif;
-                                                endforeach;
-                                            endif; 
-                                            if (!$hasExtra):
-                                            ?>
-                                                <span class="text-[10px] text-slate-600 font-bold uppercase tracking-widest italic opacity-50">Private Deal (Solo)</span>
-                                            <?php endif; ?>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-8">
-                                    <div>
-                                        <label class="block text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-4">Lead Email</label>
-                                        <div class="flex items-center gap-3 group pb-3 border-b border-white/10 focus-within:border-neon-cyan transition-all">
-                                            <i class="ph ph-envelope-simple text-slate-600 group-focus-within:text-neon-cyan transition-colors"></i>
-                                            <input type="email" name="email" value="<?= $opportunity ? htmlspecialchars($opportunity['email']) : '' ?>" 
-                                                   class="bg-transparent border-none w-full p-0 text-sm text-white font-bold focus:ring-0" placeholder="email@agency.com">
-                                        </div>
-                                    </div>
-                                    
-                                    <div>
-                                        <label class="block text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-4">Direct Phone</label>
-                                        <div class="flex items-center gap-3 group pb-3 border-b border-white/10 focus-within:border-neon-cyan transition-all">
-                                            <i class="ph ph-phone text-slate-600 group-focus-within:text-neon-cyan transition-colors"></i>
-                                            <input type="text" name="phone" value="<?= $opportunity ? htmlspecialchars($opportunity['phone']) : '' ?>" 
-                                                   class="bg-transparent border-none w-full p-0 text-sm text-white font-bold focus:ring-0" placeholder="+971 ...">
-                                        </div>
-                                    </div>
+                            <!-- Row 4: Client / Contact -->
+                            <div class="lg:col-span-2">
+                                <label class="block text-[9px] font-black text-slate-600 uppercase tracking-[0.4em] mb-2 ml-1">CLIENT / CONTACT</label>
+                                <div class="relative group px-3 py-2 bg-white/[0.01] border border-white/5 rounded-lg focus-within:border-neon-cyan/20 transition-all">
+                                    <select name="contact_id" class="bg-transparent border-none w-full p-0 text-xs text-white font-black uppercase tracking-widest focus:ring-0 appearance-none cursor-pointer">
+                                        <option value="" class="bg-[#0b0e14]">-- Select Contact --</option>
+                                        <?php foreach ($contacts as $c): ?>
+                                            <option value="<?= $c['id'] ?>" <?= ($opportunity && $opportunity['contact_id'] == $c['id']) ? 'selected' : '' ?> class="bg-[#0b0e14]">
+                                                <?= strtoupper(htmlspecialchars($c['name'])) ?>
+                                            </option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                    <i class="ph ph-caret-down absolute right-3 top-1/2 -translate-y-1/2 text-slate-700 text-[10px] pointer-events-none"></i>
                                 </div>
                             </div>
                         </div>
-                    </div>
-
-                    <!-- Tabs Section -->
-                    <div class="border-b border-white/5 flex gap-6 mb-6">
-                        <button type="button" class="pb-2 border-b-2 border-primary text-sm font-bold text-white">Internal Notes</button>
-                        <button type="button" class="pb-2 border-b-2 border-transparent text-sm font-bold text-slate-500 hover:text-slate-300 transition-colors">Extra Information</button>
                     </div>
 
                     <!-- Linked Invoices Section -->
@@ -290,10 +272,9 @@ $currentPage = 'crm_pipeline';
                     </div>
                     <?php endif; ?>
 
-                    <!-- Description / Internal Notes -->
-                    <div class="mb-10 admin-stat-card !p-6 border border-white/5 shadow-premium !bg-glass-bg">
-                        <label class="block text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-4">Internal Strategic Notes</label>
-                        <textarea name="notes" rows="6" class="w-full bg-black/20 border border-white/10 rounded-2xl p-6 text-white text-sm focus:ring-1 focus:ring-neon-cyan placeholder:text-slate-800 leading-relaxed shadow-inner" placeholder="Detailed strategic notes about this opportunity..."><?= htmlspecialchars($opportunity['notes'] ?? '') ?></textarea>
+                    <div class="mb-6">
+                        <label class="block text-[9px] font-black text-slate-600 uppercase tracking-[0.4em] mb-2">Internal Notes</label>
+                        <textarea name="notes" rows="5" class="w-full bg-black/40 border border-white/5 rounded-lg p-3 text-white text-xs font-mono focus:ring-1 focus:ring-neon-cyan/20 placeholder:text-slate-800 leading-relaxed shadow-inner" placeholder="Add internal notes about this opportunity..."><?= htmlspecialchars($opportunity['notes'] ?? '') ?></textarea>
                     </div>
 
                     <div class="flex justify-between items-center py-6 border-t border-white/5 foot-actions hidden">
@@ -306,44 +287,45 @@ $currentPage = 'crm_pipeline';
             </div>
         </div>
 
-        <!-- Right: Chatter / Timeline -->
-        <div class="lg:w-[450px] bg-bg-surface/30 border-l border-white/5 flex flex-col shrink-0 overflow-hidden backdrop-blur-3xl">
-            <!-- Chatter Header -->
-            <div class="p-6 border-b border-white/5 flex items-center justify-between gap-4 bg-white/[0.02]">
-                <button type="button" onclick="showLogForm()" class="px-5 py-2.5 bg-neon-cyan/10 hover:bg-neon-cyan/20 text-neon-cyan text-[10px] font-black uppercase tracking-widest rounded-xl transition-all shadow-lg shadow-neon-cyan/5 border border-neon-cyan/20">
-                    <i class="ph ph-plus-circle mr-2"></i> Log Activity
-                </button>
-                <div class="flex items-center gap-3">
-                    <div class="relative group">
-                        <i class="ph ph-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-600 group-hover:text-neon-cyan transition-colors z-10"></i>
-                        <input type="text" id="logNoteSearch" onkeyup="filterLogNotes()" placeholder="Explore timeline..." class="form-input !text-[10px] font-bold py-2 pl-9 !w-40 bg-black/40 border-white/10 hover:border-neon-cyan/30 focus:border-neon-cyan transition-all rounded-xl shadow-inner uppercase tracking-wider">
-                    </div>
+        <!-- Right: Activity Timeline (Sidebar) -->
+        <div class="lg:w-[340px] bg-bg-surface/30 border-l border-white/5 flex flex-col shrink-0 overflow-hidden backdrop-blur-3xl relative z-[90]">
+            <!-- Activity Control -->
+            <div class="p-6 border-b border-white/5 flex flex-col gap-5 bg-white/[0.02]">
+                <div class="flex items-center justify-between">
+                    <span class="text-[9px] font-black text-slate-600 uppercase tracking-[0.3em]">ACTIVITY FEED</span>
+                    <button type="button" onclick="showLogForm()" class="px-4 py-2 bg-neon-cyan/5 hover:bg-neon-cyan/20 text-neon-cyan text-[8px] font-black uppercase tracking-widest rounded-lg transition-all border border-neon-cyan/20 flex items-center gap-2 group">
+                        <i class="ph ph-chat-circle-dots text-sm group-hover:scale-110 transition-transform"></i> ADD NOTE
+                    </button>
+                </div>
+                <div class="relative group">
+                    <i class="ph ph-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-700 text-xs group-focus-within:text-neon-cyan transition-colors z-10"></i>
+                    <input type="text" id="logNoteSearch" onkeyup="filterLogNotes()" placeholder="Search activity..." class="w-full bg-black/40 border-white/10 hover:border-neon-cyan/30 focus:border-neon-cyan focus:ring-1 focus:ring-neon-cyan/10 transition-all rounded-xl text-[10px] font-bold py-3 pl-10 uppercase tracking-widest placeholder:text-slate-800 text-slate-300">
                 </div>
             </div>
 
-            <!-- Composer (Odoo Style) -->
-            <div id="logForm" class="p-4 bg-slate-800/40 border-b border-white/5 hidden">
+            <!-- Composer Module -->
+            <div id="logForm" class="p-5 bg-black/40 border-b border-white/5 hidden animate-in slide-in-from-top-4 duration-300">
                 <form action="<?= htmlspecialchars(BASE_URL) ?>/admin/crm_opportunity?id=<?= $opportunity['id'] ?>" method="POST" enctype="multipart/form-data" id="chatterForm">
                     <input type="hidden" name="action" value="add_log_note">
                     <input type="hidden" name="note_type" value="note">
                     
-                    <textarea name="content" id="logTextarea" rows="3" required 
-                              class="w-full bg-slate-900 border border-white/10 rounded-lg p-3 text-sm text-white focus:ring-1 focus:ring-primary placeholder:text-slate-600 mb-3" 
-                              placeholder="Log an internal note..."></textarea>
+                    <textarea name="content" id="logTextarea" rows="4" required 
+                              class="w-full bg-[#0b0e14] border border-white/10 rounded-xl p-3 text-[11px] text-white focus:ring-1 focus:ring-neon-cyan/20 placeholder:text-slate-800 mb-3 font-mono leading-relaxed" 
+                              placeholder="INITIATE_INTERNAL_NOTE..."></textarea>
                     
                     <div id="chatterAttachmentPreview" class="mb-3 flex flex-wrap gap-2"></div>
 
                     <div class="flex items-center justify-between">
-                        <div class="flex items-center gap-3 text-slate-400">
-                            <label class="cursor-pointer hover:text-white transition-colors" title="Attach file">
-                                <i class="ph ph-paperclip text-lg"></i>
+                        <div class="flex items-center gap-4">
+                            <label class="cursor-pointer text-slate-600 hover:text-neon-cyan transition-colors" title="Attach Data File">
+                                <i class="ph ph-paperclip-horizontal text-base"></i>
                                 <input type="file" name="attachment" class="hidden" onchange="handleChatterAttach(this)">
                             </label>
-                            <button type="button" class="hover:text-white transition-colors" title="Add emoji"><i class="ph ph-smiley text-lg"></i></button>
+                            <button type="button" class="text-slate-600 hover:text-neon-cyan transition-colors" title="Insert Expression"><i class="ph ph-smiley text-base"></i></button>
                         </div>
-                        <div class="flex gap-2">
-                            <button type="button" onclick="showLogForm(false)" class="px-3 py-1.5 text-xs text-slate-400 hover:text-white">Discard</button>
-                            <button type="submit" class="px-5 py-1.5 bg-primary text-white text-xs font-bold uppercase rounded-md shadow-lg shadow-primary/20">Log</button>
+                        <div class="flex gap-3">
+                            <button type="button" onclick="showLogForm(false)" class="text-[8px] font-black uppercase tracking-widest text-slate-600 hover:text-white transition-colors">Abort</button>
+                            <button type="submit" class="px-6 py-2 bg-neon-cyan text-black text-[9px] font-black uppercase tracking-[0.2em] rounded-lg shadow-[0_0_15px_rgba(6,182,212,0.2)] hover:bg-cyan-400 transition-all active:scale-95">Transmit</button>
                         </div>
                     </div>
                 </form>
@@ -369,13 +351,12 @@ $currentPage = 'crm_pipeline';
                 </div>
             <?php endif; ?>
 
-            <!-- Timeline Thread -->
-
-            <div class="flex-1 overflow-y-auto overflow-x-hidden p-4 space-y-6 chatter-thread" id="logNotesContainer">
+            <!-- Transmission Stream -->
+            <div class="flex-1 overflow-y-auto overflow-x-hidden p-5 space-y-6 chatter-thread crm-main-scroll" id="logNotesContainer">
                 <?php if (empty($log_notes)): ?>
-                    <div class="text-center py-10 opacity-20" id="emptyNotesState">
-                        <i class="ph ph-chat-circle-dots text-5xl mb-2"></i>
-                        <p class="text-xs font-medium uppercase tracking-widest">Chatter started</p>
+                    <div class="text-center py-20 opacity-10" id="emptyNotesState">
+                        <i class="ph ph-broadcast text-6xl mb-4"></i>
+                        <p class="text-[7px] font-black uppercase tracking-[0.4em]">Awaiting signal...</p>
                     </div>
                 <?php else: ?>
                     <?php 
@@ -385,70 +366,75 @@ $currentPage = 'crm_pipeline';
                         if ($noteDate !== $lastDate):
                             $lastDate = $noteDate;
                     ?>
-                        <div class="flex items-center gap-4 py-2 note-date-header">
-                            <div class="flex-1 h-px bg-white/5"></div>
-                            <span class="text-[10px] uppercase font-bold text-slate-600 tracking-widest"><?= $noteDate ?></span>
-                            <div class="flex-1 h-px bg-white/5"></div>
+                        <div class="flex items-center gap-4 py-4 note-date-header">
+                            <div class="flex-1 h-px bg-white/[0.03]"></div>
+                            <span class="text-[7px] uppercase font-black text-slate-700 tracking-[0.4em]"><?= strtoupper($noteDate) ?></span>
+                            <div class="flex-1 h-px bg-white/[0.03]"></div>
                         </div>
                     <?php endif; ?>
 
-                    <div id="log-note-<?= $note['id'] ?>" class="group relative flex gap-3 log-item <?= !empty($note['is_deleted']) ? 'opacity-50' : '' ?>" data-content="<?= htmlspecialchars(strtolower($note['content'])) ?>">
-                        <div class="w-8 h-8 rounded-full bg-slate-700 flex items-center justify-center text-sm font-bold uppercase shrink-0">
-                            <?= substr($note['username'], 0, 1) ?>
+                    <div id="log-note-<?= $note['id'] ?>" class="group relative flex gap-4 log-item <?= !empty($note['is_deleted']) ? 'opacity-30' : '' ?>" data-content="<?= htmlspecialchars(strtolower($note['content'])) ?>">
+                        <div class="relative shrink-0">
+                            <div class="w-8 h-8 rounded-lg bg-white/5 border border-white/5 flex items-center justify-center text-[10px] font-black uppercase text-neon-cyan shadow-inner">
+                                <?= substr($note['username'], 0, 1) ?>
+                            </div>
+                            <div class="absolute -bottom-1 -right-1 w-3 h-3 rounded-full bg-[#0b0e14] flex items-center justify-center p-0.5 border border-white/5">
+                                <div class="w-full h-full rounded-full bg-neon-cyan shadow-[0_0_5px_rgba(6,182,212,0.5)]"></div>
+                            </div>
                         </div>
-                        <div class="flex-1 leading-normal">
-                            <div class="flex items-center justify-between mb-1">
-                                <div class="flex items-center gap-2">
-                                    <span class="font-bold text-slate-200 text-sm"><?= htmlspecialchars($note['full_name'] ?: $note['username']) ?></span>
-                                    <span class="text-[10px] text-slate-600 font-medium">- <?= date('H:i', strtotime($note['created_at'])) ?></span>
+                        <div class="flex-1 min-w-0">
+                            <div class="flex items-center justify-between mb-1.5">
+                                <div class="flex items-baseline gap-2">
+                                    <span class="font-black text-white text-[10px] uppercase tracking-wide truncate max-w-[120px]"><?= htmlspecialchars($note['full_name'] ?: $note['username']) ?></span>
+                                    <span class="text-[8px] text-slate-700 font-bold"><?= date('H:i', strtotime($note['created_at'])) ?></span>
                                 </div>
                                 <?php if (empty($note['is_deleted'])): ?>
-                                <button type="button" onclick="deleteLogNote(<?= $note['id'] ?>, <?= $opportunity['id'] ?>)" class="transition-opacity text-slate-500 hover:text-red-400 p-1" title="Delete this log note">
-                                    <i class="ph ph-trash"></i>
+                                <button type="button" onclick="deleteLogNote(<?= $note['id'] ?>, <?= $opportunity['id'] ?>)" class="opacity-0 group-hover:opacity-100 transition-opacity text-slate-700 hover:text-neon-rose p-1 active:scale-90" title="Delete note">
+                                    <i class="ph ph-terminal-window text-sm"></i>
                                 </button>
-                                <?php endif; ?>
+<?php endif; ?>
                             </div>
                             <?php if (!empty($note['is_deleted'])): ?>
-                                <div class="text-sm italic text-slate-600 flex items-center gap-1.5">
+                                <div class="text-[10px] italic text-slate-700 font-mono tracking-tight flex items-center gap-1.5 opacity-60">
                                     <i class="ph ph-prohibit"></i> This note was deleted
                                 </div>
                             <?php else: ?>
-                            <div class="text-sm text-slate-400 chatter-content" data-content="<?= htmlspecialchars($note['content']) ?>">
+                            <div class="text-xs text-slate-400 chatter-content leading-relaxed font-medium break-words" data-content="<?= htmlspecialchars($note['content']) ?>">
                                 <?= parseLogContent($note['content']) ?>
                             </div>
 
-                            <!-- Attachments -->
-                            <?php foreach ($attachments as $att): ?>
-                                <?php if ($att['linked_id'] == $note['id'] && $att['linked_type'] === 'log_note'): ?>
-                                    <div class="mt-3 inline-block">
+                            <!-- Attachments Segment -->
+                            <div class="flex flex-wrap gap-2 mt-3">
+                                <?php foreach ($attachments as $att): ?>
+                                    <?php if ($att['linked_id'] == $note['id'] && $att['linked_type'] === 'log_note'): ?>
                                         <?php if (strpos($att['file_type'], 'image') !== false): ?>
                                             <div class="relative group/att">
-                                                <img src="<?= htmlspecialchars(BASE_URL . $att['file_path']) ?>" class="max-w-[200px] max-h-[150px] rounded-lg border border-white/10 shadow-lg cursor-zoom-in hover:brightness-110 transition-all">
-                                                <a href="<?= htmlspecialchars(BASE_URL . $att['file_path']) ?>" download class="absolute top-2 right-2 bg-black/60 p-1.5 rounded-full text-white opacity-0 group-hover/att:opacity-100 transition-opacity">
+                                                <img src="<?= htmlspecialchars(BASE_URL . $att['file_path']) ?>" class="max-w-[180px] max-h-[140px] rounded-xl border border-white/10 shadow-2xl cursor-zoom-in hover:brightness-125 hover:scale-[1.02] transition-all">
+                                                <a href="<?= htmlspecialchars(BASE_URL . $att['file_path']) ?>" download class="absolute top-2 right-2 bg-black/60 backdrop-blur-md p-1.5 rounded-full text-white opacity-0 group-hover/att:opacity-100 transition-opacity">
                                                     <i class="ph ph-download"></i>
                                                 </a>
                                             </div>
                                         <?php else: ?>
-                                            <a href="<?= htmlspecialchars(BASE_URL . $att['file_path']) ?>" download class="flex items-center gap-3 p-2 bg-slate-900 rounded-lg border border-white/5 hover:bg-slate-800 transition-colors">
-                                                <div class="w-10 h-10 bg-slate-800 rounded flex items-center justify-center text-slate-500">
-                                                    <i class="ph ph-file-doc text-2xl"></i>
+                                            <a href="<?= htmlspecialchars(BASE_URL . $att['file_path']) ?>" download class="flex items-center gap-3 p-2 bg-black/40 rounded-xl border border-white/5 hover:bg-neon-cyan/5 hover:border-neon-cyan/20 transition-all group/file">
+                                                <div class="w-8 h-8 bg-white/5 rounded-lg flex items-center justify-center text-slate-600 group-hover/file:text-neon-cyan transition-colors">
+                                                    <i class="ph ph-file-zip text-lg"></i>
                                                 </div>
-                                                <div class="flex flex-col flex-1">
-                                                    <span class="text-xs font-bold text-slate-300"><?= htmlspecialchars($att['file_name']) ?></span>
-                                                    <span class="text-[10px] text-slate-600 uppercase"><?= number_format($att['file_size'] / 1024, 1) ?> KB</span>
+                                                <div class="flex flex-col min-w-0 pr-2">
+                                                    <span class="text-[9px] font-black text-slate-400 truncate max-w-[100px]"><?= htmlspecialchars($att['file_name']) ?></span>
+                                                    <span class="text-[7px] text-slate-700 uppercase font-black tracking-widest"><?= number_format($att['file_size'] / 1024, 1) ?>_KB</span>
                                                 </div>
-                                                <i class="ph ph-download-simple text-slate-500"></i>
                                             </a>
                                         <?php endif; ?>
-                                    </div>
-                                <?php endif; ?>
-                            <?php endforeach; ?>
+                                    <?php endif; ?>
+                                <?php endforeach; ?>
+                            </div>
                             <?php endif; ?>
                         </div>
                     </div>
                     <?php endforeach; ?>
                 <?php endif; ?>
             </div>
+        </div>
         </div>
         </div>
     </main>

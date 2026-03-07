@@ -16,8 +16,8 @@ if (isset($_GET['lang'])) {
 // Track website visit & geodata
 trackVisit();
 
-// Parse request URI
-$requestUri = $_SERVER['REQUEST_URI'];
+// Parse request URI with fallback for built-in PHP server
+$requestUri = $_SERVER['REQUEST_URI'] ?? $_SERVER['PHP_SELF'] ?? '/';
 $basePath   = BASE_URL;
 
 // Extract path part (remove query string)

@@ -13,6 +13,8 @@ $currentPage = 'crm_pipeline';
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- SortableJS for smooth Kanban dragging -->
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
     <link rel="stylesheet" href="<?= htmlspecialchars(BASE_URL) ?>/assets/css/style.css">
     <style> 
         .kanban-column { min-height: 200px; }
@@ -27,11 +29,11 @@ $currentPage = 'crm_pipeline';
     <?php require __DIR__ . '/partials/sidebar.php'; ?>
     <div class="flex-1 flex flex-col min-w-0">
     <!-- Topbar -->
-    <header class="h-auto lg:h-20 flex flex-col lg:flex-row items-center justify-between px-4 lg:px-8 bg-white/[0.02] backdrop-blur-xl border-b border-white/5 shrink-0 relative overflow-hidden py-4 lg:py-0 gap-4 lg:gap-0">
-        <div class="absolute inset-0 bg-gradient-to-r from-cyan-500/5 via-transparent to-transparent"></div>
+    <header class="h-auto lg:h-20 flex flex-col lg:flex-row items-center px-4 lg:px-8 bg-white/[0.02] backdrop-blur-xl border-b border-white/5 shrink-0 relative z-[100] py-4 lg:py-0 gap-4 lg:gap-8">
+        <div class="absolute inset-0 bg-gradient-to-r from-cyan-500/5 via-transparent to-transparent pointer-events-none"></div>
         
-        <!-- Row 1 (Mobile) / Left Content (Desktop) -->
-        <div class="relative flex items-center justify-between w-full lg:w-auto">
+        <!-- 1. Left Content (Logo/Title & Mobile Profile) -->
+        <div class="relative flex items-center justify-between w-full lg:w-auto shrink-0 z-[120]">
             <div class="flex items-center gap-4">
                 <div class="w-10 h-10 rounded-xl bg-cyan-500/10 flex items-center justify-center border border-cyan-500/20">
                     <i class="ph ph-kanban text-2xl text-cyan-500"></i>
@@ -47,78 +49,108 @@ $currentPage = 'crm_pipeline';
             </div>
         </div>
 
-        <!-- Row 2 (Mobile) / Right Content (Desktop) -->
-        <div class="relative flex items-center justify-between lg:justify-end gap-3 sm:gap-6 w-full lg:w-auto">
-            <!-- View Switcher -->
-            <div class="flex bg-black/40 rounded-xl p-1 border border-white/10 shadow-inner">
-                <a href="?view=kanban&search=<?= urlencode($search) ?>" class="p-2 rounded-lg transition-all <?= $view === 'kanban' ? 'bg-cyan-500 text-black shadow-lg shadow-cyan-500/20' : 'text-slate-500 hover:text-white' ?>" title="Kanban View">
-                    <i class="ph ph-layout text-lg"></i>
-                </a>
-                <a href="?view=list&search=<?= urlencode($search) ?>" class="p-2 rounded-lg transition-all <?= $view === 'list' ? 'bg-cyan-500 text-black shadow-lg shadow-cyan-500/20' : 'text-slate-500 hover:text-white' ?>" title="List View">
-                    <i class="ph ph-list text-lg"></i>
-                </a>
-            </div>
-
+        <!-- 2. Middle Content (Search & Actions) -->
+        <div class="relative flex-1 w-full lg:w-auto flex flex-wrap lg:flex-nowrap items-center justify-start lg:justify-center gap-3 pb-1 lg:pb-0 z-[110]">
+            
             <!-- Action Button -->
-            <button onclick="document.getElementById('addLeadModal').classList.remove('hidden')" class="flex-1 lg:flex-none group flex items-center justify-center gap-2 px-4 py-2.5 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 hover:border-emerald-500/40 rounded-xl transition-all duration-300">
+            <button onclick="document.getElementById('addLeadModal').classList.remove('hidden')" class="shrink-0 h-10 group flex items-center justify-center gap-2 px-4 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 hover:border-emerald-500/40 rounded-xl transition-all duration-300">
                 <i class="ph ph-plus-circle text-lg text-emerald-500 group-hover:rotate-90 transition-transform duration-500"></i>
                 <span class="text-[10px] font-black uppercase tracking-widest text-emerald-500 whitespace-nowrap">
-                    <span class="hidden sm:inline">Create Opportunity</span>
-                    <span class="sm:hidden">Create</span>
+                    <span class="hidden lg:inline">New Lead</span>
+                    <span class="lg:hidden">New</span>
                 </span>
             </button>
 
-            <!-- Topbar on Desktop -->
-            <div class="hidden lg:block">
-                <?php 
-                $showTopbarSearch = true;
-                $topbarSearchPlaceholder = 'SEARCH PIPELINE...';
-                $topbarSearchHiddenFields = ['view' => $view ?? 'kanban'];
-                require __DIR__ . '/partials/_topbar.php'; 
-                ?>
+            <!-- MEGA SEARCH BAR -->
+            <div class="relative flex-1 min-w-[150px] lg:w-80 lg:max-w-md h-10 bg-black/40 rounded-xl border border-cyan-500/20 shadow-inner group focus-within:border-cyan-500/50 transition-all duration-300 z-[120]">
+                <div class="flex items-center px-4 h-full">
+                    <i class="ph ph-magnifying-glass text-cyan-500"></i>
+                    <form action="" method="GET" class="flex-1 px-3 flex items-center h-full">
+                        <input type="hidden" name="view" value="<?= e($view ?? 'kanban') ?>">
+                        <input type="text" name="search" value="<?= e($search ?? '') ?>" 
+                               placeholder="SEARCH PIPELINE..." 
+                               class="bg-transparent border-none text-[11px] font-bold text-white placeholder-slate-600 outline-none w-full uppercase tracking-widest h-full">
+                    </form>
+                    <div class="h-4 w-px bg-white/10 mx-2"></div>
+                    <button type="button" onclick="toggleDropdown('mega-filter-menu', event)" class="p-1 text-slate-400 hover:text-white transition-colors flex items-center justify-center">
+                        <i class="ph-bold ph-caret-down text-xs"></i>
+                    </button>
+                </div>
+
+                <!-- MEGA DROPDOWN (Odoo Inspired) -->
+                <div id="mega-filter-menu" class="hidden fixed lg:absolute left-4 right-4 lg:left-0 lg:right-auto top-[140px] lg:top-[calc(100%+8px)] w-auto lg:w-[600px] max-w-full lg:max-w-[90vw] bg-[#161d27] border border-white/10 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] z-[9999] backdrop-blur-3xl overflow-hidden animate-in fade-in zoom-in duration-200">
+                    <div class="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-white/5">
+                        <!-- Filters Column -->
+                        <div class="p-5">
+                            <div class="flex items-center gap-2 text-[10px] font-black text-cyan-500 uppercase tracking-widest mb-4">
+                                <i class="ph-bold ph-funnel-simple"></i> Filters
+                            </div>
+                            <div class="space-y-1">
+                                <a href="?search=Won" class="flex items-center justify-between px-3 py-2 text-[10px] font-bold text-slate-400 hover:text-white hover:bg-white/5 rounded-lg transition-all">Won Deals <i class="ph ph-check-circle opacity-0 group-hover:opacity-100"></i></a>
+                                <a href="?search=Lost" class="flex items-center justify-between px-3 py-2 text-[10px] font-bold text-slate-400 hover:text-white hover:bg-white/5 rounded-lg transition-all">Lost Deals</a>
+                                <a href="?search=New" class="flex items-center justify-between px-3 py-2 text-[10px] font-bold text-slate-400 hover:text-white hover:bg-white/5 rounded-lg transition-all">New Leads</a>
+                                <hr class="border-white/5 my-2">
+                                <a href="#" class="flex items-center gap-2 px-3 py-2 text-[9px] font-black text-slate-500 italic hover:text-cyan-500 transition-colors uppercase tracking-widest">
+                                    <i class="ph ph-plus-circle"></i> Add Custom Filter
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- Group By Column -->
+                        <div class="p-5">
+                            <div class="flex items-center gap-2 text-[10px] font-black text-purple-500 uppercase tracking-widest mb-4">
+                                <i class="ph-bold ph-stack"></i> Group By
+                            </div>
+                            <div class="space-y-1">
+                                <a href="?group=stage" class="px-3 py-2 block text-[10px] font-bold text-slate-400 hover:text-white hover:bg-white/5 rounded-lg transition-all">By Sector (Stage)</a>
+                                <a href="?group=salesperson" class="px-3 py-2 block text-[10px] font-bold text-slate-400 hover:text-white hover:bg-white/5 rounded-lg transition-all">By Handler (Sales)</a>
+                                <a href="?group=priority" class="px-3 py-2 block text-[10px] font-bold text-slate-400 hover:text-white hover:bg-white/5 rounded-lg transition-all">By Priority</a>
+                                <hr class="border-white/5 my-2">
+                                <a href="#" class="flex items-center gap-2 px-3 py-2 text-[9px] font-black text-slate-500 italic hover:text-purple-500 transition-colors uppercase tracking-widest">
+                                    <i class="ph ph-plus-circle"></i> Add Custom Group
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- Favorites Column -->
+                        <div class="p-5">
+                            <div class="flex items-center gap-2 text-[10px] font-black text-amber-500 uppercase tracking-widest mb-4">
+                                <i class="ph-bold ph-star text-xs"></i> Favorites
+                            </div>
+                            <div class="space-y-1">
+                                <div class="px-3 py-2 text-[10px] font-bold text-slate-600 bg-white/[0.02] rounded-lg border border-white/5 flex flex-col gap-1">
+                                    <span class="text-[8px] font-black uppercase text-slate-700">Recent Search</span>
+                                    <span>High Value Active</span>
+                                </div>
+                                <hr class="border-white/5 my-2">
+                                <a href="#" class="flex items-center gap-2 px-3 py-2 text-[9px] font-black text-slate-500 hover:text-amber-500 transition-colors uppercase tracking-widest">
+                                    <i class="ph ph-floppy-disk"></i> Save Search
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
+
+            <!-- View Switcher -->
+            <div class="flex h-10 bg-black/40 rounded-xl p-1 border border-white/10 shadow-inner shrink-0 items-center">
+                <a href="?view=kanban&search=<?= urlencode($search) ?>" class="p-1 px-2 rounded-lg transition-all <?= $view === 'kanban' ? 'bg-cyan-500 text-black shadow-lg shadow-cyan-500/20' : 'text-slate-500 hover:text-white' ?>" title="Kanban View">
+                    <i class="ph ph-layout text-lg"></i>
+                </a>
+                <a href="?view=list&search=<?= urlencode($search) ?>" class="p-1 px-2 rounded-lg transition-all <?= $view === 'list' ? 'bg-cyan-500 text-black shadow-lg shadow-cyan-500/20' : 'text-slate-500 hover:text-white' ?>" title="List View">
+                    <i class="ph ph-list text-lg"></i>
+                </a>
+            </div>
+        </div>
+
+        <!-- 3. Desktop Profile Content -->
+        <div class="relative hidden lg:flex items-center shrink-0 z-[120] pl-2">
+            <?php 
+            $showTopbarSearch = false; // Disabled to favor the unified mega search
+            require __DIR__ . '/partials/_topbar.php'; 
+            ?>
         </div>
     </header>
-
-    <div class="px-4 lg:px-8 py-4 bg-[#0b0e14]">
-        <div class="flex flex-col sm:flex-row items-center justify-between gap-4 bg-white/[0.02] backdrop-blur-xl p-3 rounded-2xl border border-white/5 shadow-2xl">
-            <div class="w-full sm:w-auto flex items-center justify-between sm:justify-start gap-4 flex-1">
-                <div class="text-[10px] font-black text-slate-500 uppercase tracking-widest hidden lg:block">Pipeline Controls</div>
-                <!-- Search on Mobile -->
-                <div class="lg:hidden flex-1 relative group">
-                    <form action="" method="GET" class="w-full">
-                        <input type="hidden" name="view" value="<?= e($view ?? 'kanban') ?>">
-                        <i class="ph ph-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-600 group-focus-within:text-cyan-500"></i>
-                        <input type="text" name="search" value="<?= e($search ?? '') ?>" placeholder="SEARCH..." class="w-full bg-black/40 border border-white/10 rounded-xl pl-9 pr-4 py-2 text-[10px] font-black uppercase tracking-widest text-white outline-none focus:border-cyan-500/40 transition-all">
-                    </form>
-                </div>
-            </div>
-
-            <div class="flex items-center justify-between w-full sm:w-auto gap-3">
-                <div class="relative flex-1 sm:flex-none">
-                    <button onclick="toggleDropdown('filter-menu', event)" class="w-full px-4 py-2.5 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 hover:text-cyan-500 hover:bg-cyan-500/5 rounded-xl flex items-center justify-center sm:justify-start gap-2 transition-all border border-transparent hover:border-cyan-500/20 active:scale-95">
-                        <i class="ph ph-funnel-simple-bold text-base"></i> <span class="hidden sm:inline">Filters</span>
-                    </button>
-                    <div id="filter-menu" class="hidden absolute right-0 top-12 w-56 bg-[#161d27] border border-white/10 rounded-2xl shadow-premium py-3 z-[200] backdrop-blur-2xl">
-                        <div class="px-4 py-2 text-[9px] font-black text-slate-600 uppercase tracking-widest border-b border-white/5 mb-2">Outcome Status</div>
-                        <a href="?search=Won" class="flex items-center justify-between px-4 py-2.5 text-[10px] text-slate-400 hover:bg-emerald-500/10 hover:text-emerald-500 transition-all uppercase tracking-widest font-black">Won Deals <i class="ph ph-check-circle text-sm"></i></a>
-                        <a href="?search=Lost" class="flex items-center justify-between px-4 py-2.5 text-[10px] text-slate-400 hover:bg-pink-500/10 hover:text-pink-500 transition-all uppercase tracking-widest font-black">Lost Deals <i class="ph ph-x-circle text-sm"></i></a>
-                        <a href="?search=New" class="flex items-center justify-between px-4 py-2.5 text-[10px] text-slate-400 hover:bg-cyan-500/10 hover:text-cyan-500 transition-all uppercase tracking-widest font-black">New Leads <i class="ph ph-sparkle text-sm"></i></a>
-                    </div>
-                </div>
-                <div class="hidden sm:block w-px h-6 bg-white/10 mx-1"></div>
-                <div class="relative flex-1 sm:flex-none">
-                    <button onclick="toggleDropdown('group-menu', event)" class="w-full px-4 py-2.5 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 hover:text-purple-500 hover:bg-purple-500/5 rounded-xl flex items-center justify-center sm:justify-start gap-2 transition-all border border-transparent hover:border-purple-500/20 active:scale-95">
-                        <i class="ph ph-stack-bold text-base"></i> <span class="hidden sm:inline">Grouping</span>
-                    </button>
-                    <div id="group-menu" class="hidden absolute right-0 top-12 w-56 bg-[#161d27] border border-white/10 rounded-2xl shadow-premium py-2 z-[200] backdrop-blur-2xl">
-                        <a href="?group=stage" class="block px-4 py-2 text-[10px] text-slate-400 hover:bg-white/5 hover:text-white transition-all uppercase tracking-widest font-black">By Sector (Stage)</a>
-                        <a href="?group=salesperson" class="block px-4 py-2 text-[10px] text-slate-400 hover:bg-white/5 hover:text-white transition-all uppercase tracking-widest font-black">By Handler (Sales)</a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
 
     <?php if ($flash = getFlash()): ?>
         <div class="m-6 mb-0 p-4 rounded-xl border border-emerald-500/20 bg-emerald-500/10 text-emerald-400 text-sm flex items-center gap-2 shrink-0">
@@ -128,7 +160,7 @@ $currentPage = 'crm_pipeline';
     <?php endif; ?>
 
     <!-- Board/List Container -->
-    <main class="flex-1 overflow-x-auto overflow-y-hidden p-6 pt-2 crm-main-scroll">
+    <main class="flex-1 overflow-x-auto overflow-y-auto p-6 pt-2 crm-main-scroll">
         <?php if ($view === 'list'): ?>
             <!-- Sequence View (List) -->
             <div id="pipeline-list-container" class="admin-table-wrapper backdrop-blur-xl border border-white/5 rounded-3xl overflow-hidden shadow-premium flex flex-col">
@@ -195,7 +227,7 @@ $currentPage = 'crm_pipeline';
             </div>
         <?php else: ?>
             <!-- Matrix View (Kanban) -->
-            <div class="flex h-full lg:flex-row flex-col lg:flex-nowrap gap-6 items-start pb-8" id="stages-wrapper" style="min-width: 0;">
+            <div class="flex h-full flex-row flex-nowrap overflow-x-auto lg:overflow-visible gap-6 items-start pb-8" id="stages-wrapper" style="min-width: 0;">
                 
                 <?php foreach ($pipeline as $stageName => $stageData): 
                     $opps = $stageData['opportunities'];
@@ -205,13 +237,13 @@ $currentPage = 'crm_pipeline';
                 
                 <?php if ($isCollapsed): ?>
                     <!-- Collapsed Stage -->
-                    <div class="lg:h-[calc(100vh-280px)] h-16 shrink-0 flex items-center border border-white/5 rounded-2xl lg:pt-6 lg:pb-4 lg:w-16 w-full cursor-pointer hover:bg-white/[0.03] transition-all bg-white/[0.01] group/collapsed shadow-premium px-4 lg:flex-col" onclick="toggleCollapse(<?= $info['id'] ?>)">
+                    <div class="lg:h-[calc(100vh-280px)] h-[calc(100vh-280px)] shrink-0 flex items-center border border-white/5 rounded-2xl pt-6 pb-4 w-16 cursor-pointer hover:bg-white/[0.03] transition-all bg-white/[0.01] group/collapsed shadow-premium px-4 flex-col" onclick="toggleCollapse(<?= $info['id'] ?>)">
                         <div class="text-slate-600 mb-6 group-hover/collapsed:text-neon-cyan transition-colors" title="Expand Stage">
                             <i class="ph-bold ph-arrows-out-line-horizontal text-xl"></i>
                         </div>
-                        <div class="flex-1 w-full flex lg:justify-center lg:mt-2 relative">
-                            <div class="lg:transform lg:rotate-180" style="writing-mode: horizontal-tb; text-orientation: mixed;">
-                                <span class="text-slate-500 font-black tracking-[0.3em] uppercase text-[10px] flex items-center gap-4 group-hover/collapsed:text-white transition-colors lg:[writing-mode:vertical-rl]">
+                        <div class="flex-1 w-full flex justify-center mt-2 relative">
+                            <div class="transform rotate-180" style="writing-mode: horizontal-tb; text-orientation: mixed;">
+                                <span class="text-slate-500 font-black tracking-[0.3em] uppercase text-[10px] flex items-center gap-4 group-hover/collapsed:text-white transition-colors [writing-mode:vertical-rl]">
                                     <span class="text-neon-cyan"><?= count($opps) ?> Deals</span>
                                     <span class="opacity-20">/ / /</span>
                                     <?= htmlspecialchars($stageName) ?>
@@ -221,16 +253,16 @@ $currentPage = 'crm_pipeline';
                     </div>
                 <?php else: ?>
                     <!-- Expanded Stage -->
-                    <div class="w-full lg:w-[320px] flex flex-col lg:h-[calc(100vh-280px)] shrink-0 stage-column group/stage" data-stage-id="<?= $info['id'] ?>" data-stage-name="<?= htmlspecialchars($stageName) ?>">
+                    <div class="w-[300px] lg:w-[320px] flex flex-col shrink-0 stage-column group/stage" data-stage-id="<?= $info['id'] ?>" data-stage-name="<?= htmlspecialchars($stageName) ?>">
                         <!-- Stage Header -->
                         <div class="flex items-center justify-between mb-4 px-2 relative">
                             <div class="opacity-0 group-hover/stage:opacity-100 cursor-grab text-slate-600 hover:text-neon-cyan transition-all mr-2 stage-drag-handle">
                                 <i class="ph-bold ph-dots-six-vertical text-lg"></i>
                             </div>
                             
-                            <h3 class="font-black text-white text-[10px] uppercase tracking-[0.2em] flex-1 truncate flex items-center gap-3">
+                            <h3 class="font-bold text-white text-xs flex-1 truncate flex items-center gap-3">
                                 <?= htmlspecialchars($stageName) ?>
-                                <span class="px-2 py-0.5 bg-white/5 text-slate-500 text-[8px] rounded-md font-black italic opp-count border border-white/5"><?= count($opps) ?></span>
+                                <span class="px-2 py-0.5 bg-white/5 text-slate-400 text-[10px] rounded-md opp-count border border-white/5"><?= count($opps) ?></span>
                             </h3>
                             
                             <div class="relative">
@@ -238,10 +270,10 @@ $currentPage = 'crm_pipeline';
                                     <i class="ph-bold ph-dots-three text-lg"></i>
                                 </button>
                                 <div id="stage-menu-<?= $info['id'] ?>" class="hidden absolute right-0 top-10 w-44 bg-glass-bg border border-white/10 rounded-xl shadow-premium py-2 z-[200] backdrop-blur-2xl">
-                                    <button onclick="toggleCollapse(<?= $info['id'] ?>)" class="w-full text-left px-4 py-2 text-[10px] font-black text-slate-400 hover:bg-white/5 hover:text-white flex items-center gap-2 uppercase tracking-widest border-b border-white/5 mb-1 transition-all">
+                                    <button onclick="toggleCollapse(<?= $info['id'] ?>)" class="w-full text-left px-4 py-2 text-[11px] font-semibold text-slate-300 hover:bg-white/5 hover:text-white flex items-center gap-2 border-b border-white/5 mb-1 transition-all">
                                         <i class="ph ph-arrows-in-line-horizontal text-base"></i> Collapse Stage
                                     </button>
-                                    <button type="button" onclick="deleteStage(<?= $info['id'] ?>)" class="w-full text-left px-4 py-2 text-[10px] font-black text-neon-rose/60 hover:bg-neon-rose/5 hover:text-neon-rose flex items-center gap-2 uppercase tracking-widest transition-all">
+                                    <button type="button" onclick="deleteStage(<?= $info['id'] ?>)" class="w-full text-left px-4 py-2 text-[11px] font-semibold text-neon-rose/80 hover:bg-neon-rose/5 hover:text-neon-rose flex items-center gap-2 transition-all">
                                         <i class="ph ph-trash text-base"></i> Delete Stage
                                     </button>
                                 </div>
@@ -249,57 +281,27 @@ $currentPage = 'crm_pipeline';
                         </div>
 
                         <!-- Sector Grid (Kanban Body) -->
-                        <div class="flex-1 overflow-y-auto crm-main-scroll rounded-2xl bg-white/[0.01] border border-white/[0.03] p-4 pb-[200px] flex flex-col gap-4 kanban-column min-h-[300px] lg:min-h-[150px] shadow-inner transition-colors hover:border-white/5" data-stage="<?= htmlspecialchars($stageName) ?>">
+                        <div class="flex-1 rounded-2xl bg-white/[0.01] border border-white/[0.03] p-4 pb-12 flex flex-col gap-4 kanban-column min-h-[500px] lg:min-h-[150px] shadow-inner transition-colors hover:border-white/5" data-stage="<?= htmlspecialchars($stageName) ?>">
                             
                             <?php foreach ($opps as $opp): ?>
-                                <div class="kanban-card admin-stat-card !p-4 !bg-glass-bg border border-white/5 shadow-premium cursor-grab active:cursor-grabbing hover:border-neon-cyan/40 hover:bg-white/[0.05] transition-all relative group/card shrink-0 min-h-[140px] <?= !empty($opp['color_code']) ? 'crm-color-'.$opp['color_code'] : '' ?>" 
-                                     draggable="true" data-id="<?= $opp['id'] ?>" onclick="if(!document.body.classList.contains('is-dragging')) window.location.href='<?= htmlspecialchars(BASE_URL) ?>/admin/crm_opportunity?id=<?= $opp['id'] ?>'">
+                                <div class="kanban-card admin-stat-card !p-4 !bg-[#161d27] border border-white/5 shadow-premium cursor-grab active:cursor-grabbing hover:border-neon-cyan/40 transition-all relative group/card shrink-0 min-h-[130px] !overflow-visible <?= !empty($opp['color_code']) ? 'crm-color-'.$opp['color_code'] : '' ?>" 
+                                     data-id="<?= $opp['id'] ?>" onclick="if(!document.body.classList.contains('is-dragging')) window.location.href='<?= htmlspecialchars(BASE_URL) ?>/admin/crm_opportunity?id=<?= $opp['id'] ?>'">
                                     
-                                    <!-- Options Link -->
-                                    <button type="button" title="Quick Access" onclick="toggleDropdown('card-menu-<?= $opp['id'] ?>', event)" class="absolute top-2 right-2 opacity-0 group-hover/card:opacity-100 transition-all p-1 text-slate-600 hover:text-neon-cyan hover:bg-white/5 rounded-md active:scale-75">
+                                    <!-- Quick Access Trigger -->
+                                    <button type="button" title="Quick Access" onclick="toggleDropdown('card-menu-<?= $opp['id'] ?>', event)" class="absolute top-2 right-2 opacity-0 group-hover/card:opacity-100 transition-all p-1 text-slate-500 hover:text-neon-cyan hover:bg-white/5 rounded-md active:scale-75">
                                         <i class="ph-bold ph-dots-three-vertical text-base"></i>
                                     </button>
 
-                                    <!-- Quick Context Menu -->
-                                    <div id="card-menu-<?= $opp['id'] ?>" onclick="event.stopPropagation()" class="hidden absolute right-2 top-10 w-64 bg-[#161d27] border border-white/10 rounded-2xl shadow-2xl p-5 z-[300] backdrop-blur-3xl">
-                                        <div class="text-[9px] text-slate-600 mb-3 font-black uppercase tracking-[0.2em] border-b border-white/5 pb-1">Actions</div>
-                                        <div class="space-y-1 mb-5">
-                                            <a href="<?= htmlspecialchars(BASE_URL) ?>/admin/crm_opportunity?id=<?= $opp['id'] ?>" class="w-full text-left px-3 py-2 text-[10px] font-black text-slate-400 hover:bg-white/5 hover:text-white flex items-center gap-2 rounded-lg transition-all uppercase tracking-widest">
-                                                <i class="ph ph-eye text-base"></i> View Details
-                                            </a>
-                                            <form action="<?= htmlspecialchars(BASE_URL) ?>/admin/crm_pipeline" method="POST" id="deleteOpp_<?= $opp['id'] ?>">
-                                                <input type="hidden" name="action" value="delete_opportunity">
-                                                <input type="hidden" name="id" value="<?= $opp['id'] ?>">
-                                                <button type="button" onclick="showDeleteModal('<?= htmlspecialchars(addslashes($opp['title'])) ?>', 'deleteOpp_<?= $opp['id'] ?>')" class="w-full text-left px-3 py-2 text-[10px] font-black text-neon-rose/60 hover:bg-neon-rose/5 hover:text-neon-rose flex items-center gap-2 rounded-lg transition-all uppercase tracking-widest">
-                                                    <i class="ph ph-trash text-base"></i> Delete Record
-                                                </button>
-                                            </form>
-                                        </div>
-                                        
-                                        <div class="text-[9px] text-slate-600 mb-3 font-black uppercase tracking-[0.2em] border-b border-white/5 pb-1">Visual Signature</div>
-                                        <div class="grid grid-cols-4 gap-2">
-                                            <?php $colors = ['none', 'red', 'orange', 'yellow', 'green', 'blue', 'purple', 'teal', 'pink']; ?>
-                                            <?php foreach ($colors as $c): ?>
-                                                <div onclick="updateCardColor(<?= $opp['id'] ?>, '<?= $c ?>')" 
-                                                     class="w-full aspect-square rounded-lg cursor-pointer border border-white/10 hover:scale-110 active:scale-90 transition-all flex items-center justify-center
-                                                            <?= $c === 'none' ? 'bg-slate-700' : 'bg-'.$c.'-500' ?>" 
-                                                     title="<?= ucfirst($c) ?>">
-                                                     <?php if($c === 'none'): ?><i class="ph ph-prohibit-inset text-slate-400 text-sm"></i><?php endif; ?>
-                                                </div>
-                                            <?php endforeach; ?>
-                                        </div>
-                                    </div>
-
                                     <!-- Opportunity Title -->
                                     <div class="mb-2 pr-4">
-                                        <a href="<?= htmlspecialchars(BASE_URL) ?>/admin/crm_opportunity?id=<?= $opp['id'] ?>" class="font-black text-white group-hover/card:text-neon-cyan transition-colors text-[11px] uppercase tracking-wide line-clamp-2 leading-relaxed">
+                                        <a href="<?= htmlspecialchars(BASE_URL) ?>/admin/crm_opportunity?id=<?= $opp['id'] ?>" class="font-semibold text-slate-100 group-hover/card:text-neon-cyan transition-colors text-sm line-clamp-2 leading-snug">
                                             <?= htmlspecialchars($opp['title']) ?>
                                         </a>
                                     </div>
 
                                     <!-- Organization/Client -->
                                     <?php if (!empty($opp['contact_name'])): ?>
-                                        <div class="text-[9px] text-slate-500 font-bold uppercase tracking-widest mb-3 flex items-center gap-1.5 px-2 py-1 bg-white/[0.03] rounded-md border border-white/5 w-fit">
+                                        <div class="text-[11px] text-slate-400 font-medium mb-3 flex items-center gap-1.5 px-2 py-1 bg-white/[0.02] rounded-md border border-white/5 w-fit">
                                             <i class="ph ph-buildings opacity-50"></i>
                                             <?= htmlspecialchars($opp['contact_name']) ?>
                                         </div>
@@ -307,30 +309,30 @@ $currentPage = 'crm_pipeline';
                                     
                                     <!-- Priority & Forecast -->
                                     <div class="flex items-center justify-between mb-4">
-                                        <div class="flex items-center gap-0.5">
+                                        <div class="flex items-center gap-1">
                                             <?php for($s=1; $s<=3; $s++): ?>
-                                                <i class="ph-fill ph-circle text-[6px] <?= $s <= $opp['priority'] ? 'text-neon-amber' : 'text-slate-800' ?>"></i>
+                                                <i class="ph-fill ph-circle text-[8px] <?= $s <= $opp['priority'] ? 'text-neon-amber' : 'text-slate-700' ?>"></i>
                                             <?php endfor; ?>
                                         </div>
                                         <?php if ($opp['expected_revenue'] > 0): ?>
-                                            <span class="text-[10px] font-black text-neon-emerald tracking-tight">
+                                            <span class="text-xs font-bold text-neon-emerald tracking-tight">
                                                 $<?= number_format($opp['expected_revenue'] / 1000, 1) ?>K
                                             </span>
                                         <?php endif; ?>
                                     </div>
 
-                                    <!-- Personnel Assignment (FIXED) -->
-                                    <div class="flex items-center justify-between mt-auto pt-3 border-t border-white/[0.03] text-[9px] text-slate-500 font-black">
+                                    <!-- Personnel Assignment -->
+                                    <div class="flex items-center justify-between mt-auto pt-3 border-t border-white/[0.03] text-[10px] text-slate-400 font-medium tracking-wide">
                                         <div class="flex items-center gap-3">
-                                            <span class="flex items-center gap-1.5 opacity-60"><i class="ph ph-clock text-slate-700"></i> <?= date('d M', strtotime($opp['created_at'])) ?></span>
+                                            <span class="flex items-center gap-1 opacity-70"><i class="ph ph-clock text-slate-500"></i> <?= date('d M', strtotime($opp['created_at'])) ?></span>
                                             <?php if ($opp['probability'] > 0): ?>
                                                 <span class="text-neon-cyan/60"><?= $opp['probability'] ?>%</span>
                                             <?php endif; ?>
                                         </div>
                                         <?php
-                                            $spName = '--';
+                                            $spName = 'U';
                                             $spEmoji = '';
-                                            $spTitle = 'Unassigned Pulse';
+                                            $spTitle = 'Unassigned';
                                             $isActiveHandler = false;
                                             if (!empty($opp['salesperson_id'])) {
                                                 foreach ($salespersons as $sp) {
@@ -345,8 +347,8 @@ $currentPage = 'crm_pipeline';
                                             }
                                         ?>
                                         <div class="flex items-center gap-2 group/avatar relative" title="<?= e($spTitle) ?>">
-                                            <span class="text-[7px] text-slate-700 uppercase tracking-tighter hidden group-hover/card:block transition-all"><?= explode(' ', $spTitle)[0] ?></span>
-                                            <div class="w-7 h-7 rounded-xl flex items-center justify-center text-[10px] font-black border transition-all <?= $isActiveHandler ? 'bg-neon-cyan/10 border-neon-cyan/30 text-neon-cyan shadow-[0_0_10px_rgba(6,182,212,0.1)]' : 'bg-white/5 border-white/10 text-slate-700' ?>">
+                                            <span class="text-[9px] text-slate-500 hidden group-hover/card:block transition-all"><?= explode(' ', $spTitle)[0] ?></span>
+                                            <div class="w-6 h-6 rounded-full flex items-center justify-center text-[9px] font-bold border transition-all <?= $isActiveHandler ? 'bg-neon-cyan/10 border-neon-cyan/30 text-neon-cyan shadow-[0_0_10px_rgba(6,182,212,0.1)]' : 'bg-white/5 border-white/10 text-slate-500' ?>">
                                                 <?= $spEmoji ?: $spName ?>
                                             </div>
                                         </div>
@@ -358,12 +360,10 @@ $currentPage = 'crm_pipeline';
                                     <?php endif; ?>
                                 </div>
                             <?php endforeach; ?>
-
-                            <div class="drop-indicator hidden h-1 bg-neon-cyan/20 rounded-full my-2 w-full border border-dashed border-neon-cyan/30"></div>
                             
                             <div class="mt-2 opacity-0 group-hover/stage:opacity-100 transition-all transform translate-y-2 group-hover/stage:translate-y-0">
-                                <button onclick="openLeadModal('<?= htmlspecialchars($stageName) ?>')" class="w-full py-3 bg-white/[0.02] border border-dashed border-white/10 rounded-xl text-slate-600 hover:text-neon-cyan hover:border-neon-cyan/50 hover:bg-neon-cyan/5 transition-all text-[9px] font-black uppercase tracking-widest flex items-center justify-center gap-2">
-                                    <i class="ph ph-plus-circle text-base"></i> Sync New Lead
+                                <button onclick="openLeadModal('<?= htmlspecialchars($stageName) ?>')" class="w-full py-2.5 bg-white/[0.02] border border-dashed border-white/10 rounded-xl text-slate-400 hover:text-neon-cyan hover:border-neon-cyan/50 hover:bg-neon-cyan/5 transition-all text-[11px] font-semibold flex items-center justify-center gap-2">
+                                    <i class="ph ph-plus-circle text-base"></i> Add Target
                                 </button>
                             </div>
                         </div>
@@ -488,31 +488,48 @@ $currentPage = 'crm_pipeline';
 </form>
 
 <script>
-    // System Initialization & Drag Dynamics
-    let draggedItem = null;
-    let targetStage = null;
+    // System Initialization & Kanban Dynamics
     const body = document.body;
 
-    // Pulse Effects & Hover Interactions
+    // Initialize SortableJS for smooth Kanban dragging
+    document.querySelectorAll('.kanban-column').forEach(column => {
+        new Sortable(column, {
+            group: 'pipeline',
+            animation: 250,
+            ghostClass: 'opacity-30',
+            dragClass: 'rotate-3',
+            easing: "cubic-bezier(0.25, 1, 0.5, 1)",
+            onEnd: function (evt) {
+                const itemEl = evt.item;  // dragged element
+                const to = evt.to;        // target list
+                const from = evt.from;    // original list
+                
+                const oppId = itemEl.dataset.id;
+                const stageName = to.dataset.stage;
+                
+                if (oppId && stageName && from !== to) {
+                    // Update Sector in Database
+                    fetch('<?= htmlspecialchars(BASE_URL) ?>/admin/crm_pipeline', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                        body: `action=update_stage&id=${oppId}&stage=${encodeURIComponent(stageName)}`
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.success) {
+                            showPulseNotification('Vector Synchronized', 'neon-cyan');
+                            updateCounts();
+                        }
+                    });
+                } else if (from === to) {
+                    // Just reordered within the same column (if position matters later)
+                }
+            },
+        });
+    });
+
+    // 3D Tilt Reality Factor & Pulse Effects
     document.querySelectorAll('.kanban-card').forEach(card => {
-        card.addEventListener('dragstart', function(e) {
-            draggedItem = this;
-            body.classList.add('is-dragging');
-            this.classList.add('dragging');
-            e.dataTransfer.setData('text/plain', this.dataset.id);
-            // Multi-dimensional shift
-            setTimeout(() => this.style.display = 'none', 0);
-        });
-
-        card.addEventListener('dragend', function() {
-            draggedItem = null;
-            body.classList.remove('is-dragging');
-            this.classList.remove('dragging');
-            this.style.display = 'block';
-            document.querySelectorAll('.drop-indicator').forEach(di => di.classList.add('hidden'));
-        });
-
-        // 3D Tilt Reality Factor
         card.addEventListener('mousemove', (e) => {
             const rect = card.getBoundingClientRect();
             const x = e.clientX - rect.left;
@@ -526,49 +543,6 @@ $currentPage = 'crm_pipeline';
 
         card.addEventListener('mouseleave', () => {
             card.style.transform = 'none';
-        });
-    });
-
-    // Sector Management (Columns)
-    document.querySelectorAll('.kanban-column').forEach(column => {
-        column.addEventListener('dragover', function(e) {
-            e.preventDefault();
-            const indicator = this.querySelector('.drop-indicator');
-            if (indicator) indicator.classList.remove('hidden');
-            this.classList.add('drag-over');
-        });
-
-        column.addEventListener('dragleave', function() {
-            const indicator = this.querySelector('.drop-indicator');
-            if (indicator) indicator.classList.add('hidden');
-            this.classList.remove('drag-over');
-        });
-
-        column.addEventListener('drop', function(e) {
-            e.preventDefault();
-            this.classList.remove('drag-over');
-            const oppId = e.dataTransfer.getData('text/plain');
-            const stageName = this.dataset.stage;
-            const indicator = this.querySelector('.drop-indicator');
-            if (indicator) indicator.classList.add('hidden');
-
-            if (draggedItem && oppId && stageName) {
-                this.insertBefore(draggedItem, indicator);
-                
-                // Real-time Sector Uplink
-                fetch('<?= htmlspecialchars(BASE_URL) ?>/admin/crm_pipeline', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                    body: `action=update_stage&id=${oppId}&stage=${encodeURIComponent(stageName)}`
-                })
-                .then(res => res.json())
-                .then(data => {
-                    if (data.success) {
-                        showPulseNotification('Vector Synchronized', 'neon-cyan');
-                        updateCounts();
-                    }
-                });
-            }
         });
     });
 
@@ -604,11 +578,42 @@ $currentPage = 'crm_pipeline';
         const isOpen = !el.classList.contains('hidden');
         
         // Auto-close others
-        document.querySelectorAll('[id^="filter-"], [id^="group-"], [id^="fav-"], [id^="stage-menu-"], [id^="card-menu-"]').forEach(d => {
-            d.classList.add('hidden');
+        document.querySelectorAll('[id^="filter-"], [id^="group-"], [id^="fav-"], [id^="stage-menu-"], [id^="card-menu-"], #mega-filter-menu').forEach(d => {
+            if (d.id !== id) d.classList.add('hidden');
         });
 
-        if (!isOpen) el.classList.remove('hidden');
+        if (!isOpen) {
+            el.classList.remove('hidden');
+            
+            // Re-position fixed dropdowns (like card menus) dynamically
+            if (el.id.startsWith('card-menu-')) {
+                const btnRect = e.currentTarget.getBoundingClientRect();
+                
+                // Set initial hidden states to get accurate dimensions
+                el.style.visibility = 'hidden';
+                el.classList.remove('hidden');
+                const menuRect = el.getBoundingClientRect();
+                el.classList.add('hidden');
+                el.style.visibility = 'visible';
+                
+                let topPos = btnRect.bottom + 8;
+                let leftPos = btnRect.right - menuRect.width;
+
+                // Adjust if it goes off bottom viewport
+                if (topPos + menuRect.height > window.innerHeight) {
+                    topPos = btnRect.top - menuRect.height - 8;
+                }
+                
+                // Adjust if it goes off left viewport
+                if (leftPos < 0) {
+                    leftPos = btnRect.left;
+                }
+                
+                el.style.top = topPos + 'px';
+                el.style.left = leftPos + 'px';
+                el.classList.remove('hidden');
+            }
+        }
     }
 
     // Close on outer click
@@ -661,7 +666,42 @@ $currentPage = 'crm_pipeline';
         }
     }
 </script>
+    <!-- Master Dropdown Registry (Root Level to Escape Transforms) -->
+    <div id="dropdown-registry">
+        <?php foreach ($pipeline as $stageName => $stageData): ?>
+            <?php foreach ($stageData['opportunities'] as $opp): ?>
+                <div id="card-menu-<?= $opp['id'] ?>" onclick="event.stopPropagation()" class="hidden fixed w-56 bg-[#161d27] border border-white/10 rounded-2xl shadow-[0_20px_60px_-15px_rgba(0,0,0,0.8)] p-4 z-[9999] backdrop-blur-3xl transition-opacity">
+                    <div class="text-[9px] text-slate-600 mb-3 font-black uppercase tracking-[0.2em] border-b border-white/5 pb-1">Actions</div>
+                    <div class="space-y-1 mb-5">
+                        <a href="<?= htmlspecialchars(BASE_URL) ?>/admin/crm_opportunity?id=<?= $opp['id'] ?>" class="w-full text-left px-3 py-2 text-[10px] font-black text-slate-400 hover:bg-white/5 hover:text-white flex items-center gap-2 rounded-lg transition-all uppercase tracking-widest">
+                            <i class="ph ph-eye text-base"></i> View Details
+                        </a>
+                        <form action="<?= htmlspecialchars(BASE_URL) ?>/admin/crm_pipeline" method="POST" id="deleteOpp_<?= $opp['id'] ?>">
+                            <input type="hidden" name="action" value="delete_opportunity">
+                            <input type="hidden" name="id" value="<?= $opp['id'] ?>">
+                            <button type="button" onclick="showDeleteModal('<?= htmlspecialchars(addslashes($opp['title'])) ?>', 'deleteOpp_<?= $opp['id'] ?>')" class="w-full text-left px-3 py-2 text-[10px] font-black text-neon-rose/60 hover:bg-neon-rose/5 hover:text-neon-rose flex items-center gap-2 rounded-lg transition-all uppercase tracking-widest">
+                                <i class="ph ph-trash text-base"></i> Delete Record
+                            </button>
+                        </form>
+                    </div>
+                    
+                    <div class="text-[9px] text-slate-600 mb-3 font-black uppercase tracking-[0.2em] border-b border-white/5 pb-1">Visual Signature</div>
+                    <div class="grid grid-cols-4 gap-2">
+                        <?php $colors = ['none', 'red', 'orange', 'yellow', 'green', 'blue', 'purple', 'teal', 'pink']; ?>
+                        <?php foreach ($colors as $c): ?>
+                            <div onclick="updateCardColor(<?= $opp['id'] ?>, '<?= $c ?>')" 
+                                 class="w-full aspect-square rounded-lg cursor-pointer border border-white/10 hover:scale-110 active:scale-90 transition-all flex items-center justify-center
+                                        <?= $c === 'none' ? 'bg-slate-700' : 'bg-'.$c.'-500' ?>" 
+                                 title="<?= ucfirst($c) ?>">
+                                 <?php if($c === 'none'): ?><i class="ph ph-prohibit-inset text-slate-400 text-sm"></i><?php endif; ?>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+            <?php endforeach; ?>
+        <?php endforeach; ?>
     </div>
+</div>
 </div>
 
 <?php require __DIR__ . '/partials/_delete_modal.php'; ?>

@@ -10,8 +10,8 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet">
     
-    <!-- Icons (Standard Bold Phosphor) -->
-    <link rel="stylesheet" type="text/css" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/bold/style.css">
+    <!-- Icons (Standard Regular Phosphor) -->
+    <link rel="stylesheet" type="text/css" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
     
     <!-- Styles -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -49,25 +49,25 @@
 
         .login-card {
             width: 100%;
-            max-width: 440px;
+            max-width: 420px;
             background: var(--card-surface);
             border: 1px solid var(--border-muted);
-            border-radius: 32px;
-            padding: 64px 48px;
-            box-shadow: 0 40px 100px -20px rgba(0, 0, 0, 0.8);
+            border-radius: 24px;
+            padding: 48px 40px;
+            box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.6);
             position: relative;
         }
 
         @media (max-width: 480px) {
             .login-card {
                 padding: 40px 24px;
-                border-radius: 24px;
+                border-radius: 20px;
                 max-width: 90%;
             }
             .app-title { font-size: 24px; }
-            .logo-box { width: 64px; height: 64px; margin-bottom: 20px; }
+            .logo-box { width: 56px; height: 56px; margin-bottom: 20px; }
             .input-stack { margin-top: 32px; }
-            .submit-trigger { padding: 16px; margin-top: 32px; }
+            .submit-trigger { padding: 14px; margin-top: 24px; }
         }
 
         /* Refined border gradient */
@@ -75,7 +75,7 @@
             content: '';
             position: absolute;
             inset: 0;
-            border-radius: 32px;
+            border-radius: 24px;
             padding: 1px;
             background: linear-gradient(145deg, rgba(255, 255, 255, 0.1), transparent 50%, rgba(255, 255, 255, 0.03));
             -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
@@ -86,21 +86,21 @@
         }
 
         .logo-box {
-            width: 80px;
-            height: 80px;
-            margin: 0 auto 28px;
+            width: 64px;
+            height: 64px;
+            margin: 0 auto 24px;
             background: #1c2128;
             border: 1px solid var(--border-muted);
-            border-radius: 24px;
+            border-radius: 16px;
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
         }
 
         .app-title {
             font-family: 'Outfit', sans-serif;
-            font-size: 32px;
+            font-size: 28px;
             font-weight: 800;
             letter-spacing: -0.015em;
             text-align: center;
@@ -116,14 +116,14 @@
             font-size: 11px;
             font-weight: 700;
             text-transform: uppercase;
-            letter-spacing: 0.4em;
+            letter-spacing: 0.2em;
             color: #64748b;
-            margin-top: 10px;
-            opacity: 0.6;
+            margin-top: 8px;
+            opacity: 0.8;
         }
 
         .input-stack {
-            margin-top: 48px;
+            margin-top: 36px;
         }
 
         .label-text {
@@ -131,9 +131,9 @@
             font-size: 11px;
             font-weight: 700;
             text-transform: uppercase;
-            letter-spacing: 0.12em;
+            letter-spacing: 0.1em;
             color: #475569;
-            margin-bottom: 12px;
+            margin-bottom: 8px;
             margin-left: 2px;
         }
 
@@ -143,11 +143,11 @@
 
         .field-container i {
             position: absolute;
-            left: 20px;
+            left: 16px;
             top: 50%;
             transform: translateY(-50%);
-            color: #334155;
-            font-size: 20px;
+            color: #52525b;
+            font-size: 18px;
             transition: all 0.3s;
         }
 
@@ -155,10 +155,10 @@
             width: 100%;
             background: var(--input-field-bg);
             border: 1px solid var(--border-muted);
-            border-radius: 18px;
-            padding: 18px 20px 18px 56px;
+            border-radius: 12px;
+            padding: 14px 16px 14px 44px;
             color: #fff;
-            font-size: 15px;
+            font-size: 14px;
             font-weight: 500;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
@@ -178,39 +178,39 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            margin-top: 32px;
+            margin-top: 24px;
             padding: 0 4px;
         }
 
         .toggle-group {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 10px;
             cursor: pointer;
             font-size: 13px;
-            font-weight: 600;
-            color: #64748b;
+            font-weight: 500;
+            color: #94a3b8;
             transition: color 0.3s;
         }
 
         .toggle-group:hover {
-            color: #94a3b8;
+            color: #e2e8f0;
         }
 
         .switch-ui {
             position: relative;
-            width: 40px;
-            height: 22px;
+            width: 36px;
+            height: 20px;
             background: #232a35;
-            border-radius: 12px;
+            border-radius: 10px;
             transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
         .switch-ui::after {
             content: '';
             position: absolute;
-            left: 4px;
-            top: 4px;
+            left: 3px;
+            top: 3px;
             width: 14px;
             height: 14px;
             background: #475569;
@@ -223,7 +223,7 @@
         }
 
         input[type="checkbox"]:checked + .switch-ui::after {
-            left: 22px;
+            left: 19px;
             background: #fff;
             box-shadow: 0 0 10px rgba(0,0,0,0.2);
         }
@@ -233,17 +233,17 @@
             background: #fff;
             color: #000;
             border: none;
-            border-radius: 18px;
-            padding: 20px;
-            font-size: 15px;
-            font-weight: 800;
-            margin-top: 40px;
+            border-radius: 12px;
+            padding: 14px;
+            font-size: 14px;
+            font-weight: 700;
+            margin-top: 32px;
             cursor: pointer;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 12px;
+            gap: 8px;
             letter-spacing: 0.01em;
         }
 
@@ -261,24 +261,24 @@
             background: rgba(239, 68, 68, 0.08);
             border: 1px solid rgba(239, 68, 68, 0.15);
             color: #f87171;
-            padding: 16px 20px;
-            border-radius: 18px;
+            padding: 12px 16px;
+            border-radius: 12px;
             font-size: 13px;
-            font-weight: 600;
-            margin-top: 32px;
+            font-weight: 500;
+            margin-top: 24px;
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 10px;
             animation: bounceIn 0.5s;
         }
 
         .copyright-tag {
             text-align: center;
             font-size: 11px;
-            font-weight: 600;
-            color: #334155;
-            margin-top: 48px;
-            letter-spacing: 0.1em;
+            font-weight: 500;
+            color: #52525b;
+            margin-top: 32px;
+            letter-spacing: 0.05em;
             text-transform: uppercase;
         }
 
@@ -295,9 +295,9 @@
     <div class="login-card">
         <div class="logo-box">
             <?php $logo = getSetting('site_logo'); if(!empty($logo)): ?>
-                <img src="<?= baseUrl($logo) ?>" alt="<?= APP_NAME ?>" class="w-12 h-12 object-contain filter drop-shadow-lg">
+                <img src="<?= baseUrl($logo) ?>" alt="<?= APP_NAME ?>" class="w-10 h-10 object-contain filter drop-shadow-lg scale-110">
             <?php else: ?>
-                <i class="ph-bold ph-lightning text-white text-3xl"></i>
+                <i class="ph ph-lightning text-white text-3xl"></i>
             <?php endif; ?>
         </div>
         <h1 class="app-title"><?= APP_NAME ?></h1>
@@ -316,15 +316,15 @@
                     <label for="username" class="label-text"><?= t('admin_username') ?></label>
                     <div class="field-container">
                         <input type="text" id="username" name="username" class="input-box" placeholder="Username" required autofocus>
-                        <i class="ph-bold ph-user-circle"></i>
+                        <i class="ph ph-user-circle"></i>
                     </div>
                 </div>
 
-                <div class="form-unit" style="margin-top: 28px;">
+                <div class="form-unit" style="margin-top: 24px;">
                     <label for="password" class="label-text"><?= t('admin_password') ?></label>
                     <div class="field-container">
                         <input type="password" id="password" name="password" class="input-box" placeholder="Password" required>
-                        <i class="ph-bold ph-lock-key"></i>
+                        <i class="ph ph-lock-key"></i>
                     </div>
                 </div>
             </div>
@@ -339,7 +339,7 @@
 
             <button type="submit" class="submit-trigger">
                 <span>Sign in to Terminal</span>
-                <i class="ph-bold ph-arrow-right text-lg"></i>
+                <i class="ph ph-arrow-right text-lg"></i>
             </button>
         </form>
 

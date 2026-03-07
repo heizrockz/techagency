@@ -78,6 +78,22 @@
             </div>
         </div>
 
+        <!-- Traffic Analytics Graph -->
+        <div class="px-8 pb-8">
+            <div class="admin-table-wrapper backdrop-blur-xl border border-white/5 rounded-3xl overflow-hidden shadow-premium p-6">
+                <div class="flex items-center justify-between mb-2">
+                    <h2 class="text-[11px] font-black text-white uppercase tracking-[0.3em] flex items-center gap-3">
+                        <i class="ph ph-chart-line-up text-neon-emerald"></i>
+                        Traffic Analytics Pipeline
+                    </h2>
+                    <a href="<?= baseUrl('/admin/visitors') ?>" class="text-[9px] font-black text-slate-500 hover:text-neon-cyan uppercase tracking-widest transition-all">
+                        Advanced Options →
+                    </a>
+                </div>
+                <div id="trafficChart" class="w-full h-80 -ml-2"></div>
+            </div>
+        </div>
+
         <!-- Recent Registrations Activity -->
         <div class="px-8 pb-8">
             <div class="admin-table-wrapper backdrop-blur-xl border border-white/5 rounded-3xl overflow-hidden shadow-premium flex flex-col">
@@ -155,5 +171,70 @@
     </div>
 </div>
 
+<!-- ApexCharts -->
+<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    var options = {
+        series: [{
+            name: 'Unique Visitors',
+            data: <?= json_encode($trafficData ?? []) ?>
+        }],
+        chart: {
+            type: 'area',
+            height: 320,
+            fontFamily: 'Inter, sans-serif',
+            toolbar: { show: false },
+            background: 'transparent',
+            parentHeightOffset: 0
+        },
+        colors: ['#10b981'],
+        fill: {
+            type: 'gradient',
+            gradient: {
+                shadeIntensity: 1,
+                opacityFrom: 0.4,
+                opacityTo: 0.05,
+                stops: [0, 100]
+            }
+        },
+        dataLabels: { enabled: false },
+        stroke: {
+            curve: 'smooth',
+            width: 2
+        },
+        xaxis: {
+            categories: <?= json_encode($trafficLabels ?? []) ?>,
+            axisBorder: { show: false },
+            axisTicks: { show: false },
+            labels: {
+                style: { colors: '#64748b', fontSize: '9px', fontWeight: 600, cssClass: 'uppercase tracking-widest' },
+                offsetY: 5
+            }
+        },
+        yaxis: {
+            labels: {
+                style: { colors: '#64748b', fontSize: '10px', fontWeight: 600 },
+                formatter: (value) => { return Math.floor(value) }
+            }
+        },
+        grid: {
+            borderColor: 'rgba(255,255,255,0.05)',
+            strokeDashArray: 4,
+            yaxis: { lines: { show: true } },
+            padding: { top: 0, right: 0, bottom: 0, left: 10 }
+        },
+        theme: { mode: 'dark' },
+        tooltip: {
+            theme: 'dark',
+            x: { show: true },
+            y: { formatter: function (val) { return val + " visits" } }
+        }
+    };
+
+    var chart = new ApexCharts(document.querySelector("#trafficChart"), options);
+    chart.render();
+});
+</script>
 </body>
 </html>
