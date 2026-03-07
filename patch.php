@@ -510,6 +510,18 @@ safeExec($db, "
 ", "Table `app_licenses`");
 
 safeExec($db, "
+    CREATE TABLE IF NOT EXISTS `app_license_features` (
+        `id` int(11) NOT NULL AUTO_INCREMENT,
+        `license_id` int(11) NOT NULL,
+        `feature_key` varchar(100) NOT NULL,
+        `feature_value` text DEFAULT NULL,
+        PRIMARY KEY (`id`),
+        UNIQUE KEY `lic_feat` (`license_id`,`feature_key`),
+        KEY `license_id` (`license_id`)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+", "Table `app_license_features`");
+
+safeExec($db, "
     CREATE TABLE IF NOT EXISTS `app_devices` (
         `id` int(11) NOT NULL AUTO_INCREMENT,
         `license_id` int(11) NOT NULL,
