@@ -9,6 +9,19 @@ require_once __DIR__ . '/config.php';
 require_once __DIR__ . '/includes/helpers.php';
 require_once __DIR__ . '/includes/auth.php';
 
+// Global logger to catch the Java app request regardless of the URI
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $db = getDB();
+    try {
+        $uri = $_SERVER['REQUEST_URI'] ?? 'unknown';
+        $payload = file_get_contents('php://input');
+        if (!empty($payload)) {
+            $db->prepare("INSERT INTO app_device_logs (device_id, event_type, details) VALUES (?, 'error', ?)")
+               ->execute([0, "URI: $uri | Payload: $payload"]);
+        }
+    } catch (\Exception $e) {}
+}
+
 // ── Language Handling ─────────────────────────────────────
 if (isset($_GET['lang'])) {
     appSetLocale($_GET['lang']);
