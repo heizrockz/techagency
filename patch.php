@@ -168,6 +168,11 @@ safeExec($db, "
 ", "Table `admin_notifications`");
 
 // ═════════════════════════════════════════════════════════════
+// STEP 11 — Cleanup old scripts
+// ═════════════════════════════════════════════════════════════
+out("STEP 11 — Cleanup old scripts", 'head');
+
+// ═════════════════════════════════════════════════════════════
 // STEP 3 — Contacts & Invoices
 // ═════════════════════════════════════════════════════════════
 out("STEP 3 — Contacts & Invoices", 'head');
@@ -407,8 +412,114 @@ if (tableExists($db, 'contents')) {
 }
 
 // ═════════════════════════════════════════════════════════════
-// STEP 10 — Cleanup old scripts
+// STEP 10 — App Ecosystem (MicoStore)
 // ═════════════════════════════════════════════════════════════
+out("STEP 10 — App Ecosystem (MicoStore)", 'head');
+
+safeExec($db, "
+    CREATE TABLE IF NOT EXISTS `app_categories` (
+        `id` int(11) NOT NULL AUTO_INCREMENT,
+        `name` varchar(255) NOT NULL,
+        `slug` varchar(255) NOT NULL,
+        `icon` varchar(100) DEFAULT NULL,
+        `color` varchar(50) DEFAULT 'cyan',
+        `description` text DEFAULT NULL,
+        `sort_order` int(11) DEFAULT 0,
+        `is_active` tinyint(1) DEFAULT 1,
+        `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+        PRIMARY KEY (`id`),
+        UNIQUE KEY `slug` (`slug`)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+", "Table `app_categories`");
+
+safeExec($db, "
+    CREATE TABLE IF NOT EXISTS `app_products` (
+        `id` int(11) NOT NULL AUTO_INCREMENT,
+        `category_id` int(11) NOT NULL,
+        `name` varchar(255) NOT NULL,
+        `slug` varchar(255) NOT NULL,
+        `version` varchar(50) DEFAULT '1.0.0',
+        `icon_url` varchar(500) DEFAULT NULL,
+        `header_image` varchar(500) DEFAULT NULL,
+        `description` text DEFAULT NULL,
+        `features` text DEFAULT NULL,
+        `pricing_model` enum('free','paid','subscription') DEFAULT 'free',
+        `price` decimal(15,2) DEFAULT 0.00,
+        `compare_price` decimal(15,2) DEFAULT NULL,
+        `download_url` varchar(500) DEFAULT NULL,
+        `show_buy_button` tinyint(1) DEFAULT 1,
+        `buy_url` varchar(500) DEFAULT NULL,
+        `is_public` tinyint(1) DEFAULT 1,
+        `show_price` tinyint(1) DEFAULT 1,
+        `is_active` tinyint(1) DEFAULT 1,
+        `download_count` int(11) DEFAULT 0,
+        `meta_description` text DEFAULT NULL,
+        `meta_keywords` text DEFAULT NULL,
+        `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+        PRIMARY KEY (`id`),
+        UNIQUE KEY `slug` (`slug`),
+        FOREIGN KEY (`category_id`) REFERENCES `app_categories` (`id`) ON DELETE CASCADE
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+", "Table `app_products`");
+
+// Ensure columns exist if table was older
+addColumn($db, 'app_products', 'header_image',     "varchar(500) DEFAULT NULL AFTER `icon_url`");
+addColumn($db, 'app_products', 'features',         "text DEFAULT NULL AFTER `description`");
+addColumn($db, 'app_products', 'download_url',     "varchar(500) DEFAULT NULL AFTER `compare_price`");
+addColumn($db, 'app_products', 'show_buy_button',  "tinyint(1) DEFAULT 1 AFTER `download_url`");
+addColumn($db, 'app_products', 'buy_url',          "varchar(500) DEFAULT NULL AFTER `show_buy_button`");
+addColumn($db, 'app_products', 'is_public',        "tinyint(1) DEFAULT 1 AFTER `buy_url`");
+addColumn($db, 'app_products', 'show_price',       "tinyint(1) DEFAULT 1 AFTER `is_public`");
+addColumn($db, 'app_products', 'download_count',   "int(11) DEFAULT 0 AFTER `is_active`");
+addColumn($db, 'app_products', 'meta_description', "text DEFAULT NULL");
+addColumn($db, 'app_products', 'meta_keywords',    "text DEFAULT NULL");
+
+safeExec($db, "
+    CREATE TABLE IF NOT EXISTS `app_product_images` (
+        `id` int(11) NOT NULL AUTO_INCREMENT,
+        `product_id` int(11) NOT NULL,
+        `image_path` varchar(500) NOT NULL,
+        `sort_order` int(11) DEFAULT 0,
+        PRIMARY KEY (`id`),
+        FOREIGN KEY (`product_id`) REFERENCES `app_products` (`id`) ON DELETE CASCADE
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+", "Table `app_product_images`");
+
+safeExec($db, "
+    CREATE TABLE IF NOT EXISTS `app_sections` (
+        `id` int(11) NOT NULL AUTO_INCREMENT,
+        `title` varchar(255) NOT NULL,
+        `sort_order` int(11) DEFAULT 0,
+        `is_active` tinyint(1) DEFAULT 1,
+        PRIMARY KEY (`id`)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+", "Table `app_sections`");
+
+safeExec($db, "
+    CREATE TABLE IF NOT EXISTS `app_section_products` (
+        `section_id` int(11) NOT NULL,
+        `product_id` int(11) NOT NULL,
+        `sort_order` int(11) DEFAULT 0,
+        PRIMARY KEY (`section_id`,`product_id`),
+        FOREIGN KEY (`section_id`) REFERENCES `app_sections` (`id`) ON DELETE CASCADE,
+        FOREIGN KEY (`product_id`) REFERENCES `app_products` (`id`) ON DELETE CASCADE
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+", "Table `app_section_products`");
+
+safeExec($db, "
+    CREATE TABLE IF NOT EXISTS `app_reviews` (
+        `id` int(11) NOT NULL AUTO_INCREMENT,
+        `product_id` int(11) NOT NULL,
+        `name` varchar(255) NOT NULL,
+        `rating` int(1) NOT NULL DEFAULT 5,
+        `comment` text NOT NULL,
+        `admin_reply` text DEFAULT NULL,
+        `status` enum('pending','approved','rejected') DEFAULT 'pending',
+        `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+        PRIMARY KEY (`id`),
+        FOREIGN KEY (`product_id`) REFERENCES `app_products` (`id`) ON DELETE CASCADE
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+", "Table `app_reviews`");
 out("STEP 10 — Cleanup old scripts", 'head');
 
 $publicFilesToDelete = [
