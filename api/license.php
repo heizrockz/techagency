@@ -7,6 +7,9 @@
  * Returns: {"status":"active","type":"pro","features":{...}}
  */
 
+// Debug logging
+file_put_contents(__DIR__ . '/log.txt', date('[Y-m-d H:i:s] ') . $_SERVER['REQUEST_METHOD'] . ' ' . file_get_contents('php://input') . " | GET: " . json_encode($_GET) . "\n", FILE_APPEND);
+
 header('Content-Type: application/json; charset=utf-8');
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: POST, OPTIONS');
@@ -23,16 +26,25 @@ require_once __DIR__ . '/../config.php';
 require_once __DIR__ . '/../includes/db.php';
 $db = getDB();
 
-// Extract the license key and the hardware ID
-// Depending on how the client sends it, we handle common permutations
+// 1. Identify the license key
 $licenseKey = trim($input['license_key'] ?? $input['key'] ?? $_GET['key'] ?? $_GET['license_key'] ?? '');
-$hardwareId = trim($input['hardware_id'] ?? $input['product_code'] ?? $input['machine_id'] ?? $_GET['hardware_id'] ?? $_GET['product_code'] ?? '');
 
-// Fallback for legacy clients that only sent "product_code" as the license key itself
-if (empty($licenseKey) && !empty($hardwareId)) {
-    $licenseKey = $hardwareId;
-    // We don't have a distinct hardware ID in this legacy scenario
+// 2. Identify the hardware ID candidates (excluding product_code for now if it might be the key)
+$hardwareId = trim($input['hardware_id'] ?? $input['machine_id'] ?? $_GET['hardware_id'] ?? '');
+
+// 3. Handle "product_code" fallback (common in Java app)
+$productCode = trim($input['product_code'] ?? $_GET['product_code'] ?? '');
+
+if (empty($licenseKey) && !empty($productCode)) {
+    // If we only have product_code, it MUST be the license key (legacy)
+    $licenseKey = $productCode;
+} elseif (!empty($productCode) && empty($hardwareId)) {
+    // If we have both, and hardware_id is missing, product_code is the hardware_id
+    $hardwareId = $productCode;
 }
+
+// 4. Trace the request
+file_put_contents(__DIR__ . '/log.txt', date('[Y-m-d H:i:s] ') . "REQ: Key=$licenseKey, HW=$hardwareId (Method: " . $_SERVER['REQUEST_METHOD'] . ")\n", FILE_APPEND);
 
 if (empty($licenseKey)) {
     http_response_code(400);
@@ -87,6 +99,7 @@ try {
         if (!empty($features['bound_hardware_id'])) {
             $boundId = $features['bound_hardware_id'];
             if (empty($hardwareId) || $hardwareId !== $boundId) {
+                file_put_contents(__DIR__ . '/log.txt', date('[Y-m-d H:i:s] ') . "MISMATCH: Provided HW [$hardwareId] !== Bound HW [$boundId] for key [$licenseKey]\n", FILE_APPEND);
                 http_response_code(403);
                 echo json_encode(['status' => 'invalid', 'error' => 'Invalid key. Please check your purchase details.']);
                 exit;
@@ -99,7 +112,7 @@ try {
         $aboutText = $features['about_text'] ?? "Mico Sage\nLicensed to: " . ($license['label'] ?: $license['license_key']);
 
         echo json_encode([
-            'status' => $license['status'],
+            'status' => strtoupper($license['status']),
             'type' => $license['type'],
             'product' => $license['product_name'],
             'recovery_limit' => $recoveryLimit,
