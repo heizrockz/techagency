@@ -32,7 +32,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 }
 
 $input = json_decode(file_get_contents('php://input'), true);
-file_put_contents(__DIR__ . '/payload.log', date('Y-m-d H:i:s') . " Payload: " . file_get_contents('php://input') . "\n", FILE_APPEND);
+file_put_contents(sys_get_temp_dir() . '/mico_payload.log', date('Y-m-d H:i:s') . " Payload: " . file_get_contents('php://input') . "\n", FILE_APPEND);
 
 // Extract the license key and the hardware ID
 // Depending on how the client sends it, we handle common permutations

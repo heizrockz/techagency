@@ -1,5 +1,5 @@
 <?php
-$logFile = __DIR__ . '/payload.log';
+$logFile = sys_get_temp_dir() . '/mico_payload.log';
 if (file_exists($logFile)) {
     header('Content-Type: text/plain');
     echo file_get_contents($logFile);
