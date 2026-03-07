@@ -32,8 +32,17 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 }
 
 $input = json_decode(file_get_contents('php://input'), true);
-// Support both old "product_code" and new "license_key" field names
-$licenseKey = trim($input['license_key'] ?? $input['product_code'] ?? '');
+
+// Extract the license key and the hardware ID
+// Depending on how the client sends it, we handle common permutations
+$licenseKey = trim($input['license_key'] ?? $input['key'] ?? '');
+$hardwareId = trim($input['hardware_id'] ?? $input['product_code'] ?? $input['machine_id'] ?? '');
+
+// Fallback for legacy clients that only sent "product_code" as the license key itself
+if (empty($licenseKey) && !empty($hardwareId)) {
+    $licenseKey = $hardwareId;
+    // We don't have a distinct hardware ID in this legacy scenario
+}
 
 if (empty($licenseKey)) {
     http_response_code(400);
@@ -85,6 +94,17 @@ try {
         foreach ($fStmt->fetchAll() as $f) {
             $features[$f['feature_key']] = $f['feature_value'];
         }
+
+        // ── Hardware ID Binding Check ──
+        if (!empty($features['bound_hardware_id'])) {
+            $boundId = $features['bound_hardware_id'];
+            if (empty($hardwareId) || $hardwareId !== $boundId) {
+                http_response_code(403);
+                echo json_encode(['status' => 'invalid', 'error' => 'Invalid key. Please check your purchase details.']);
+                exit;
+            }
+        }
+        // ───────────────────────────────
 
         // Legacy compatibility: map features to old fields
         $recoveryLimit = isset($features['recovery_limit']) ? (int)$features['recovery_limit'] : -1;

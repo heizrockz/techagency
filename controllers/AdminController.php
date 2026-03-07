@@ -2117,6 +2117,14 @@ function adminAppLicenses(): void
                 if (!empty($fk)) $fStmt->execute([$id, $fk, $fv]);
             }
         }
+        
+        $boundHardwareId = trim($_POST['bound_hardware_id'] ?? '');
+        if (!empty($boundHardwareId)) {
+            $db->prepare('INSERT INTO app_license_features (license_id, feature_key, feature_value) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE feature_value = VALUES(feature_value)')
+               ->execute([$id, 'bound_hardware_id', $boundHardwareId]);
+        } else {
+            $db->prepare("DELETE FROM app_license_features WHERE license_id = ? AND feature_key = 'bound_hardware_id'")->execute([$id]);
+        }
 
         setFlash('License saved.', 'success');
         header('Location: ' . baseUrl('admin/app-licenses'));
@@ -2130,6 +2138,22 @@ function adminAppLicenses(): void
         ORDER BY l.created_at DESC")->fetchAll();
 
     $allProducts = $db->query("SELECT id, name FROM app_products WHERE is_active=1 ORDER BY name")->fetchAll();
+    
+    $editLicense = null;
+    $editFeatures = [];
+    if ($action === 'edit' && isset($_GET['id'])) {
+        $editId = intval($_GET['id']);
+        $stmt = $db->prepare("SELECT * FROM app_licenses WHERE id = ?");
+        $stmt->execute([$editId]);
+        $editLicense = $stmt->fetch();
+        
+        $fStmt = $db->prepare('SELECT feature_key, feature_value FROM app_license_features WHERE license_id = ?');
+        $fStmt->execute([$editId]);
+        foreach ($fStmt->fetchAll() as $f) {
+            $editFeatures[$f['feature_key']] = $f;
+        }
+    }
+    
     require __DIR__ . '/../views/admin/app_licenses.php';
 }
 

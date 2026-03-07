@@ -132,6 +132,12 @@ if (!defined('APP_NAME')) die('Direct access prevented');
                                     <label class="text-sm font-semibold text-white/60 ml-1">Admin Notes</label>
                                     <textarea name="notes" rows="2" class="form-input bg-white/5 border-white/10 focus:border-orange-500/50"><?= e($editLicense['notes'] ?? '') ?></textarea>
                                 </div>
+
+                                <div class="space-y-2 col-span-1 md:col-span-2">
+                                    <label class="text-sm font-semibold text-white/60 ml-1">Bound Hardware ID (Product Code)</label>
+                                    <input type="text" name="bound_hardware_id" class="form-input font-mono bg-white/5 border-white/10 focus:border-orange-500/50" value="<?= e($editFeatures['bound_hardware_id']['feature_value'] ?? '') ?>" placeholder="Optional: Lock license to specific hardware (e.g. M3-REC-...)">
+                                    <p class="text-xs text-white/40 ml-1 mt-1">If provided, the software must match this exact identifier during activation.</p>
+                                </div>
                             </div>
 
                             <!-- Features List -->
