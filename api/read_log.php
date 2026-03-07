@@ -1,8 +1,11 @@
 <?php
-$logFile = __DIR__ . '/../uploads/mico_payload.log';
-if (file_exists($logFile)) {
-    header('Content-Type: text/plain');
-    echo file_get_contents($logFile);
-} else {
-    echo "No payload log found at $logFile";
+require_once __DIR__ . '/../config.php';
+require_once __DIR__ . '/../includes/db.php';
+try {
+    $db = getDB();
+    $logs = $db->query("SELECT * FROM app_device_logs WHERE event_type = 'error' ORDER BY id DESC LIMIT 5")->fetchAll(PDO::FETCH_ASSOC);
+    header('Content-Type: application/json');
+    echo json_encode($logs, JSON_PRETTY_PRINT);
+} catch (Exception $e) {
+    echo "DB Error: " . $e->getMessage();
 }
