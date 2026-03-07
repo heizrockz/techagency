@@ -128,9 +128,10 @@ if (!defined('APP_NAME')) die('Direct access prevented');
                                     <p class="text-xs text-white/40 ml-1 mt-1">Leave blank for lifetime validity.</p>
                                 </div>
                                 
-                                <div class="space-y-2">
-                                    <label class="text-sm font-semibold text-white/60 ml-1">Admin Notes</label>
-                                    <textarea name="notes" rows="2" class="form-input bg-white/5 border-white/10 focus:border-orange-500/50"><?= e($editLicense['notes'] ?? '') ?></textarea>
+                                <div class="space-y-2 col-span-1 md:col-span-2">
+                                    <label class="text-sm font-semibold text-white/60 ml-1">About Message (Custom)</label>
+                                    <textarea name="about_text" rows="3" class="form-input bg-white/5 border-white/10 focus:border-orange-500/50" placeholder="Custom text to show in the app's About box for this license..."><?= e($editLicense['about_text'] ?? '') ?></textarea>
+                                    <p class="text-xs text-white/40 ml-1 mt-1">If provided, this overrides the default product description in the application.</p>
                                 </div>
 
                                 <div class="space-y-2 col-span-1 md:col-span-2">

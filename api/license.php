@@ -47,8 +47,22 @@ if (empty($licenseKey) && !empty($productCode)) {
 file_put_contents(__DIR__ . '/log.txt', date('[Y-m-d H:i:s] ') . "REQ: Key=$licenseKey, HW=$hardwareId (Method: " . $_SERVER['REQUEST_METHOD'] . ")\n", FILE_APPEND);
 
 if (empty($licenseKey)) {
+    // Check if we can find a license by hardware ID binding
+    if (!empty($hardwareId)) {
+        $stmt = $db->prepare('SELECT l.license_key FROM app_licenses l 
+            JOIN app_license_features f ON l.id = f.license_id 
+            WHERE f.feature_key = "bound_hardware_id" AND f.feature_value = ? LIMIT 1');
+        $stmt->execute([$hardwareId]);
+        $foundKey = $stmt->fetchColumn();
+        if ($foundKey) {
+            $licenseKey = $foundKey;
+        }
+    }
+}
+
+if (empty($licenseKey)) {
     http_response_code(400);
-    echo json_encode(['error' => 'license_key is required']);
+    echo json_encode(['error' => 'license_key is required', 'status' => 'invalid']);
     exit;
 }
 
@@ -69,6 +83,17 @@ try {
             WHERE l.license_key = ?');
         $stmt->execute([$licenseKey]);
         $license = $stmt->fetch();
+
+        if (!$license && !empty($hardwareId)) {
+            // Check if we can find a license by hardware ID binding
+            $stmt = $db->prepare('SELECT l.*, p.name as product_name, p.version as product_version
+                FROM app_licenses l 
+                JOIN app_products p ON l.product_id = p.id
+                JOIN app_license_features f ON l.id = f.license_id 
+                WHERE f.feature_key = "bound_hardware_id" AND f.feature_value = ? LIMIT 1');
+            $stmt->execute([$hardwareId]);
+            $license = $stmt->fetch();
+        }
 
         if (!$license) {
             http_response_code(404);
@@ -107,9 +132,24 @@ try {
         }
         // ───────────────────────────────
 
+        // ── Device Tracking ──
+        if (!empty($hardwareId)) {
+            $ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+            $hostname = $input['hostname'] ?? $_GET['hostname'] ?? null;
+            $appVer = $input['app_version'] ?? $_GET['app_version'] ?? null;
+            
+            $db->prepare("INSERT INTO app_devices (license_id, hardware_id, ip_address, hostname, app_version, is_online, last_heartbeat) 
+                VALUES (?, ?, ?, ?, ?, 1, NOW()) 
+                ON DUPLICATE KEY UPDATE license_id=VALUES(license_id), ip_address=VALUES(ip_address), 
+                hostname=IFNULL(VALUES(hostname), hostname), app_version=IFNULL(VALUES(app_version), app_version), 
+                is_online=1, last_heartbeat=NOW()")
+                ->execute([$license['id'], $hardwareId, $ip, $hostname, $appVer]);
+        }
+        // ──────────────────
+
         // Legacy compatibility: map features to old fields
         $recoveryLimit = isset($features['recovery_limit']) ? (int)$features['recovery_limit'] : -1;
-        $aboutText = $features['about_text'] ?? "Mico Sage\nLicensed to: " . ($license['label'] ?: $license['license_key']);
+        $aboutText = $license['about_text'] ?: ($features['about_text'] ?? "Mico Sage\nLicensed to: " . ($license['label'] ?: $license['license_key']));
 
         echo json_encode([
             'status' => strtoupper($license['status']),

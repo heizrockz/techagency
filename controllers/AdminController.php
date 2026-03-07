@@ -2073,6 +2073,13 @@ function adminAppLicenses(): void
     $db = getDB();
     $action = $_GET['action'] ?? 'list';
 
+    if ($action === 'delete' && isset($_GET['id'])) {
+        $db->prepare("DELETE FROM app_licenses WHERE id = ?")->execute([intval($_GET['id'])]);
+        setFlash('License revoked and deleted.', 'success');
+        header('Location: ' . baseUrl('admin/app-licenses'));
+        exit;
+    }
+
     if ($action === 'bulk') {
         $ids = $_POST['selected_ids'] ?? [];
         $bulkAction = $_POST['bulk_action'] ?? '';
@@ -2099,12 +2106,14 @@ function adminAppLicenses(): void
         $expiresAt = !empty($_POST['expires_at']) ? $_POST['expires_at'] : null;
         $notes = trim($_POST['notes'] ?? '');
 
+        $aboutText = trim($_POST['about_text'] ?? '');
+
         if ($id > 0) {
-            $db->prepare('UPDATE app_licenses SET product_id=?, license_key=?, label=?, status=?, type=?, max_devices=?, expires_at=?, notes=? WHERE id=?')
-                ->execute([$productId, $licenseKey, $label, $status, $type, $maxDevices, $expiresAt, $notes, $id]);
+            $db->prepare('UPDATE app_licenses SET product_id=?, license_key=?, label=?, status=?, type=?, max_devices=?, expires_at=?, notes=?, about_text=? WHERE id=?')
+                ->execute([$productId, $licenseKey, $label, $status, $type, $maxDevices, $expiresAt, $notes, $aboutText, $id]);
         } else {
-            $db->prepare('INSERT INTO app_licenses (product_id, license_key, label, status, type, max_devices, expires_at, notes) VALUES (?,?,?,?,?,?,?,?)')
-                ->execute([$productId, $licenseKey, $label, $status, $type, $maxDevices, $expiresAt, $notes]);
+            $db->prepare('INSERT INTO app_licenses (product_id, license_key, label, status, type, max_devices, expires_at, notes, about_text) VALUES (?,?,?,?,?,?,?,?,?)')
+                ->execute([$productId, $licenseKey, $label, $status, $type, $maxDevices, $expiresAt, $notes, $aboutText]);
             $id = $db->lastInsertId();
         }
 
@@ -2286,7 +2295,29 @@ function adminAppReviews(): void
 function _ensureAppTables()
 {
     $db = getDB();
-    // Tables should exist if migration was run, but we can check here if needed.
+    try {
+        $db->prepare("ALTER TABLE app_licenses ADD COLUMN IF NOT EXISTS about_text TEXT NULL AFTER notes")->execute();
+        
+        $db->exec("CREATE TABLE IF NOT EXISTS app_devices (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            license_id INT NOT NULL,
+            hardware_id VARCHAR(255) NOT NULL,
+            hostname VARCHAR(255),
+            ip_address VARCHAR(45),
+            app_version VARCHAR(20),
+            is_online TINYINT(1) DEFAULT 1,
+            last_heartbeat DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            UNIQUE KEY unq_hw (hardware_id)
+        )");
+
+        $db->exec("CREATE TABLE IF NOT EXISTS app_device_logs (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            device_id INT NOT NULL,
+            event_type VARCHAR(50),
+            details TEXT,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )");
+    } catch (Exception $e) {}
 }
 
 function _generateLicenseKey()
