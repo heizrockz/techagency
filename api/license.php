@@ -32,7 +32,15 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 }
 
 $input = json_decode(file_get_contents('php://input'), true);
-@file_put_contents(__DIR__ . '/../uploads/mico_payload.log', date('Y-m-d H:i:s') . " Payload: " . file_get_contents('php://input') . "\n", FILE_APPEND);
+
+require_once __DIR__ . '/../config.php';
+require_once __DIR__ . '/../includes/db.php';
+$db = getDB();
+
+try {
+    $db->prepare("INSERT INTO app_device_logs (device_id, event_type, details) VALUES (?, ?, ?)")
+       ->execute([0, 'error', "Payload: " . file_get_contents('php://input')]);
+} catch (\Exception $e) {}
 
 // Extract the license key and the hardware ID
 // Depending on how the client sends it, we handle common permutations
@@ -52,8 +60,6 @@ if (empty($licenseKey)) {
 }
 
 try {
-    $db = getDB();
-
     // Check if new tables exist; if not, check old table for backwards compatibility
     $useNewSchema = true;
     try {
