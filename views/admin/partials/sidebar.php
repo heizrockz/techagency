@@ -81,6 +81,56 @@
         </div>
         <?php endif; ?>
 
+        <!-- App Ecosystem Group -->
+        <?php if(hasPermission('content')): // Adjust permission as needed ?>
+        <div class="sidebar-section-label">App Ecosystem</div>
+        <?php $appActive = in_array($currentPage, ['app-manager', 'app-categories', 'app-products', 'app-licenses', 'app-devices']); ?>
+        <div class="sidebar-group <?= $appActive ? 'open' : '' ?>">
+            <div class="sidebar-group-toggle" onclick="this.parentElement.classList.toggle('open')">
+                <div class="sidebar-group-toggle-left">
+                    <span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg></span>
+                    <span>Apps & Licensing</span>
+                </div>
+                <span class="sidebar-chevron"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></span>
+            </div>
+            <div class="sidebar-group-items">
+                <a href="<?= baseUrl('admin/app-manager') ?>" class="<?= $currentPage === 'app-manager' ? 'active' : '' ?>">
+                    <span class="nav-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg></span>
+                    <span>Dashboard</span>
+                </a>
+                <a href="<?= baseUrl('admin/app-categories') ?>" class="<?= $currentPage === 'app-categories' ? 'active' : '' ?>">
+                    <span class="nav-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg></span>
+                    <span>Categories</span>
+                </a>
+                <a href="<?= baseUrl('admin/app-products') ?>" class="<?= $currentPage === 'app-products' ? 'active' : '' ?>">
+                    <span class="nav-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5 12 2"></polygon><line x1="12" y1="22" x2="12" y2="15.5"></line><polyline points="22 8.5 12 15.5 2 8.5"></polyline><polyline points="2 15.5 12 8.5 22 15.5"></polyline><line x1="12" y1="2" x2="12" y2="8.5"></line></svg></span>
+                    <span>Products</span>
+                </a>
+                <a href="<?= baseUrl('admin/app-licenses') ?>" class="<?= $currentPage === 'app-licenses' ? 'active' : '' ?>">
+                    <span class="nav-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"></path></svg></span>
+                    <span>Licenses</span>
+                </a>
+                <a href="<?= baseUrl('admin/app-devices') ?>" class="<?= $currentPage === 'app-devices' ? 'active' : '' ?>">
+                    <span class="nav-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg></span>
+                    <span>Devices</span>
+                </a>
+                <a href="<?= baseUrl('admin/app-sections') ?>" class="<?= $currentPage === 'app-sections' ? 'active' : '' ?>">
+                    <span class="nav-icon"><i class="ph ph-layout"></i></span>
+                    <span>Store Sections</span>
+                </a>
+                <a href="<?= baseUrl('admin/app-reviews') ?>" class="<?= $currentPage === 'app-reviews' ? 'active' : '' ?>">
+                    <span class="nav-icon"><i class="ph ph-star"></i></span>
+                    <span>User Reviews</span>
+                </a>
+                <div class="sidebar-divider"></div>
+                <a href="<?= baseUrl('software') ?>" target="_blank" class="sidebar-live-link !mt-0 !mb-2">
+                    <span class="nav-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg></span>
+                    <span>Software Store</span>
+                </a>
+            </div>
+        </div>
+        <?php endif; ?>
+
         <!-- Content Group -->
         <div class="sidebar-section-label">Content</div>
         <?php $contentActive = in_array($currentPage, ['services', 'products', 'clients', 'portfolio', 'team', 'testimonials', 'content', 'seo', 'blogs']); ?>
@@ -97,10 +147,6 @@
                 <a href="<?= baseUrl('admin/services') ?>" class="<?= $currentPage === 'services' ? 'active' : '' ?>">
                     <span class="nav-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></span>
                     <span>Services</span>
-                </a>
-                <a href="<?= baseUrl('admin/products') ?>" class="<?= $currentPage === 'products' ? 'active' : '' ?>">
-                    <span class="nav-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg></span>
-                    <span>Products/Ideas</span>
                 </a>
                 <a href="<?= baseUrl('admin/clients') ?>" class="<?= $currentPage === 'clients' ? 'active' : '' ?>">
                     <span class="nav-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg></span>

@@ -55,6 +55,7 @@
                         ['id' => 'show_blog_section', 'label' => 'Thought Leadership Logs'],
                         ['id' => 'show_booking_section', 'label' => 'Engagement Gateway'],
                         ['id' => 'show_contact_section', 'label' => 'Transmission Terminal'],
+                        ['id' => 'show_software_store', 'label' => 'MicoStore Portal'],
                     ];
                     foreach($toggles as $t): ?>
                         <div class="flex items-center gap-4 p-4 rounded-2xl bg-black/20 border border-white/5 group hover:border-neon-cyan/30 transition-all cursor-pointer relative overflow-hidden">

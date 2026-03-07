@@ -19,6 +19,9 @@
         <li><a href="<?= baseUrl('/') ?>#services"><?= t('nav_services') ?></a></li>
         <li><a href="<?= baseUrl('/') ?>#about"><?= t('nav_about') ?></a></li>
         <li><a href="<?= baseUrl('portfolio') ?>"><?= t('nav_portfolio') ?></a></li>
+        <?php if(getSetting('show_software_store', '1') === '1'): ?>
+        <li><a href="<?= baseUrl('software') ?>"><?= getCurrentLocale() === 'en' ? 'Software' : 'برامج' ?></a></li>
+        <?php endif; ?>
         <?php if(getSetting('show_products_section', '1') === '1'): ?>
         <li><a href="<?= baseUrl('/') ?>#products"><?= getCurrentLocale() === 'en' ? 'Products' : 'منتجات' ?></a></li>
         <?php endif; ?>

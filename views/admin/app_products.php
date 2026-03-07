@@ -1,0 +1,345 @@
+<?php
+// Ensure this file is only accessed through the controller
+if (!defined('APP_NAME')) die('Direct access prevented');
+?>
+<!DOCTYPE html>
+<html lang="<?= e(getCurrentLocale()) ?>" dir="<?= isRTL() ? 'rtl' : 'ltr' ?>">
+<head>
+    <title>App Products — <?= APP_NAME ?></title>
+    <?php require __DIR__ . '/partials/_head_assets.php'; ?>
+    <style>
+        .form-tab { display: none; }
+        .form-tab.active { display: block; }
+        .tab-btn.active { 
+            background: rgba(139, 92, 246, 0.1);
+            color: #8b5cf6;
+            border-color: rgba(139, 92, 246, 0.4);
+        }
+    </style>
+</head>
+<body dir="<?= isRTL() ? 'rtl' : 'ltr' ?>">
+<div class="admin-layout flex w-full h-screen overflow-hidden">
+    <?php $currentPage = 'app-products'; require __DIR__ . '/partials/sidebar.php'; ?>
+    <div class="flex-1 flex flex-col min-w-0">
+        <header class="h-20 flex items-center justify-between px-8 bg-glass-bg border-b border-white/5 shrink-0 backdrop-blur-xl sticky top-0 z-[100]">
+            <div class="absolute inset-0 bg-gradient-to-r from-violet-500/5 via-transparent to-transparent"></div>
+            <div class="relative flex items-center gap-4">
+                <div class="w-10 h-10 rounded-xl bg-violet-500/10 flex items-center justify-center border border-violet-500/20">
+                    <i class="ph ph-app-window text-2xl text-violet-500 animate-pulse"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold text-white tracking-tight">App Products</h1>
+                    <p class="text-[10px] text-white/40 uppercase tracking-widest font-black hidden sm:block">Product Management</p>
+                </div>
+            </div>
+            <div class="relative flex items-center gap-4">
+                <a href="<?= baseUrl('admin/app-products?action=new') ?>" class="group flex items-center gap-2 px-3 sm:px-5 py-2.5 bg-violet-500/10 hover:bg-violet-500/20 border border-violet-500/20 hover:border-violet-500/40 rounded-xl transition-all duration-300">
+                    <i class="ph ph-plus-circle text-lg text-violet-500 group-hover:rotate-90 transition-transform duration-500"></i>
+                    <span class="text-sm font-semibold text-violet-500 hidden sm:inline">New Product</span>
+                </a>
+                <div class="h-8 w-px bg-white/10 mx-2"></div>
+                <?php require __DIR__ . '/partials/_topbar.php'; ?>
+            </div>
+        </header>
+
+        <main class="flex-1 overflow-y-auto p-8 crm-main-scroll bg-[#0b0e14]">
+            <?php if ($flash = getFlash()): ?>
+                <div class="mb-8 p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-xl flex items-center gap-3 animate-in fade-in slide-in-from-top-4">
+                    <div class="w-8 h-8 rounded-lg bg-emerald-500/20 flex items-center justify-center border border-emerald-500/20">
+                        <i class="ph ph-check-circle text-emerald-500"></i>
+                    </div>
+                    <p class="text-emerald-500 font-medium"><?= e($flash) ?></p>
+                </div>
+            <?php endif; ?>
+
+            <?php if ($action === 'edit' || $action === 'new'): ?>
+                <?php 
+                $editProduct = null;
+                $gallery = [];
+                if ($action === 'edit' && isset($_GET['id'])) {
+                    $db = getDB();
+                    $stmt = $db->prepare("SELECT * FROM app_products WHERE id = ?");
+                    $stmt->execute([intval($_GET['id'])]);
+                    $editProduct = $stmt->fetch();
+                    
+                    $gallery = $db->query("SELECT * FROM app_product_images WHERE product_id = " . intval($_GET['id']) . " ORDER BY sort_order")->fetchAll();
+                }
+                ?>
+                <div class="max-w-4xl mx-auto pb-20">
+                    <div class="admin-card relative overflow-hidden group">
+                        <!-- Header & Tabs -->
+                        <div class="flex items-center justify-between p-6 border-b border-white/5">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-lg bg-violet-500/10 flex items-center justify-center border border-violet-500/20 text-violet-500">
+                                    <i class="ph ph-pencil-line text-xl"></i>
+                                </div>
+                                <h2 class="text-xl font-bold text-white"><?= $action === 'edit' ? 'Edit Product' : 'Add New Product' ?></h2>
+                            </div>
+                            
+                            <div class="flex items-center bg-white/5 p-1 rounded-xl">
+                                <button onclick="switchTab('general')" class="tab-btn active px-4 py-1.5 rounded-lg text-xs font-bold uppercase tracking-widest transition-all">General</button>
+                                <button onclick="switchTab('seo')" class="tab-btn px-4 py-1.5 rounded-lg text-xs font-bold uppercase tracking-widest transition-all">SEO & Vis</button>
+                                <button onclick="switchTab('gallery')" class="tab-btn px-4 py-1.5 rounded-lg text-xs font-bold uppercase tracking-widest transition-all">Gallery</button>
+                            </div>
+                        </div>
+
+                        <form method="POST" action="<?= baseUrl('admin/app-products') ?>" class="p-6" enctype="multipart/form-data">
+                            <input type="hidden" name="id" value="<?= $editProduct['id'] ?? 0 ?>">
+                            
+                            <!-- General Tab -->
+                            <div id="tab-general" class="form-tab active space-y-6">
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div class="space-y-2">
+                                        <label class="text-[11px] font-bold text-white/40 uppercase tracking-widest ml-1">Product Name</label>
+                                        <input type="text" name="name" class="form-input" required value="<?= e($editProduct['name'] ?? '') ?>" placeholder="e.g. Acme POS Pro">
+                                    </div>
+                                    <div class="space-y-2">
+                                        <label class="text-[11px] font-bold text-white/40 uppercase tracking-widest ml-1">Slug Identifier</label>
+                                        <input type="text" name="slug" class="form-input" value="<?= e($editProduct['slug'] ?? '') ?>" placeholder="Auto-generated if empty">
+                                    </div>
+                                    <div class="space-y-2">
+                                        <label class="text-[11px] font-bold text-white/40 uppercase tracking-widest ml-1">Category</label>
+                                        <select name="category_id" class="form-input">
+                                            <option value="">Select Category...</option>
+                                            <?php foreach ($categories as $cat): ?>
+                                                <option value="<?= $cat['id'] ?>" <?= ($editProduct['category_id'] ?? 0) == $cat['id'] ? 'selected' : '' ?>>
+                                                    <?= e($cat['name']) ?>
+                                                </option>
+                                            <?php endforeach; ?>
+                                        </select>
+                                    </div>
+                                    <div class="space-y-2">
+                                        <label class="text-[11px] font-bold text-white/40 uppercase tracking-widest ml-1">Version</label>
+                                        <input type="text" name="version" class="form-input" value="<?= e($editProduct['version'] ?? '1.0.0') ?>">
+                                    </div>
+                                </div>
+
+                                <div class="p-4 rounded-xl bg-violet-500/5 border border-violet-500/10 space-y-4">
+                                    <h3 class="text-[10px] font-black uppercase tracking-widest text-violet-500">Visual Assets</h3>
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div class="space-y-2">
+                                            <label class="text-[11px] font-bold text-white/40 uppercase tracking-widest ml-1">Icon Upload</label>
+                                            <input type="file" name="icon_file" class="form-input !py-1.5 text-[10px]">
+                                            <input type="text" name="icon_url" class="form-input text-xs" value="<?= e($editProduct['icon_url'] ?? '') ?>" placeholder="Or paste icon URL">
+                                        </div>
+                                        <div class="space-y-2">
+                                            <label class="text-[11px] font-bold text-white/40 uppercase tracking-widest ml-1">Header/Cover Upload</label>
+                                            <input type="file" name="header_file" class="form-input !py-1.5 text-[10px]">
+                                            <input type="text" name="header_image" class="form-input text-xs" value="<?= e($editProduct['header_image'] ?? '') ?>" placeholder="Or paste header URL">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="space-y-2">
+                                    <label class="text-[11px] font-bold text-white/40 uppercase tracking-widest ml-1">Short Description</label>
+                                    <textarea name="description" rows="2" class="form-input" placeholder="Brief summary for list view..."><?= e($editProduct['description'] ?? '') ?></textarea>
+                                </div>
+                                <div class="space-y-2">
+                                    <label class="text-[11px] font-bold text-white/40 uppercase tracking-widest ml-1">Full Specifications (One per line)</label>
+                                    <textarea name="features" rows="4" class="form-input" placeholder="Feature 1\nFeature 2..."><?= e($editProduct['features'] ?? '') ?></textarea>
+                                </div>
+
+                                <div class="p-4 rounded-xl bg-emerald-500/5 border border-emerald-500/10 space-y-4">
+                                    <h3 class="text-[10px] font-black uppercase tracking-widest text-emerald-500">Pricing & Distribution</h3>
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div class="space-y-2">
+                                            <label class="text-[11px] font-bold text-white/40 uppercase tracking-widest ml-1">Pricing Model</label>
+                                            <select name="pricing_model" class="form-input">
+                                                <?php $models = ['free' => 'Free', 'one_time' => 'One-Time Purchase', 'monthly' => 'Monthly Subscription', 'yearly' => 'Yearly Subscription']; 
+                                                foreach($models as $k => $v): ?>
+                                                    <option value="<?= $k ?>" <?= ($editProduct['pricing_model'] ?? 'free') === $k ? 'selected' : '' ?>><?= $v ?></option>
+                                                <?php endforeach; ?>
+                                            </select>
+                                        </div>
+                                        <div class="space-y-2">
+                                            <label class="text-[11px] font-bold text-white/40 uppercase tracking-widest ml-1">Base Price ($)</label>
+                                            <input type="number" step="0.01" name="price" class="form-input" value="<?= e($editProduct['price'] ?? '0.00') ?>">
+                                        </div>
+                                    </div>
+                                    <div class="space-y-2">
+                                        <label class="text-[11px] font-bold text-white/40 uppercase tracking-widest ml-1">Download URL / Build Upload</label>
+                                        <input type="file" name="software_file" class="form-input !py-1.5 text-[10px] mb-2">
+                                        <input type="text" name="download_url" class="form-input text-xs" value="<?= e($editProduct['download_url'] ?? '') ?>" placeholder="Or direct link">
+                                    </div>
+                                    <div class="space-y-2">
+                                        <label class="text-[11px] font-bold text-white/40 uppercase tracking-widest ml-1">Buy / Checkout URL</label>
+                                        <input type="text" name="buy_url" class="form-input" value="<?= e($editProduct['buy_url'] ?? '') ?>" placeholder="Stripe/PayPal link">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- SEO Tab -->
+                            <div id="tab-seo" class="form-tab space-y-6">
+                                <div class="p-6 rounded-2xl bg-white/5 border border-white/10 space-y-6">
+                                    <h3 class="text-[10px] font-black uppercase tracking-widest text-white/60">Search Engine Optimization</h3>
+                                    <div class="space-y-2">
+                                        <label class="text-[11px] font-bold text-white/40 uppercase tracking-widest ml-1">Meta Description</label>
+                                        <textarea name="meta_description" rows="3" class="form-input" placeholder="Enter specific description for Google search..."><?= e($editProduct['meta_description'] ?? '') ?></textarea>
+                                    </div>
+                                    <div class="space-y-2">
+                                        <label class="text-[11px] font-bold text-white/40 uppercase tracking-widest ml-1">Meta Keywords (comma separated)</label>
+                                        <input type="text" name="meta_keywords" class="form-input" value="<?= e($editProduct['meta_keywords'] ?? '') ?>" placeholder="software, tool, efficiency, recovery">
+                                    </div>
+                                </div>
+
+                                <div class="p-6 rounded-2xl bg-white/5 border border-white/10 space-y-4">
+                                    <h3 class="text-[10px] font-black uppercase tracking-widest text-white/60">Visibility Settings</h3>
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <label class="flex items-center gap-3 p-4 rounded-xl bg-white/5 border border-white/5 hover:border-white/20 transition-all cursor-pointer">
+                                            <input type="checkbox" name="is_public" class="w-4 h-4 rounded border-white/10" <?= ($editProduct['is_public'] ?? 1) ? 'checked' : '' ?>>
+                                            <div>
+                                                <p class="text-sm font-bold text-white">Publicly Listed</p>
+                                                <p class="text-[10px] text-white/40">Visible in software store page</p>
+                                            </div>
+                                        </label>
+                                        <label class="flex items-center gap-3 p-4 rounded-xl bg-white/5 border border-white/5 hover:border-white/20 transition-all cursor-pointer">
+                                            <input type="checkbox" name="show_price" class="w-4 h-4 rounded border-white/10" <?= ($editProduct['show_price'] ?? 1) ? 'checked' : '' ?>>
+                                            <div>
+                                                <p class="text-sm font-bold text-white">Show Price</p>
+                                                <p class="text-[10px] text-white/40">Display price tag on products</p>
+                                            </div>
+                                        </label>
+                                        <label class="flex items-center gap-3 p-4 rounded-xl bg-white/5 border border-white/5 hover:border-white/20 transition-all cursor-pointer">
+                                            <input type="checkbox" name="show_buy_button" class="w-4 h-4 rounded border-white/10" <?= ($editProduct['show_buy_button'] ?? 1) ? 'checked' : '' ?>>
+                                            <div>
+                                                <p class="text-sm font-bold text-white">Show Buy Button</p>
+                                                <p class="text-[10px] text-white/40">Enable checkout redirect</p>
+                                            </div>
+                                        </label>
+                                        <label class="flex items-center gap-3 p-4 rounded-xl bg-white/5 border border-white/5 hover:border-white/20 transition-all cursor-pointer">
+                                            <input type="checkbox" name="is_active" class="w-4 h-4 rounded border-white/10" <?= ($editProduct['is_active'] ?? 1) ? 'checked' : '' ?>>
+                                            <div>
+                                                <p class="text-sm font-bold text-white">Internal Activation</p>
+                                                <p class="text-[10px] text-white/40">Enable licensing system access</p>
+                                            </div>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Gallery Tab -->
+                            <div id="tab-gallery" class="form-tab space-y-6">
+                                <div class="p-6 rounded-2xl bg-white/5 border border-white/10 space-y-6">
+                                    <div class="flex items-center justify-between">
+                                        <h3 class="text-[10px] font-black uppercase tracking-widest text-white/60">Product Image Gallery</h3>
+                                        <span class="text-[10px] text-white/20 px-2 py-0.5 rounded-full border border-white/10">Max 10 images</span>
+                                    </div>
+                                    
+                                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                                        <?php foreach ($gallery as $img): ?>
+                                            <div class="relative group aspect-video rounded-xl overflow-hidden bg-white/5 border border-white/10">
+                                                <img src="<?= baseUrl($img['image_path']) ?>" class="w-full h-full object-cover">
+                                                <div class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                                                    <a href="#" onclick="deleteImage(<?= $img['id'] ?>)" class="w-8 h-8 rounded-lg bg-pink-500/20 hover:bg-pink-500/40 border border-pink-500/20 flex items-center justify-center text-pink-500">
+                                                        <i class="ph ph-trash"></i>
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        <?php endforeach; ?>
+                                        <label class="aspect-video rounded-xl border-2 border-dashed border-white/10 hover:border-violet-500/40 hover:bg-violet-500/5 transition-all flex flex-col items-center justify-center gap-2 cursor-pointer">
+                                            <i class="ph ph-plus-circle text-2xl text-white/20"></i>
+                                            <span class="text-[10px] font-bold text-white/20 uppercase">Add More</span>
+                                            <input type="file" name="gallery_files[]" multiple class="hidden">
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="flex items-center gap-4 mt-8 pt-8 border-t border-white/5">
+                                <button type="submit" class="flex-1 bg-violet-500 hover:bg-violet-600 text-white font-bold py-3 rounded-xl transition-all shadow-lg shadow-violet-500/20">
+                                    Save Product Details
+                                </button>
+                                <a href="<?= baseUrl('admin/app-products') ?>" class="px-8 py-3 bg-white/5 hover:bg-white/10 text-white font-bold rounded-xl transition-all border border-white/5">
+                                    Cancel
+                                </a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <script>
+                function switchTab(tabId) {
+                    document.querySelectorAll('.form-tab').forEach(t => t.classList.remove('active'));
+                    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                    document.getElementById('tab-' + tabId).classList.add('active');
+                    event.currentTarget.classList.add('active');
+                }
+                function deleteImage(id) {
+                    if (confirm('Delete this image from gallery?')) {
+                        // Implement ajax delete if needed
+                    }
+                    event.preventDefault();
+                }
+                </script>
+
+            <?php else: ?>
+                <!-- Product List View -->
+                <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                    <?php foreach ($products as $p): ?>
+                        <div class="admin-card group hover:scale-[1.01] transition-transform duration-300">
+                            <div class="p-6">
+                                <div class="flex items-start justify-between mb-6">
+                                    <div class="flex items-center gap-4">
+                                        <div class="w-14 h-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center overflow-hidden">
+                                            <?php if($p['icon_url']): ?>
+                                                <img src="<?= strpos($p['icon_url'], 'http') === 0 ? e($p['icon_url']) : baseUrl($p['icon_url']) ?>" class="w-full h-full object-contain p-2">
+                                            <?php else: ?>
+                                                <i class="ph ph-cube text-3xl text-violet-500 group-hover:rotate-12 transition-transform"></i>
+                                            <?php endif; ?>
+                                        </div>
+                                        <div>
+                                            <h3 class="text-lg font-bold text-white group-hover:text-violet-400 transition-colors"><?= e($p['name']) ?></h3>
+                                            <div class="flex items-center gap-2 mt-1">
+                                                <span class="px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-widest" style="background: <?= $p['category_color'] ?>20; color: <?= $p['category_color'] ?>; border: 1px solid <?= $p['category_color'] ?>30;">
+                                                    <?= e($p['category_name']) ?>
+                                                </span>
+                                                <span class="text-[10px] text-white/40 font-mono">v<?= e($p['version']) ?></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="flex gap-1.5">
+                                        <a href="<?= baseUrl('admin/app-products?action=edit&id=' . $p['id']) ?>" class="w-8 h-8 rounded-lg bg-white/5 hover:bg-violet-500/20 border border-white/5 flex items-center justify-center text-white/60 hover:text-violet-500 transition-all">
+                                            <i class="ph ph-pencil-simple"></i>
+                                        </a>
+                                        <a href="<?= baseUrl('admin/app-products?action=delete&id=' . $p['id']) ?>" onclick="return confirm('Full delete?')" class="w-8 h-8 rounded-lg bg-white/5 hover:bg-pink-500/20 border border-white/5 flex items-center justify-center text-white/60 hover:text-pink-500 transition-all">
+                                            <i class="ph ph-trash"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                                
+                                <div class="grid grid-cols-3 gap-4 p-4 rounded-xl bg-white/[0.02] border border-white/5">
+                                    <div class="text-center">
+                                        <p class="text-[10px] font-black uppercase tracking-widest text-white/20 mb-1">Licenses</p>
+                                        <p class="text-lg font-bold text-white"><?= $p['license_count'] ?></p>
+                                    </div>
+                                    <div class="text-center border-x border-white/5">
+                                        <p class="text-[10px] font-black uppercase tracking-widest text-white/20 mb-1">Active</p>
+                                        <p class="text-lg font-bold text-emerald-500"><?= $p['active_license_count'] ?></p>
+                                    </div>
+                                    <div class="text-center">
+                                        <p class="text-[10px] font-black uppercase tracking-widest text-white/20 mb-1">Price</p>
+                                        <p class="text-lg font-bold text-violet-500">$<?= number_format($p['price'], 0) ?></p>
+                                    </div>
+                                </div>
+
+                                <div class="mt-6 flex items-center justify-between">
+                                    <div class="flex items-center gap-2">
+                                        <div class="w-2 h-2 rounded-full <?= $p['is_active'] ? 'bg-emerald-500' : 'bg-pink-500' ?> animate-pulse"></div>
+                                        <span class="text-[10px] font-black uppercase tracking-widest text-white/40"><?= $p['is_active'] ? 'Active' : 'Draft' ?></span>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <i class="ph ph-globe text-white/20"></i>
+                                        <span class="text-[10px] font-black uppercase tracking-widest <?= $p['is_public'] ? 'text-violet-400' : 'text-white/20' ?>"><?= $p['is_public'] ? 'Public' : 'Hidden' ?></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            <?php endif; ?>
+        </main>
+    </div>
+</div>
+<?php require __DIR__ . '/partials/_footer_assets.php'; ?>
+</body>
+</html>

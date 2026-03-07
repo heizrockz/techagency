@@ -1879,3 +1879,396 @@ function adminEmailMarketing(): void {
 
     require __DIR__ . '/../views/admin/email_marketing.php';
 }
+
+// ── App Ecosystem ──────────────────────────────────────────
+
+function adminAppManager(): void
+{
+    requireAdmin();
+    requirePermission('settings');
+    _ensureAppTables();
+    $db = getDB();
+
+    $totalProducts = $db->query("SELECT COUNT(*) FROM app_products")->fetchColumn();
+    $totalLicenses = $db->query("SELECT COUNT(*) FROM app_licenses")->fetchColumn();
+    $activeLicenses = $db->query("SELECT COUNT(*) FROM app_licenses WHERE status='active'")->fetchColumn();
+    $onlineDevices = $db->query("SELECT COUNT(*) FROM app_devices WHERE is_online=1")->fetchColumn();
+    $totalInstalls = $db->query("SELECT SUM(total_installs) FROM app_products")->fetchColumn() ?: 0;
+
+    $categoryStats = $db->query("SELECT c.name, c.icon, c.color, (SELECT COUNT(*) FROM app_products p WHERE p.category_id = c.id) as product_count FROM app_categories c ORDER BY c.sort_order")->fetchAll();
+    $licenseStatusDist = $db->query("SELECT status, COUNT(*) as cnt FROM app_licenses GROUP BY status")->fetchAll();
+    
+    // Unified Feed: Heartbeats + Downloads
+    $recentConnections = $db->query("SELECT l.*, d.hostname, d.ip_address, d.app_version, lic.license_key, p.name as product_name 
+        FROM app_device_logs l 
+        LEFT JOIN app_devices d ON l.device_id = d.id 
+        LEFT JOIN app_licenses lic ON d.license_id = lic.id
+        LEFT JOIN app_products p ON lic.product_id = p.id
+        ORDER BY l.created_at DESC LIMIT 15")->fetchAll();
+
+    require __DIR__ . '/../views/admin/app_manager.php';
+}
+
+function adminAppCategories(): void
+{
+    requireAdmin();
+    requirePermission('settings');
+    _ensureAppTables();
+    $db = getDB();
+    $action = $_GET['action'] ?? 'list';
+
+    if ($action === 'delete' && isset($_GET['id'])) {
+        $db->prepare('DELETE FROM app_categories WHERE id = ?')->execute([intval($_GET['id'])]);
+        setFlash('Category deleted.', 'success');
+        header('Location: ' . baseUrl('admin/app-categories'));
+        exit;
+    }
+
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        $id = intval($_POST['id'] ?? 0);
+        $name = trim($_POST['name'] ?? '');
+        $slug = trim($_POST['slug'] ?? '');
+        if (empty($slug)) $slug = strtolower(str_replace(' ', '-', $name));
+        $icon = trim($_POST['icon'] ?? 'ph-cube');
+        $color = trim($_POST['color'] ?? 'cyan');
+        $desc = trim($_POST['description'] ?? '');
+        $sort = intval($_POST['sort_order'] ?? 0);
+        $active = isset($_POST['is_active']) ? 1 : 0;
+
+        if ($id > 0) {
+            $db->prepare('UPDATE app_categories SET name=?, slug=?, icon=?, color=?, description=?, sort_order=?, is_active=? WHERE id=?')
+                ->execute([$name, $slug, $icon, $color, $desc, $sort, $active, $id]);
+        } else {
+            $db->prepare('INSERT INTO app_categories (name, slug, icon, color, description, sort_order, is_active) VALUES (?,?,?,?,?,?,?)')
+                ->execute([$name, $slug, $icon, $color, $desc, $sort, $active]);
+        }
+        setFlash('Category saved.', 'success');
+        header('Location: ' . baseUrl('admin/app-categories'));
+        exit;
+    }
+
+    $categories = $db->query("SELECT c.*, (SELECT COUNT(*) FROM app_products p WHERE p.category_id = c.id) as product_count FROM app_categories c ORDER BY c.sort_order")->fetchAll();
+    require __DIR__ . '/../views/admin/app_categories.php';
+}
+
+function adminAppProducts(): void
+{
+    requireAdmin();
+    requirePermission('settings');
+    _ensureAppTables();
+    $db = getDB();
+    $action = $_GET['action'] ?? 'list';
+
+    if ($action === 'delete' && isset($_GET['id'])) {
+        $db->prepare('DELETE FROM app_products WHERE id = ?')->execute([intval($_GET['id'])]);
+        setFlash('Product deleted.', 'success');
+        header('Location: ' . baseUrl('admin/app-products'));
+        exit;
+    }
+
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        $id = intval($_POST['id'] ?? 0);
+        $catId = intval($_POST['category_id'] ?? 0);
+        $name = trim($_POST['name'] ?? '');
+        $slug = trim($_POST['slug'] ?? '');
+        if (empty($slug)) $slug = strtolower(str_replace(' ', '-', $name));
+        $version = trim($_POST['version'] ?? '1.0.0');
+        $iconUrl = trim($_POST['icon_url'] ?? '');
+        $headerImage = trim($_POST['header_image'] ?? '');
+        $desc = trim($_POST['description'] ?? '');
+        $features = trim($_POST['features'] ?? '');
+        $downloadUrl = trim($_POST['download_url'] ?? '');
+        $buyUrl = trim($_POST['buy_url'] ?? '');
+        $model = $_POST['pricing_model'] ?? 'free';
+        $price = floatval($_POST['price'] ?? 0);
+        $active = isset($_POST['is_active']) ? 1 : 0;
+        $showBuy = isset($_POST['show_buy_button']) ? 1 : 0;
+        $isPublic = isset($_POST['is_public']) ? 1 : 0;
+        $showPrice = isset($_POST['show_price']) ? 1 : 0;
+        $metaDesc = trim($_POST['meta_description'] ?? '');
+        $metaKeys = trim($_POST['meta_keywords'] ?? '');
+
+        // Handle Uploads
+        $uploadDir = __DIR__ . '/../uploads/apps/';
+        if (!is_dir($uploadDir)) mkdir($uploadDir, 0755, true);
+
+        $uploadFields = [
+            'icon_file' => 'iconUrl',
+            'header_file' => 'headerImage',
+            'software_file' => 'downloadUrl'
+        ];
+
+        foreach ($uploadFields as $field => $targetVar) {
+            if (!empty($_FILES[$field]['name']) && $_FILES[$field]['error'] === UPLOAD_ERR_OK) {
+                $ext = pathinfo($_FILES[$field]['name'], PATHINFO_EXTENSION);
+                $newName = $slug . '_' . $field . '_' . uniqid() . '.' . $ext;
+                if (move_uploaded_file($_FILES[$field]['tmp_name'], $uploadDir . $newName)) {
+                    $$targetVar = 'uploads/apps/' . $newName;
+                }
+            }
+        }
+
+        if ($id > 0) {
+            $db->prepare('UPDATE app_products SET category_id=?, name=?, slug=?, version=?, icon_url=?, header_image=?, description=?, features=?, download_url=?, buy_url=?, show_buy_button=?, pricing_model=?, price=?, is_active=?, is_public=?, show_price=?, meta_description=?, meta_keywords=? WHERE id=?')
+                ->execute([$catId, $name, $slug, $version, $iconUrl, $headerImage, $desc, $features, $downloadUrl, $buyUrl, $showBuy, $model, $price, $active, $isPublic, $showPrice, $metaDesc, $metaKeys, $id]);
+        } else {
+            $db->prepare('INSERT INTO app_products (category_id, name, slug, version, icon_url, header_image, description, features, download_url, buy_url, show_buy_button, pricing_model, price, is_active, is_public, show_price, meta_description, meta_keywords) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)')
+                ->execute([$catId, $name, $slug, $version, $iconUrl, $headerImage, $desc, $features, $downloadUrl, $buyUrl, $showBuy, $model, $price, $active, $isPublic, $showPrice, $metaDesc, $metaKeys]);
+            $id = $db->lastInsertId();
+        }
+
+        // Handle gallery uploads
+        if (!empty($_FILES['gallery_files']['name'][0])) {
+            foreach ($_FILES['gallery_files']['tmp_name'] as $key => $tmpName) {
+                if ($_FILES['gallery_files']['error'][$key] === UPLOAD_ERR_OK) {
+                    $ext = pathinfo($_FILES['gallery_files']['name'][$key], PATHINFO_EXTENSION);
+                    $newName = $slug . '_gallery_' . uniqid() . '.' . $ext;
+                    if (move_uploaded_file($tmpName, $uploadDir . $newName)) {
+                        $db->prepare("INSERT INTO app_product_images (product_id, image_path) VALUES (?, ?)")
+                           ->execute([$id, 'uploads/apps/' . $newName]);
+                    }
+                }
+            }
+        }
+
+        setFlash('Product saved.', 'success');
+        header('Location: ' . baseUrl('admin/app-products'));
+        exit;
+    }
+
+    $products = $db->query("SELECT p.*, c.name as category_name, c.color as category_color, 
+        (SELECT COUNT(*) FROM app_licenses l WHERE l.product_id = p.id) as license_count,
+        (SELECT COUNT(*) FROM app_licenses l2 WHERE l2.product_id = p.id AND l2.status='active') as active_license_count
+        FROM app_products p 
+        LEFT JOIN app_categories c ON p.category_id = c.id 
+        ORDER BY p.created_at DESC")->fetchAll();
+    $categories = $db->query("SELECT id, name FROM app_categories WHERE is_active=1 ORDER BY sort_order")->fetchAll();
+    require __DIR__ . '/../views/admin/app_products.php';
+}
+
+function adminAppDownloadTrack(): void
+{
+    requireAdmin();
+    $db = getDB();
+    $id = intval($_GET['id'] ?? 0);
+    if ($id <= 0) die('Invalid ID');
+
+    $db->prepare("UPDATE app_products SET download_count = download_count + 1, total_installs = total_installs + 1 WHERE id = ?")->execute([$id]);
+    
+    // Add a log entry for notification
+    $product = $db->query("SELECT name FROM app_products WHERE id = $id")->fetch();
+    $db->prepare("INSERT INTO app_device_logs (device_id, event_type, details) VALUES (1, 'download', ?)")
+       ->execute(["Download started: " . ($product['name'] ?? 'Unknown App')]);
+
+    setFlash('Download tracking updated.', 'success');
+    header('Location: ' . baseUrl('admin/app-manager'));
+    exit;
+}
+
+function adminAppLicenses(): void
+{
+    requireAdmin();
+    requirePermission('settings');
+    _ensureAppTables();
+    $db = getDB();
+    $action = $_GET['action'] ?? 'list';
+
+    if ($action === 'bulk') {
+        $ids = $_POST['selected_ids'] ?? [];
+        $bulkAction = $_POST['bulk_action'] ?? '';
+        if (!empty($ids) && in_array($bulkAction, ['suspend', 'revoke', 'activate'])) {
+            $statusMap = ['suspend' => 'suspended', 'revoke' => 'revoked', 'activate' => 'active'];
+            $placeholders = implode(',', array_fill(0, count($ids), '?'));
+            $db->prepare("UPDATE app_licenses SET status=? WHERE id IN ($placeholders)")
+                ->execute(array_merge([$statusMap[$bulkAction]], array_map('intval', $ids)));
+            setFlash(count($ids) . ' license(s) updated.', 'success');
+        }
+        header('Location: ' . baseUrl('admin/app-licenses'));
+        exit;
+    }
+
+    if ($_SERVER['REQUEST_METHOD'] === 'POST' && $action !== 'bulk') {
+        $id = intval($_POST['id'] ?? 0);
+        $productId = intval($_POST['product_id'] ?? 0);
+        $licenseKey = trim($_POST['license_key'] ?? '');
+        if (empty($licenseKey)) $licenseKey = _generateLicenseKey();
+        $label = trim($_POST['label'] ?? '');
+        $status = $_POST['status'] ?? 'active';
+        $type = $_POST['type'] ?? 'standard';
+        $maxDevices = intval($_POST['max_devices'] ?? 1);
+        $expiresAt = !empty($_POST['expires_at']) ? $_POST['expires_at'] : null;
+        $notes = trim($_POST['notes'] ?? '');
+
+        if ($id > 0) {
+            $db->prepare('UPDATE app_licenses SET product_id=?, license_key=?, label=?, status=?, type=?, max_devices=?, expires_at=?, notes=? WHERE id=?')
+                ->execute([$productId, $licenseKey, $label, $status, $type, $maxDevices, $expiresAt, $notes, $id]);
+        } else {
+            $db->prepare('INSERT INTO app_licenses (product_id, license_key, label, status, type, max_devices, expires_at, notes) VALUES (?,?,?,?,?,?,?,?)')
+                ->execute([$productId, $licenseKey, $label, $status, $type, $maxDevices, $expiresAt, $notes]);
+            $id = $db->lastInsertId();
+        }
+
+        if (isset($_POST['feature_keys']) && is_array($_POST['feature_keys'])) {
+            $db->prepare('DELETE FROM app_license_features WHERE license_id = ?')->execute([$id]);
+            $fStmt = $db->prepare('INSERT INTO app_license_features (license_id, feature_key, feature_value) VALUES (?,?,?)');
+            foreach ($_POST['feature_keys'] as $i => $fk) {
+                $fk = trim($fk);
+                $fv = trim($_POST['feature_values'][$i] ?? '');
+                if (!empty($fk)) $fStmt->execute([$id, $fk, $fv]);
+            }
+        }
+
+        setFlash('License saved.', 'success');
+        header('Location: ' . baseUrl('admin/app-licenses'));
+        exit;
+    }
+
+    $licenses = $db->query("SELECT l.*, p.name as product_name, 
+        (SELECT COUNT(*) FROM app_devices d WHERE d.license_id = l.id) as device_count,
+        (SELECT COUNT(*) FROM app_devices d2 WHERE d2.license_id = l.id AND d2.is_online=1) as online_count
+        FROM app_licenses l JOIN app_products p ON l.product_id = p.id
+        ORDER BY l.created_at DESC")->fetchAll();
+
+    $allProducts = $db->query("SELECT id, name FROM app_products WHERE is_active=1 ORDER BY name")->fetchAll();
+    require __DIR__ . '/../views/admin/app_licenses.php';
+}
+
+function adminAppDevices(): void
+{
+    requireAdmin();
+    requirePermission('settings');
+    _ensureAppTables();
+    $db = getDB();
+    $action = $_GET['action'] ?? 'list';
+
+    if ($action === 'disconnect' && isset($_GET['id'])) {
+        $db->prepare('UPDATE app_devices SET is_online = 0 WHERE id = ?')->execute([intval($_GET['id'])]);
+        setFlash('Device disconnected.', 'success');
+        header('Location: ' . baseUrl('admin/app-devices'));
+        exit;
+    }
+
+    // Auto-offline stale devices
+    $db->query("UPDATE app_devices SET is_online = 0 WHERE is_online = 1 AND last_heartbeat < DATE_SUB(NOW(), INTERVAL 10 MINUTE)");
+
+    $devices = $db->query("SELECT d.*, l.license_key, l.label as license_label, p.name as product_name
+        FROM app_devices d
+        JOIN app_licenses l ON d.license_id = l.id
+        JOIN app_products p ON l.product_id = p.id
+        ORDER BY d.is_online DESC, d.last_heartbeat DESC")->fetchAll();
+
+    $deviceLogs = [];
+    foreach ($devices as $dev) {
+        $stmt = $db->prepare('SELECT * FROM app_device_logs WHERE device_id = ? ORDER BY created_at DESC LIMIT 5');
+        $stmt->execute([$dev['id']]);
+        $deviceLogs[$dev['id']] = $stmt->fetchAll();
+    }
+
+    require __DIR__ . '/../views/admin/app_devices.php';
+}
+
+function adminSubscriptions(): void
+{
+    header('Location: ' . baseUrl('admin/app-manager'));
+    exit;
+}
+
+function adminAppSections(): void
+{
+    requireAdmin();
+    requirePermission('settings');
+    $db = getDB();
+    $action = $_GET['action'] ?? 'list';
+
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        $id = intval($_POST['id'] ?? 0);
+        $title = trim($_POST['title'] ?? '');
+        $sortOrder = intval($_POST['sort_order'] ?? 0);
+        $isActive = isset($_POST['is_active']) ? 1 : 0;
+        $productIds = $_POST['product_ids'] ?? [];
+
+        if ($id > 0) {
+            $db->prepare("UPDATE app_sections SET title=?, sort_order=?, is_active=? WHERE id=?")
+                ->execute([$title, $sortOrder, $isActive, $id]);
+        } else {
+            $db->prepare("INSERT INTO app_sections (title, sort_order, is_active) VALUES (?, ?, ?)")
+                ->execute([$title, $sortOrder, $isActive]);
+            $id = $db->lastInsertId();
+        }
+
+        // Update products in section
+        $db->prepare("DELETE FROM app_section_products WHERE section_id = ?")->execute([$id]);
+        $pStmt = $db->prepare("INSERT INTO app_section_products (section_id, product_id, sort_order) VALUES (?, ?, ?)");
+        foreach ($productIds as $idx => $pid) {
+            $pStmt->execute([$id, intval($pid), $idx]);
+        }
+
+        setFlash('Section saved.', 'success');
+        header('Location: ' . baseUrl('admin/app-sections'));
+        exit;
+    }
+
+    if ($action === 'delete' && isset($_GET['id'])) {
+        $id = intval($_GET['id']);
+        $db->prepare("DELETE FROM app_sections WHERE id = ?")->execute([$id]);
+        $db->prepare("DELETE FROM app_section_products WHERE section_id = ?")->execute([$id]);
+        setFlash('Section deleted.', 'success');
+        header('Location: ' . baseUrl('admin/app-sections'));
+        exit;
+    }
+
+    $sections = $db->query("SELECT * FROM app_sections ORDER BY sort_order ASC")->fetchAll();
+    foreach ($sections as &$sec) {
+        $sec['products'] = $db->query("SELECT p.id, p.name FROM app_products p JOIN app_section_products sp ON p.id = sp.product_id WHERE sp.section_id = " . $sec['id'] . " ORDER BY sp.sort_order")->fetchAll();
+    }
+    
+    $allProducts = $db->query("SELECT id, name FROM app_products WHERE is_active=1 ORDER BY name")->fetchAll();
+    require __DIR__ . '/../views/admin/app_sections.php';
+}
+
+function adminAppReviews(): void
+{
+    requireAdmin();
+    requirePermission('settings');
+    $db = getDB();
+    $action = $_GET['action'] ?? 'list';
+
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        $id = intval($_POST['id'] ?? 0);
+        $reply = trim($_POST['admin_reply'] ?? '');
+        $status = $_POST['status'] ?? 'pending';
+
+        $db->prepare("UPDATE app_reviews SET admin_reply=?, status=? WHERE id=?")
+            ->execute([$reply, $status, $id]);
+        
+        setFlash('Review updated.', 'success');
+        header('Location: ' . baseUrl('admin/app-reviews'));
+        exit;
+    }
+
+    if ($action === 'delete' && isset($_GET['id'])) {
+        $db->prepare("DELETE FROM app_reviews WHERE id=?")->execute([intval($_GET['id'])]);
+        setFlash('Review deleted.', 'success');
+        header('Location: ' . baseUrl('admin/app-reviews'));
+        exit;
+    }
+
+    $reviews = $db->query("SELECT r.*, p.name as product_name FROM app_reviews r JOIN app_products p ON r.product_id = p.id ORDER BY r.created_at DESC")->fetchAll();
+    require __DIR__ . '/../views/admin/app_reviews.php';
+}
+
+// ── Helpers ────────────────────────────────────────────────
+
+function _ensureAppTables()
+{
+    $db = getDB();
+    // Tables should exist if migration was run, but we can check here if needed.
+}
+
+function _generateLicenseKey()
+{
+    return strtoupper(substr(md5(uniqid(mt_rand(), true)), 0, 4) . '-' . 
+                     substr(md5(uniqid(mt_rand(), true)), 0, 4) . '-' . 
+                     substr(md5(uniqid(mt_rand(), true)), 0, 4) . '-' . 
+                     substr(md5(uniqid(mt_rand(), true)), 0, 4));
+}
