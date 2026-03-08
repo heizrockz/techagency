@@ -2057,6 +2057,75 @@ function adminAppProducts(): void
     $db = getDB();
     $action = $_GET['action'] ?? 'list';
 
+    if ($action === 'upload_chunk') {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            header('Content-Type: application/json');
+            $uploadId = preg_replace('/[^a-zA-Z0-9_-]/', '', $_POST['uploadId'] ?? '');
+            $chunkIndex = intval($_POST['chunkIndex'] ?? 0);
+            $totalChunks = intval($_POST['totalChunks'] ?? 1);
+            $fileName = preg_replace('/[^a-zA-Z0-9_.-]/', '_', $_POST['fileName'] ?? 'upload.zip');
+            
+            if (!$uploadId) {
+                echo json_encode(['success' => false, 'error' => 'Missing upload ID']);
+                exit;
+            }
+            
+            $tmpDir = __DIR__ . '/../uploads/apps/tmp_' . $uploadId;
+            if (!is_dir($tmpDir)) @mkdir($tmpDir, 0755, true);
+            
+            $chunkFile = $tmpDir . '/' . $chunkIndex;
+            
+            if (isset($_FILES['chunk']) && $_FILES['chunk']['error'] === UPLOAD_ERR_OK) {
+                move_uploaded_file($_FILES['chunk']['tmp_name'], $chunkFile);
+            } else {
+                echo json_encode(['success' => false, 'error' => 'Chunk upload failed']);
+                exit;
+            }
+            
+            // If it's the last chunk, assemble the file
+            if ($chunkIndex === $totalChunks - 1) {
+                $finalDir = __DIR__ . '/../uploads/apps/';
+                if (!is_dir($finalDir)) @mkdir($finalDir, 0755, true);
+                
+                $ext = pathinfo($fileName, PATHINFO_EXTENSION);
+                if (empty($ext)) $ext = 'zip'; // default
+                $finalName = 'chunked_' . uniqid() . '.' . $ext;
+                $finalPath = $finalDir . $finalName;
+                
+                $out = @fopen($finalPath, "wb");
+                if ($out) {
+                    for ($i = 0; $i < $totalChunks; $i++) {
+                        $in = @fopen($tmpDir . '/' . $i, "rb");
+                        if ($in) {
+                            while ($buff = fread($in, 4096)) {
+                                fwrite($out, $buff);
+                            }
+                            fclose($in);
+                        }
+                        @unlink($tmpDir . '/' . $i); // cleanup chunk
+                    }
+                    fclose($out);
+                }
+                
+                // Remove the tmp directory
+                $files = @scandir($tmpDir);
+                if ($files) {
+                    foreach ($files as $f) {
+                        if ($f !== '.' && $f !== '..') @unlink($tmpDir . '/' . $f);
+                    }
+                }
+                @rmdir($tmpDir);
+                
+                echo json_encode(['success' => true, 'file_path' => 'uploads/apps/' . $finalName]);
+                exit;
+            }
+            
+            echo json_encode(['success' => true]);
+            exit;
+        }
+        exit;
+    }
+
     if ($action === 'delete' && isset($_GET['id'])) {
         $db->prepare('DELETE FROM app_products WHERE id = ?')->execute([intval($_GET['id'])]);
         setFlash('Product deleted.', 'success');

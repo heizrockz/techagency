@@ -156,10 +156,45 @@ if (!defined('APP_NAME')) die('Direct access prevented');
                                             <input type="number" step="0.01" name="price" class="form-input" value="<?= e($editProduct['price'] ?? '0.00') ?>">
                                         </div>
                                     </div>
-                                    <div class="space-y-2">
+                                    <div class="space-y-4">
                                         <label class="text-[11px] font-bold text-white/40 uppercase tracking-widest ml-1">Download URL / Build Upload</label>
-                                        <input type="file" name="software_file" class="form-input !py-1.5 text-[10px] mb-2">
-                                        <input type="text" name="download_url" class="form-input text-xs" value="<?= e($editProduct['download_url'] ?? '') ?>" placeholder="Or direct link">
+                                        
+                                        <!-- Advanced Uploader UI -->
+                                        <div id="advancedUploader" class="border-2 border-dashed border-violet-500/30 rounded-xl p-6 text-center hover:bg-violet-500/5 transition-all relative overflow-hidden">
+                                            <input type="file" id="softwareFileInput" name="software_file" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" onchange="startChunkUpload(this)">
+                                            
+                                            <div id="uploaderStateIdle" class="flex flex-col items-center gap-2 pointer-events-none">
+                                                <i class="ph ph-cloud-arrow-up text-3xl text-violet-500"></i>
+                                                <span class="text-sm font-bold text-violet-400">Click or Drag to Upload App/Zip</span>
+                                                <span class="text-[10px] text-white/40">Advanced chunked upload supports unlimited file sizes</span>
+                                            </div>
+                                            
+                                            <div id="uploaderStateProgress" class="hidden flex-col items-center gap-3 w-full pointer-events-none">
+                                                <div class="w-full bg-white/5 rounded-full h-3 overflow-hidden relative shadow-inner">
+                                                    <div id="uploadProgressBar" class="bg-gradient-to-r from-violet-600 to-fuchsia-500 h-full w-0 transition-all duration-300 relative shadow-[0_0_10px_rgba(139,92,246,0.5)]">
+                                                        <div class="absolute inset-0 bg-white/20 w-full animate-pulse"></div>
+                                                    </div>
+                                                </div>
+                                                <div class="flex justify-between w-full text-[11px] font-bold uppercase tracking-widest text-violet-400">
+                                                    <span id="uploadProgressText">0%</span>
+                                                    <span id="uploadETA">Calculating...</span>
+                                                </div>
+                                            </div>
+                                            
+                                            <div id="uploaderStateDone" class="hidden flex-col items-center gap-2 pointer-events-none">
+                                                <i class="ph ph-check-circle text-3xl text-emerald-500 drop-shadow-[0_0_10px_rgba(16,185,129,0.5)]"></i>
+                                                <span class="text-sm font-bold text-emerald-500">Upload Complete!</span>
+                                                <span id="uploadedFileName" class="text-[11px] text-white/60 font-mono"></span>
+                                            </div>
+                                            
+                                            <div id="uploaderStateError" class="hidden flex-col items-center gap-2 pointer-events-none">
+                                                <i class="ph ph-warning-circle text-3xl text-pink-500 drop-shadow-[0_0_10px_rgba(236,72,153,0.5)]"></i>
+                                                <span class="text-sm font-bold text-pink-500" id="uploadErrorText">Upload Failed</span>
+                                                <button type="button" onclick="resetUploader()" class="text-[10px] bg-pink-500/20 px-4 py-1.5 rounded-lg text-pink-400 font-bold uppercase tracking-widest pointer-events-auto hover:bg-pink-500/40 transition-colors mt-2">Retry Upload</button>
+                                            </div>
+                                        </div>
+                                        
+                                        <input type="text" id="downloadUrlInput" name="download_url" class="form-input text-xs" value="<?= e($editProduct['download_url'] ?? '') ?>" placeholder="Or paste direct download link">
                                     </div>
                                     <div class="space-y-2">
                                         <label class="text-[11px] font-bold text-white/40 uppercase tracking-widest ml-1">Buy / Checkout URL</label>
@@ -286,12 +321,115 @@ if (!defined('APP_NAME')) die('Direct access prevented');
 
                 function deleteImage(id) {
                     if (confirm('Delete this image from gallery?')) {
-                        // In a real app, this would be an AJAX call. 
-                        // For now, we'll just redirect to a delete endpoint if you can implement one, 
-                        // or provide a hint to the user.
                         window.location.href = `<?= baseUrl('admin/app-products?action=delete_image&id=') ?>${id}&product_id=<?= $editProduct['id'] ?? 0 ?>`;
                     }
                     event.preventDefault();
+                }
+
+                // --- Chunked Uploader Logic ---
+                function resetUploader() {
+                    document.getElementById('uploaderStateIdle').classList.remove('hidden');
+                    document.getElementById('uploaderStateProgress').classList.add('hidden');
+                    document.getElementById('uploaderStateDone').classList.add('hidden');
+                    document.getElementById('uploaderStateError').classList.add('hidden');
+                    document.getElementById('softwareFileInput').value = '';
+                    document.getElementById('softwareFileInput').classList.remove('hidden');
+                }
+
+                async function startChunkUpload(input) {
+                    if (!input.files || input.files.length === 0) return;
+                    const file = input.files[0];
+                    
+                    // Switch UI
+                    document.getElementById('uploaderStateIdle').classList.add('hidden');
+                    document.getElementById('uploaderStateProgress').classList.remove('hidden');
+                    document.getElementById('uploaderStateDone').classList.add('hidden');
+                    document.getElementById('uploaderStateError').classList.add('hidden');
+                    document.getElementById('softwareFileInput').classList.add('hidden');
+                    
+                    // Check if file is really large; if so, bigger chunks, else 2MB
+                    const chunkSize = 2 * 1024 * 1024; // 2MB
+                    const totalChunks = Math.ceil(file.size / chunkSize);
+                    const uploadId = Math.random().toString(36).substring(2) + Date.now().toString(36);
+                    const fileName = file.name;
+                    
+                    let uploadedBytes = 0;
+                    const startTime = Date.now();
+                    
+                    for (let chunkIndex = 0; chunkIndex < totalChunks; chunkIndex++) {
+                        const start = chunkIndex * chunkSize;
+                        const end = Math.min(start + chunkSize, file.size);
+                        const chunk = file.slice(start, end);
+                        
+                        const formData = new FormData();
+                        formData.append('chunk', chunk);
+                        formData.append('chunkIndex', chunkIndex);
+                        formData.append('totalChunks', totalChunks);
+                        formData.append('uploadId', uploadId);
+                        formData.append('fileName', fileName);
+                        
+                        try {
+                            const response = await uploadChunk(formData);
+                            
+                            uploadedBytes += chunk.size;
+                            const percent = Math.round((uploadedBytes / file.size) * 100);
+                            document.getElementById('uploadProgressBar').style.width = percent + '%';
+                            document.getElementById('uploadProgressText').innerText = percent + '%';
+                            
+                            // ETA
+                            const elapsed = (Date.now() - startTime) / 1000;
+                            const speed = uploadedBytes / elapsed; // bytes per sec
+                            const remainingBytes = file.size - uploadedBytes;
+                            const etaSec = Math.round(remainingBytes / speed);
+                            
+                            if (etaSec > 60) {
+                                document.getElementById('uploadETA').innerText = `ETA: ${Math.round(etaSec/60)}m ${etaSec%60}s`;
+                            } else {
+                                document.getElementById('uploadETA').innerText = etaSec > 0 ? `ETA: ${etaSec}s` : 'Finalizing...';
+                            }
+                            
+                            if (chunkIndex === totalChunks - 1) {
+                                // Done!
+                                const resData = JSON.parse(response);
+                                if (resData.success) {
+                                    document.getElementById('uploaderStateProgress').classList.add('hidden');
+                                    document.getElementById('uploaderStateDone').classList.remove('hidden');
+                                    document.getElementById('uploaderStateDone').classList.add('flex');
+                                    document.getElementById('downloadUrlInput').value = resData.file_path;
+                                    document.getElementById('uploadedFileName').innerText = fileName;
+                                    // Remove the file from the original input so it doesn't upload again on form submit
+                                    input.value = '';
+                                } else {
+                                    throw new Error(resData.error || 'Assembly failed');
+                                }
+                            }
+                        } catch (e) {
+                            console.error(e);
+                            document.getElementById('uploaderStateProgress').classList.add('hidden');
+                            document.getElementById('uploaderStateError').classList.remove('hidden');
+                            document.getElementById('uploaderStateError').classList.add('flex');
+                            document.getElementById('uploadErrorText').innerText = 'Upload Failed: ' + e.message;
+                            input.value = ''; // Clear it so they have to try again
+                            break;
+                        }
+                    }
+                }
+
+                function uploadChunk(formData) {
+                    return new Promise((resolve, reject) => {
+                        const xhr = new XMLHttpRequest();
+                        xhr.open('POST', '<?= baseUrl('admin/app-products?action=upload_chunk') ?>', true);
+                        
+                        xhr.onload = function() {
+                            if (xhr.status >= 200 && xhr.status < 300) {
+                                resolve(xhr.responseText);
+                            } else {
+                                reject(new Error(xhr.responseText || 'Server error ' + xhr.status));
+                            }
+                        };
+                        xhr.onerror = function() { reject(new Error('Network connection error')); };
+                        xhr.send(formData);
+                    });
                 }
                 </script>
 
