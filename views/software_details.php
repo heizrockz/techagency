@@ -7,6 +7,35 @@ if (!defined('APP_NAME')) die('Direct access prevented');
     <title><?= e($product['name']) ?> — Software Ecosystem</title>
     <meta name="description" content="<?= e($product['meta_description'] ?: $product['description']) ?>">
     <meta name="keywords" content="<?= e($product['meta_keywords']) ?>">
+    
+    <!-- Open Graph / Social Media -->
+    <?php
+        $ogTitle = e($product['name']) . ' — ' . APP_NAME;
+        $ogDesc = e($product['meta_description'] ?: $product['description']);
+        $ogImage = !empty($product['icon_url']) ? (strpos($product['icon_url'], 'http') === 0 ? $product['icon_url'] : baseUrl($product['icon_url'])) : '';
+        if (empty($ogImage) && !empty($product['header_image'])) {
+            $ogImage = strpos($product['header_image'], 'http') === 0 ? $product['header_image'] : baseUrl($product['header_image']);
+        }
+        $ogUrl = baseUrl('software/' . e($product['slug']));
+    ?>
+    <meta property="og:type" content="product">
+    <meta property="og:title" content="<?= $ogTitle ?>">
+    <meta property="og:description" content="<?= $ogDesc ?>">
+    <meta property="og:url" content="<?= $ogUrl ?>">
+    <?php if (!empty($ogImage)): ?>
+    <meta property="og:image" content="<?= $ogImage ?>">
+    <meta property="og:image:width" content="512">
+    <meta property="og:image:height" content="512">
+    <?php endif; ?>
+    <meta property="og:site_name" content="<?= APP_NAME ?>">
+    
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="<?= $ogTitle ?>">
+    <meta name="twitter:description" content="<?= $ogDesc ?>">
+    <?php if (!empty($ogImage)): ?>
+    <meta name="twitter:image" content="<?= $ogImage ?>">
+    <?php endif; ?>
     <?php require __DIR__ . '/admin/partials/_head_assets.php'; ?>
     <!-- Required for Navbar -->
     <link rel="stylesheet" href="<?= baseUrl('assets/css/style.css') ?>">
