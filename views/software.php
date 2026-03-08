@@ -5,6 +5,20 @@ if (!defined('APP_NAME')) die('Direct access prevented');
 <html lang="<?= e(getCurrentLocale()) ?>" dir="<?= isRTL() ? 'rtl' : 'ltr' ?>">
 <head>
     <title>Software Store — <?= APP_NAME ?></title>
+    
+    <!-- Open Graph / Social Media -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Software Store — <?= APP_NAME ?>">
+    <meta property="og:description" content="<?= getCurrentLocale() === 'ar' ? 'تطبيقات عالية الأداء وأدوات احترافية' : 'High performance apps & professional tools' ?>">
+    <meta property="og:url" content="<?= baseUrl('software') ?>">
+    <meta property="og:site_name" content="<?= APP_NAME ?>">
+    <?php $siteLogo = getSetting('site_logo'); if (!empty($siteLogo)): ?>
+    <meta property="og:image" content="<?= baseUrl($siteLogo) ?>">
+    <?php endif; ?>
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="Software Store — <?= APP_NAME ?>">
+    <meta name="twitter:description" content="<?= getCurrentLocale() === 'ar' ? 'تطبيقات عالية الأداء وأدوات احترافية' : 'High performance apps & professional tools' ?>">
+
     <?php require __DIR__ . '/admin/partials/_head_assets.php'; ?>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
     <!-- Required for Navbar -->
