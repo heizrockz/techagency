@@ -2113,11 +2113,20 @@ function adminAppProducts(): void
         ];
 
         foreach ($uploadFields as $field => $targetVar) {
-            if (!empty($_FILES[$field]['name']) && $_FILES[$field]['error'] === UPLOAD_ERR_OK) {
-                $ext = pathinfo($_FILES[$field]['name'], PATHINFO_EXTENSION);
-                $newName = $slug . '_' . $field . '_' . uniqid() . '.' . $ext;
-                if (move_uploaded_file($_FILES[$field]['tmp_name'], $uploadDir . $newName)) {
-                    $$targetVar = 'uploads/apps/' . $newName;
+            if (!empty($_FILES[$field]['name'])) {
+                if ($_FILES[$field]['error'] === UPLOAD_ERR_OK) {
+                    $ext = pathinfo($_FILES[$field]['name'], PATHINFO_EXTENSION);
+                    $newName = $slug . '_' . $field . '_' . uniqid() . '.' . $ext;
+                    if (move_uploaded_file($_FILES[$field]['tmp_name'], $uploadDir . $newName)) {
+                        $$targetVar = 'uploads/apps/' . $newName;
+                    } else {
+                        setFlash("Failed to move uploaded file: $field. Check folder permissions.", 'danger');
+                    }
+                } else {
+                    $errCode = $_FILES[$field]['error'];
+                    $errMsg = "Upload error ($errCode) for $field.";
+                    if ($errCode == 1 || $errCode == 2) $errMsg .= " File is too large.";
+                    setFlash($errMsg, 'danger');
                 }
             }
         }
@@ -2430,6 +2439,25 @@ function _ensureAppTables()
         $db->prepare("ALTER TABLE app_licenses ADD COLUMN IF NOT EXISTS about_text TEXT NULL AFTER notes")->execute();
         $db->prepare("ALTER TABLE app_licenses ADD COLUMN IF NOT EXISTS use_count INT NOT NULL DEFAULT 0 AFTER about_text")->execute();
         $db->prepare("ALTER TABLE app_licenses ADD COLUMN IF NOT EXISTS max_use_count INT NOT NULL DEFAULT 0 AFTER use_count")->execute();
+
+        // Ensure app_products has all needed columns
+        $cols = [
+            'header_image' => "VARCHAR(500) NULL AFTER icon_url",
+            'features' => "TEXT NULL AFTER description",
+            'download_url' => "VARCHAR(500) NULL AFTER price",
+            'show_buy_button' => "TINYINT(1) DEFAULT 1 AFTER download_url",
+            'buy_url' => "VARCHAR(500) NULL AFTER show_buy_button",
+            'is_public' => "TINYINT(1) DEFAULT 1 AFTER buy_url",
+            'show_price' => "TINYINT(1) DEFAULT 1 AFTER is_public",
+            'meta_description' => "TEXT NULL",
+            'meta_keywords' => "TEXT NULL"
+        ];
+
+        foreach ($cols as $col => $def) {
+            try {
+                $db->exec("ALTER TABLE app_products ADD COLUMN IF NOT EXISTS `$col` $def");
+            } catch (Exception $e) { /* Ignore if column exists or other SQL issues */ }
+        }
 
         $db->exec("CREATE TABLE IF NOT EXISTS app_devices (
             id INT AUTO_INCREMENT PRIMARY KEY,

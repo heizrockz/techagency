@@ -9,40 +9,41 @@ if (!defined('APP_NAME')) die('Direct access prevented');
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
     <style>
         :root {
-            --glass-bg: rgba(255, 255, 255, 0.03);
-            --glass-border: rgba(255, 255, 255, 0.08);
+            --glass-bg: rgba(255, 255, 255, 0.02);
+            --glass-border: rgba(255, 255, 255, 0.06);
             --accent: #8b5cf6;
+            --font-main: 'Inter', sans-serif;
         }
-        body { background: #0b0e14; color: #fff; font-family: 'Inter', sans-serif; overflow-x: hidden; }
+        body { background: #0b0e14; color: #fff; font-family: var(--font-main); overflow-x: hidden; -webkit-font-smoothing: antialiased; }
         
         .store-hero {
-            padding: 120px 0 80px;
+            padding: 140px 0 100px;
             background: 
-                radial-gradient(circle at 0% 0%, rgba(139, 92, 246, 0.05) 0%, transparent 50%),
-                radial-gradient(circle at 100% 100%, rgba(236, 72, 153, 0.05) 0%, transparent 50%);
+                radial-gradient(circle at 50% -20%, rgba(139, 92, 246, 0.1) 0%, transparent 60%),
+                radial-gradient(circle at 100% 100%, rgba(236, 72, 153, 0.02) 0%, transparent 40%);
         }
 
         .search-bar-container {
-            max-width: 650px;
-            margin: 0 auto 80px;
+            max-width: 600px;
+            margin: 0 auto 100px;
             position: relative;
         }
         .search-bar {
             width: 100%;
-            background: rgba(255,255,255,0.03);
+            background: rgba(255,255,255,0.02);
             border: 1px solid var(--glass-border);
-            padding: 18px 24px 18px 60px;
-            border-radius: 24px;
+            padding: 20px 24px 20px 64px;
+            border-radius: 20px;
             color: white;
             outline: none;
-            transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+            transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
             font-size: 16px;
-            backdrop-filter: blur(10px);
+            backdrop-filter: blur(20px);
         }
         .search-bar:focus { 
-            border-color: var(--accent); 
-            background: rgba(255,255,255,0.06); 
-            box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.1);
+            background: rgba(255,255,255,0.04); 
+            border-color: rgba(255,255,255,0.1);
+            box-shadow: 0 20px 40px -10px rgba(0,0,0,0.4);
             transform: translateY(-2px);
         }
         .search-icon { position: absolute; left: 24px; top: 50%; transform: translateY(-50%); color: rgba(255,255,255,0.2); font-size: 20px; }
@@ -51,110 +52,129 @@ if (!defined('APP_NAME')) die('Direct access prevented');
             display: flex;
             align-items: center;
             justify-content: space-between;
-            margin-bottom: 32px;
-            padding: 0 10px;
+            margin-bottom: 40px;
+            padding: 0 12px;
         }
         .section-title { 
-            font-size: 24px; 
-            font-weight: 900; 
-            letter-spacing: -1px; 
-            text-transform: uppercase;
-            background: linear-gradient(to right, #fff, rgba(255,255,255,0.4));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            font-size: 20px; 
+            font-weight: 800; 
+            letter-spacing: -0.5px;
+            color: #fff;
         }
 
-        /* App Tile Grid */
+        /* Copilot-Style App Tile Grid */
         .app-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-            gap: 24px;
-            margin-bottom: 80px;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 40px;
+            margin-bottom: 100px;
+            padding: 0 12px;
         }
 
-        .app-tile {
-            background: linear-gradient(145deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.01) 100%);
-            border: 1px solid var(--glass-border);
-            border-radius: 32px;
-            padding: 24px;
-            text-align: center;
-            transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+        .app-card {
             text-decoration: none;
             color: inherit;
-            position: relative;
-            overflow: hidden;
-        }
-        .app-tile::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: radial-gradient(800px circle at var(--x) var(--y), rgba(255,255,255,0.06), transparent 40%);
-            opacity: 0;
-            transition: opacity 0.5s;
-        }
-        .app-tile:hover {
-            transform: translateY(-8px) scale(1.02);
-            border-color: rgba(139, 92, 246, 0.3);
-            background: linear-gradient(145deg, rgba(255,255,255,0.08) 0%, rgba(255,255,255,0.02) 100%);
-            box-shadow: 0 20px 40px -10px rgba(0,0,0,0.5);
-        }
-        .app-tile:hover::before { opacity: 1; }
-
-        .app-tile-icon {
-            width: 80px;
-            height: 80px;
-            margin: 0 auto 20px;
-            border-radius: 20px;
-            background: #1a1d23;
             display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
-            border: 1px solid rgba(255,255,255,0.05);
-            transition: transform 0.5s ease;
-            position: relative;
-            z-index: 1;
+            flex-direction: column;
+            gap: 16px;
+            transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
-        .app-tile:hover .app-tile-icon { transform: scale(1.1) rotate(5deg); }
-        .app-tile-icon img { width: 70%; height: 70%; object-fit: contain; }
-        .app-tile-icon i { font-size: 40px; color: var(--accent); }
+        .app-card:hover { transform: translateY(-10px); }
 
-        .app-tile-name { font-size: 15px; font-weight: 800; margin-bottom: 4px; color: #fff; z-index: 1; position: relative; }
-        .app-tile-cat { font-size: 10px; font-weight: 700; color: rgba(255,255,255,0.3); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; z-index: 1; position: relative; }
-        
-        .app-tile-footer {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
-            z-index: 1;
-            position: relative;
-        }
-        .app-tile-rating { font-size: 11px; font-weight: 700; color: #f59e0b; display: flex; align-items: center; gap: 4px; }
-        .app-tile-price { 
-            font-size: 10px; 
-            font-weight: 900; 
-            background: rgba(255,255,255,0.05); 
-            padding: 4px 10px; 
-            border-radius: 8px; 
-            color: rgba(255,255,255,0.6);
-            border: 1px solid rgba(255,255,255,0.05);
-        }
-
-        .featured-banner {
+        .app-visual {
             width: 100%;
-            height: 400px;
+            aspect-ratio: 1;
+            border-radius: 36px;
+            overflow: hidden;
+            position: relative;
+            background: #1c212b;
+            box-shadow: 
+                0 10px 30px -10px rgba(0,0,0,0.5),
+                inset 0 0 0 1px rgba(255,255,255,0.03);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.4s;
+        }
+        .app-card:hover .app-visual {
+            box-shadow: 
+                0 30px 60px -12px rgba(0,0,0,0.6),
+                inset 0 0 0 1px rgba(255,255,255,0.08);
+        }
+
+        /* Dynamic Gradients for Backgrounds */
+        .bg-gradient-1 { background: linear-gradient(135deg, #FF6B6B 0%, #FEC260 100%); }
+        .bg-gradient-2 { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+        .bg-gradient-3 { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .bg-gradient-4 { background: linear-gradient(135deg, #2af598 0%, #009efd 100%); }
+        .bg-gradient-5 { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+        .bg-auto { background: linear-gradient(135deg, #1c212b 0%, #2a313d 100%); }
+
+        .app-icon {
+            width: 55%;
+            height: 55%;
+            object-fit: contain;
+            filter: drop-shadow(0 8px 16px rgba(0,0,0,0.2));
+            transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .app-card:hover .app-icon { transform: scale(1.1) rotate(5deg); }
+        .app-icon-fallback { font-size: 56px; color: rgba(255,255,255,0.8); transition: transform 0.5s; }
+        .app-card:hover .app-icon-fallback { transform: scale(1.1); }
+
+        .app-info { padding: 0 4px; }
+        .app-name { 
+            font-size: 16px; 
+            font-weight: 700; 
+            margin-bottom: 6px; 
+            color: rgba(255,255,255,0.9);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .app-meta {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .app-rating { display: flex; align-items: center; gap: 4px; color: rgba(255,255,255,0.3); }
+        .app-rating i { color: #f59e0b; font-size: 10px; }
+        .app-status {
+            background: rgba(255,255,255,0.05);
+            padding: 4px 10px;
+            border-radius: 8px;
+            color: rgba(255,255,255,0.4);
+            border: 1px solid rgba(255,255,255,0.05);
+            font-size: 10px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .featured-hero {
+            width: 100%;
+            height: 480px;
             border-radius: 48px;
-            margin-bottom: 80px;
+            margin-bottom: 100px;
             position: relative;
             overflow: hidden;
             border: 1px solid var(--glass-border);
+            padding: 0 12px;
         }
-        .featured-banner img { width: 100%; height: 100%; object-fit: cover; }
-        .featured-content {
+        .hero-inner {
+            width: 100%;
+            height: 100%;
+            border-radius: 40px;
+            overflow: hidden;
+            position: relative;
+        }
+        .hero-bg { width: 100%; height: 100%; object-fit: cover; }
+        .hero-overlay {
             position: absolute;
             inset: 0;
-            background: linear-gradient(to right, rgba(11, 14, 20, 0.95) 20%, transparent 80%);
+            background: linear-gradient(to right, rgba(11, 14, 20, 0.9) 20%, transparent 80%);
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -162,74 +182,77 @@ if (!defined('APP_NAME')) die('Direct access prevented');
         }
 
         @media (max-width: 768px) {
-            .app-grid { grid-template-columns: repeat(2, 1fr); }
-            .featured-content { padding: 40px; }
-            .section-title { font-size: 20px; }
+            .app-grid { grid-template-columns: repeat(2, 1fr); gap: 24px; }
+            .hero-overlay { padding: 40px; }
+            .store-hero { padding-top: 100px; }
+            .section-title { font-size: 18px; }
         }
     </style>
 </head>
-<body onmousemove="handleMouseMove(event)" dir="<?= isRTL() ? 'rtl' : 'ltr' ?>">
+<body dir="<?= isRTL() ? 'rtl' : 'ltr' ?>">
 
     <section class="store-hero">
         <div class="container mx-auto px-6">
             <div class="text-center mb-16">
-                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-violet-500/10 border border-violet-500/20 text-violet-400 text-[10px] font-black uppercase tracking-widest mb-6">
-                    <i class="ph-fill ph-sparkle"></i> Premium Ecosystem
-                </div>
-                <h1 class="text-7xl font-black mb-4 tracking-tighter">MicoStore</h1>
-                <p class="text-white/40 max-w-xl mx-auto font-medium text-lg italic leading-relaxed">High performance apps & software curated for your ecosystem.</p>
+                <h1 class="text-6xl font-black mb-4 tracking-tighter">MicoStore</h1>
+                <p class="text-white/30 max-w-xl mx-auto font-medium text-lg italic leading-relaxed">High performance apps curated for your forensic & data needs.</p>
             </div>
             
             <div class="search-bar-container">
                 <i class="ph ph-magnifying-glass search-icon"></i>
-                <input type="text" class="search-bar" placeholder="Search apps, software, and more">
+                <input type="text" class="search-bar" placeholder="Search apps, tools, and platforms">
             </div>
 
             <?php if(!empty($featured)): $f = $featured[0]; ?>
-            <!-- Hero Featured -->
-            <a href="<?= baseUrl('software/' . $f['slug']) ?>" class="featured-banner group block">
-                <img src="<?= $f['header_image'] ? (strpos($f['header_image'], 'http') === 0 ? e($f['header_image']) : baseUrl($f['header_image'])) : 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=1600&q=80' ?>" class="group-hover:scale-105 transition-transform duration-1000">
-                <div class="featured-content">
-                    <span class="text-[10px] font-black uppercase tracking-[0.2em] text-violet-400 mb-4 block">Newest Release</span>
-                    <h2 class="text-5xl font-black mb-6 tracking-tighter max-w-lg"><?= e($f['name']) ?></h2>
-                    <p class="text-white/60 max-w-md text-lg mb-8 line-clamp-2"><?= e($f['description']) ?></p>
-                    <div class="flex items-center gap-6">
-                        <span class="px-6 py-3 bg-white text-black font-black uppercase tracking-widest rounded-2xl text-xs group-hover:bg-violet-400 group-hover:text-white transition-all">Explore App</span>
+            <!-- Hero Release -->
+            <div class="featured-hero">
+                <div class="hero-inner group">
+                    <img src="<?= $f['header_image'] ? (strpos($f['header_image'], 'http') === 0 ? e($f['header_image']) : baseUrl($f['header_image'])) : 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=1600&q=80' ?>" class="hero-bg group-hover:scale-105 transition-transform duration-1000">
+                    <div class="hero-overlay">
+                        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-violet-500/20 border border-violet-500/30 text-violet-400 text-[10px] font-black uppercase tracking-widest mb-6">
+                            <i class="ph-fill ph-sparkle"></i> Featured Release
+                        </div>
+                        <h2 class="text-5xl font-black mb-4 tracking-tighter max-w-lg"><?= e($f['name']) ?></h2>
+                        <p class="text-white/50 max-w-md text-lg mb-8 line-clamp-2"><?= e($f['description']) ?></p>
+                        <a href="<?= baseUrl('software/' . $f['slug']) ?>" class="inline-flex items-center justify-center px-8 py-4 bg-white text-black font-black uppercase tracking-widest rounded-2xl text-xs hover:bg-violet-400 hover:text-white transition-all">Explore App</a>
                     </div>
                 </div>
-            </a>
+            </div>
             <?php endif; ?>
 
             <!-- Dynamic Sections -->
-            <?php foreach($sections as $sec): if(!empty($sec['products'])): ?>
+            <?php foreach($sections as $secId => $sec): if(!empty($sec['products'])): ?>
                 <div class="section-header">
                     <h2 class="section-title"><?= e($sec['title']) ?></h2>
-                    <a href="#" class="text-[10px] font-black uppercase tracking-[0.2em] text-white/20 hover:text-white transition-colors">See All</a>
+                    <a href="#" class="text-[10px] font-black uppercase tracking-[0.2em] text-white/20 hover:text-white transition-colors">Browse Category</a>
                 </div>
                 
                 <div class="app-grid">
-                    <?php foreach($sec['products'] as $p): 
+                    <?php foreach($sec['products'] as $pIdx => $p): 
                         $iconUrl = $p['icon_url'];
                         if (!empty($iconUrl) && strpos($iconUrl, 'http') !== 0) $iconUrl = baseUrl($iconUrl);
+                        
+                        // Assign a random-ish gradient class for variety
+                        $gradClass = 'bg-gradient-' . (($pIdx % 5) + 1);
                     ?>
-                        <a href="<?= baseUrl('software/' . $p['slug']) ?>" class="app-tile">
-                            <div class="app-tile-icon">
+                        <a href="<?= baseUrl('software/' . $p['slug']) ?>" class="app-card">
+                            <div class="app-visual <?= $gradClass ?>">
                                 <?php if($iconUrl): ?>
-                                    <img src="<?= e($iconUrl) ?>">
+                                    <img src="<?= e($iconUrl) ?>" class="app-icon shadow-2xl">
                                 <?php else: ?>
-                                    <i class="ph ph-cube"></i>
+                                    <i class="ph ph-cube app-icon-fallback"></i>
                                 <?php endif; ?>
                             </div>
-                            <h3 class="app-tile-name"><?= e($p['name']) ?></h3>
-                            <p class="app-tile-cat"><?= e($p['category_name']) ?></p>
-                            
-                            <div class="app-tile-footer">
-                                <div class="app-tile-rating">
-                                    <i class="ph-fill ph-star"></i> 4.7
+                            <div class="app-info">
+                                <h3 class="app-name"><?= e($p['name']) ?></h3>
+                                <div class="app-meta">
+                                    <div class="app-rating">
+                                        <i class="ph-fill ph-star"></i> 4.7
+                                    </div>
+                                    <div class="app-status">
+                                        <?= $p['pricing_model'] === 'free' ? 'Free' : '$'.number_format($p['price'], 0) ?>
+                                    </div>
                                 </div>
-                                <?php if($p['show_price']): ?>
-                                    <span class="app-tile-price"><?= $p['pricing_model'] === 'free' ? 'Free' : '$'.number_format($p['price'], 0) ?></span>
-                                <?php endif; ?>
                             </div>
                         </a>
                     <?php endforeach; ?>
@@ -240,18 +263,6 @@ if (!defined('APP_NAME')) die('Direct access prevented');
     </section>
 
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
-    <script>
-        function handleMouseMove(e) {
-            for(const tile of document.getElementsByClassName("app-tile")) {
-                const rect = tile.getBoundingClientRect(),
-                x = e.clientX - rect.left,
-                y = e.clientY - rect.top;
-
-                tile.style.setProperty("--x", `${x}px`);
-                tile.style.setProperty("--y", `${y}px`);
-            }
-        }
-    </script>
 </body>
 </html>
 
