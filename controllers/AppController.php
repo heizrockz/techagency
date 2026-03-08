@@ -16,15 +16,57 @@ function publicSoftwareStore(): void
 
     // 2. Fetch Dynamic Sections with their products
     $sections = $db->query("SELECT * FROM app_sections WHERE is_active = 1 ORDER BY sort_order ASC")->fetchAll();
-    foreach ($sections as &$sec) {
-        $stmt = $db->prepare("SELECT p.*, c.name as category_name, c.color as category_color 
-            FROM app_products p 
-            JOIN app_section_products sp ON p.id = sp.product_id 
-            JOIN app_categories c ON p.category_id = c.id
-            WHERE sp.section_id = ? AND p.is_active = 1 AND p.is_public = 1
-            ORDER BY sp.sort_order ASC");
-        $stmt->execute([$sec['id']]);
-        $sec['products'] = $stmt->fetchAll();
+    
+    // Check if we have sections defined, if not or we just want everything, we'll append an "All Apps" section
+    $allProducts = $db->query("SELECT p.*, c.name as category_name, c.color as category_color 
+        FROM app_products p 
+        JOIN app_categories c ON p.category_id = c.id
+        WHERE p.is_active = 1 AND p.is_public = 1
+        ORDER BY p.created_at DESC")->fetchAll();
+        
+    if (empty($sections)) {
+        $sections = [
+            [
+                'id' => 0,
+                'title' => 'All Applications',
+                'products' => $allProducts
+            ]
+        ];
+    } else {
+        foreach ($sections as &$sec) {
+            $stmt = $db->prepare("SELECT p.*, c.name as category_name, c.color as category_color 
+                FROM app_products p 
+                JOIN app_section_products sp ON p.id = sp.product_id 
+                JOIN app_categories c ON p.category_id = c.id
+                WHERE sp.section_id = ? AND p.is_active = 1 AND p.is_public = 1
+                ORDER BY sp.sort_order ASC");
+            $stmt->execute([$sec['id']]);
+            $sec['products'] = $stmt->fetchAll();
+        }
+        
+        // Find orphan products that aren't in any section
+        $assignedProductIds = [];
+        foreach ($sections as $sec) {
+            foreach ($sec['products'] as $p) {
+                $assignedProductIds[] = $p['id'];
+            }
+        }
+        
+        $unassignedProducts = [];
+        foreach ($allProducts as $p) {
+            if (!in_array($p['id'], $assignedProductIds)) {
+                $unassignedProducts[] = $p;
+            }
+        }
+        
+        // Append an "Other Applications" section if there are unassigned products
+        if (!empty($unassignedProducts)) {
+            $sections[] = [
+                'id' => -1,
+                'title' => 'New & Notable Discoveries',
+                'products' => $unassignedProducts
+            ];
+        }
     }
 
     require __DIR__ . '/../views/software.php';
