@@ -2210,14 +2210,22 @@ function adminAppLicenses(): void
         $notes = trim($_POST['notes'] ?? '');
 
         $aboutText = trim($_POST['about_text'] ?? '');
-        $useCount = intval($_POST['use_count'] ?? 0);
         $maxUseCount = intval($_POST['max_use_count'] ?? 0);
 
         if ($id > 0) {
+            if (isset($_POST['use_count']) && $_POST['use_count'] !== '') {
+                $useCount = intval($_POST['use_count']);
+            } else {
+                $stmt = $db->prepare('SELECT use_count FROM app_licenses WHERE id = ?');
+                $stmt->execute([$id]);
+                $useCount = $stmt->fetchColumn() ?: 0;
+            }
+
             $db->prepare('UPDATE app_licenses SET product_id=?, license_key=?, label=?, status=?, type=?, max_devices=?, expires_at=?, notes=?, about_text=?, use_count=?, max_use_count=? WHERE id=?')
                 ->execute([$productId, $licenseKey, $label, $status, $type, $maxDevices, $expiresAt, $notes, $aboutText, $useCount, $maxUseCount, $id]);
         }
         else {
+            $useCount = intval($_POST['use_count'] ?? 0);
             $db->prepare('INSERT INTO app_licenses (product_id, license_key, label, status, type, max_devices, expires_at, notes, about_text, use_count, max_use_count) VALUES (?,?,?,?,?,?,?,?,?,?,?)')
                 ->execute([$productId, $licenseKey, $label, $status, $type, $maxDevices, $expiresAt, $notes, $aboutText, $useCount, $maxUseCount]);
             $id = $db->lastInsertId();

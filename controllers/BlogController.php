@@ -5,7 +5,8 @@
 require_once __DIR__ . '/../includes/db.php';
 require_once __DIR__ . '/../includes/helpers.php';
 
-function showBlogDetail(string $slug): void {
+function showBlogDetail(string $slug): void
+{
     $blog = getBlogBySlug($slug);
 
     if (!$blog) {
@@ -17,7 +18,8 @@ function showBlogDetail(string $slug): void {
     try {
         $db = getDB();
         $db->prepare('UPDATE blogs SET view_count = COALESCE(view_count,0) + 1 WHERE slug = ?')->execute([$slug]);
-    } catch (Exception $e) { /* silently fail */ }
+    } catch (Exception $e) { /* silently fail */
+    }
 
     $locale = getCurrentLocale();
     $dir = isRTL() ? 'rtl' : 'ltr';
@@ -42,10 +44,10 @@ function showBlogDetail(string $slug): void {
 
     // SEO setup for the specific blog
     $seo = [
-        'title'          => $blog['title'] . ' | ' . APP_NAME,
-        'description'    => $blog['description'] ?? '',
-        'keywords'       => $blog['keywords'] ?? '',
-        'og_image'       => $ogImage,
+        'title' => $blog['title'] . ' | ' . APP_NAME,
+        'description' => $blog['description'] ?? '',
+        'keywords' => $blog['keywords'] ?? '',
+        'og_image' => $ogImage,
         'canonical_link' => baseUrl('blog/' . $blog['slug'])
     ];
 
@@ -53,14 +55,15 @@ function showBlogDetail(string $slug): void {
     require __DIR__ . '/../views/layouts/main.php';
 }
 
-function showAll(): void {
+function showAll(): void
+{
     $locale = getCurrentLocale();
     $seo = getSeoMeta('blogs');
-    
+
     $seo = [
-        'title'          => ($seo['title'] ?? 'Our Insights') . ' | ' . APP_NAME,
-        'description'    => $seo['description'] ?? '',
-        'keywords'       => $seo['keywords'] ?? '',
+        'title' => ($seo['title'] ?? 'Our Insights') . ' | ' . APP_NAME,
+        'description' => $seo['description'] ?? '',
+        'keywords' => $seo['keywords'] ?? '',
         'canonical_link' => baseUrl('blogs')
     ];
 

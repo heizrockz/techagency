@@ -122,6 +122,18 @@ if (!defined('APP_NAME')) die('Direct access prevented');
                                 </div>
 
                                 <div class="space-y-2">
+                                    <label class="text-sm font-semibold text-white/60 ml-1">Max Uses (Scans)</label>
+                                    <input type="number" name="max_use_count" class="form-input bg-white/5 border-white/10 focus:border-orange-500/50" value="<?= $editLicense['max_use_count'] ?? 0 ?>" min="0">
+                                </div>
+
+                                <?php if ($action === 'edit'): ?>
+                                <div class="space-y-2">
+                                    <label class="text-sm font-semibold text-white/60 ml-1">Current Usage Count</label>
+                                    <input type="number" name="use_count" class="form-input bg-white/5 border-white/10 focus:border-orange-500/50" value="<?= $editLicense['use_count'] ?? 0 ?>" min="0">
+                                </div>
+                                <?php endif; ?>
+
+                                <div class="space-y-2">
                                     <label class="text-sm font-semibold text-white/60 ml-1">Expiration Date</label>
                                     <input type="datetime-local" name="expires_at" class="form-input bg-white/5 border-white/10 focus:border-orange-500/50" 
                                            value="<?= !empty($editLicense['expires_at']) ? date('Y-m-d\TH:i', strtotime($editLicense['expires_at'])) : '' ?>">
@@ -273,10 +285,15 @@ if (!defined('APP_NAME')) die('Direct access prevented');
                                                     </div>
                                                 </td>
                                                 <td class="text-center">
-                                                    <a href="<?= baseUrl('admin/app-devices?license='.$l['id']) ?>" class="inline-flex items-center gap-1 hover:text-white transition-colors">
+                                                    <a href="<?= baseUrl('admin/app-devices?license='.$l['id']) ?>" class="inline-flex items-center justify-center gap-1 hover:text-white transition-colors">
                                                         <span class="text-sm font-mono <?= $l['online_count'] > 0 ? 'text-emerald-400' : 'text-white/60' ?>"><?= $l['device_count'] ?></span>
                                                         <span class="text-xs text-white/40">/ <?= $l['max_devices'] ?></span>
                                                     </a>
+                                                    <?php if($l['max_use_count'] > 0 || $l['use_count'] > 0): ?>
+                                                    <div class="mt-1 text-[10px] text-white/40">
+                                                        Scans: <span class="text-white/60 font-mono"><?= $l['use_count'] ?></span> / <?= $l['max_use_count'] > 0 ? $l['max_use_count'] : '∞' ?>
+                                                    </div>
+                                                    <?php endif; ?>
                                                 </td>
                                                 <td>
                                                     <?php if(empty($l['expires_at'])): ?>
