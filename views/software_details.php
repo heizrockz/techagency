@@ -10,13 +10,21 @@ if (!defined('APP_NAME')) die('Direct access prevented');
     
     <!-- Open Graph / Social Media -->
     <?php
+        $siteDomain = 'https://' . ($_SERVER['HTTP_HOST'] ?? 'micosage.com');
         $ogTitle = e($product['name']) . ' — ' . APP_NAME;
-        $ogDesc = e($product['meta_description'] ?: $product['description']);
-        $ogImage = !empty($product['icon_url']) ? (strpos($product['icon_url'], 'http') === 0 ? $product['icon_url'] : baseUrl($product['icon_url'])) : '';
-        if (empty($ogImage) && !empty($product['header_image'])) {
-            $ogImage = strpos($product['header_image'], 'http') === 0 ? $product['header_image'] : baseUrl($product['header_image']);
+        $ogDesc = trim(e($product['meta_description'] ?: $product['description']));
+        if (empty($ogDesc)) $ogDesc = 'Download ' . e($product['name']) . ' from ' . APP_NAME;
+        
+        $rawImage = !empty($product['icon_url']) ? $product['icon_url'] : (!empty($product['header_image']) ? $product['header_image'] : '');
+        $ogImage = '';
+        if (!empty($rawImage)) {
+            $ogImage = strpos($rawImage, 'http') === 0 ? $rawImage : $siteDomain . baseUrl($rawImage);
+        } else {
+            $siteLogo = getSetting('site_logo');
+            if ($siteLogo) $ogImage = $siteDomain . baseUrl($siteLogo);
         }
-        $ogUrl = baseUrl('software/' . e($product['slug']));
+        
+        $ogUrl = $siteDomain . baseUrl('software/' . e($product['slug']));
     ?>
     <meta property="og:type" content="product">
     <meta property="og:title" content="<?= $ogTitle ?>">
