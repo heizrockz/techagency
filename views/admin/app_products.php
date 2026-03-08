@@ -33,6 +33,10 @@ if (!defined('APP_NAME')) die('Direct access prevented');
                 </div>
             </div>
             <div class="relative flex items-center gap-4">
+                <a href="<?= baseUrl('admin/api-docs') ?>" class="group flex items-center gap-2 px-3 sm:px-5 py-2.5 bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/20 hover:border-blue-500/40 rounded-xl transition-all duration-300">
+                    <i class="ph ph-code text-lg text-blue-500 group-hover:-rotate-12 transition-transform duration-500"></i>
+                    <span class="text-sm font-semibold text-blue-500 hidden sm:inline">API Docs</span>
+                </a>
                 <a href="<?= baseUrl('admin/app-products?action=new') ?>" class="group flex items-center gap-2 px-3 sm:px-5 py-2.5 bg-violet-500/10 hover:bg-violet-500/20 border border-violet-500/20 hover:border-violet-500/40 rounded-xl transition-all duration-300">
                     <i class="ph ph-plus-circle text-lg text-violet-500 group-hover:rotate-90 transition-transform duration-500"></i>
                     <span class="text-sm font-semibold text-violet-500 hidden sm:inline">New Product</span>

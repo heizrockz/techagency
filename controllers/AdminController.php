@@ -2583,3 +2583,9 @@ function _generateLicenseKey()
         substr(md5(uniqid(mt_rand(), true)), 0, 4) . '-' .
         substr(md5(uniqid(mt_rand(), true)), 0, 4));
 }
+
+function adminApiDocs(): void
+{
+    requireSuperAdmin();
+    require __DIR__ . '/../views/admin/api_docs.php';
+}

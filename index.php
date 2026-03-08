@@ -203,6 +203,9 @@ elseif (strpos($path, '/admin') === 0) {
     elseif ($path === '/admin/app-devices') {
         adminAppDevices();
     }
+    elseif ($path === '/admin/api-docs') {
+        adminApiDocs();
+    }
     elseif ($path === '/admin/profile') {
         adminProfile();
     }
