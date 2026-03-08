@@ -624,20 +624,38 @@ safeExec($db, "
         KEY `product_id` (`product_id`)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
 ", "Table `app_reviews`");
-out("STEP 10 — Cleanup old scripts", 'head');
 
-$publicFilesToDelete = [
-    __DIR__ . '/dbfix.php',
-    __DIR__ . '/dbfix_notif.php',
-    __DIR__ . '/dbfix_salesperson.php',
-    __DIR__ . '/dbfix_salesperson_crm.php',
-    __DIR__ . '/dbtest.php',
-    __DIR__ . '/dbtest2.php',
-    __DIR__ . '/get_schema.php',
-    __DIR__ . '/seed_success.php',
-    __DIR__ . '/fix_topbar.py',
-    __DIR__ . '/inject_topbar.py',
-];
+safeExec($db, "
+    CREATE TABLE IF NOT EXISTS `app_product_translations` (
+      `id` int(11) NOT NULL AUTO_INCREMENT,
+      `product_id` int(11) NOT NULL,
+      `locale` varchar(10) NOT NULL,
+      `name` varchar(255) DEFAULT NULL,
+      `short_description` text DEFAULT NULL,
+      `description` text DEFAULT NULL,
+      `features` text DEFAULT NULL,
+      `created_at` timestamp NULL DEFAULT current_timestamp(),
+      `updated_at` timestamp NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+      PRIMARY KEY (`id`),
+      UNIQUE KEY `product_locale` (`product_id`,`locale`),
+      CONSTRAINT `fk_app_prod_trans` FOREIGN KEY (`product_id`) REFERENCES `app_products` (`id`) ON DELETE CASCADE
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+", "Table `app_product_translations`");
+    out("STEP 12 — Cleanup old scripts", 'head');
+
+    $publicFilesToDelete = [
+        __DIR__ . '/dbfix.php',
+        __DIR__ . '/dbfix_notif.php',
+        __DIR__ . '/dbfix_salesperson.php',
+        __DIR__ . '/dbfix_salesperson_crm.php',
+        __DIR__ . '/db_fix_app_translations.php',
+        __DIR__ . '/db_fix_products.php',
+        __DIR__ . '/db_trigger.php',
+        __DIR__ . '/dbtest.php',
+        __DIR__ . '/dbtest2.php',
+        __DIR__ . '/get_schema.php',
+        __DIR__ . '/seed_success.php',
+    ];
 
 $migrationFilesToDelete = [
     __DIR__ . '/migrations/add_multi_salesperson.php',
