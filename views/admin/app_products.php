@@ -77,9 +77,10 @@ if (!defined('APP_NAME')) die('Direct access prevented');
                             </div>
                             
                             <div class="flex items-center bg-white/5 p-1 rounded-xl">
-                                <button onclick="switchTab('general')" class="tab-btn active px-4 py-1.5 rounded-lg text-xs font-bold uppercase tracking-widest transition-all">General</button>
-                                <button onclick="switchTab('seo')" class="tab-btn px-4 py-1.5 rounded-lg text-xs font-bold uppercase tracking-widest transition-all">SEO & Vis</button>
-                                <button onclick="switchTab('gallery')" class="tab-btn px-4 py-1.5 rounded-lg text-xs font-bold uppercase tracking-widest transition-all">Gallery</button>
+                                <button type="button" onclick="switchTab('general')" class="tab-btn active px-4 py-1.5 rounded-lg text-xs font-bold uppercase tracking-widest transition-all">General</button>
+                                <button type="button" onclick="switchTab('arabic')" class="tab-btn px-4 py-1.5 rounded-lg text-xs font-bold uppercase tracking-widest transition-all text-violet-300">عربي</button>
+                                <button type="button" onclick="switchTab('seo')" class="tab-btn px-4 py-1.5 rounded-lg text-xs font-bold uppercase tracking-widest transition-all">SEO & Vis</button>
+                                <button type="button" onclick="switchTab('gallery')" class="tab-btn px-4 py-1.5 rounded-lg text-xs font-bold uppercase tracking-widest transition-all">Gallery</button>
                             </div>
                         </div>
 
@@ -200,6 +201,29 @@ if (!defined('APP_NAME')) die('Direct access prevented');
                                         <label class="text-[11px] font-bold text-white/40 uppercase tracking-widest ml-1">Buy / Checkout URL</label>
                                         <input type="text" name="buy_url" class="form-input" value="<?= e($editProduct['buy_url'] ?? '') ?>" placeholder="Stripe/PayPal link">
                                     </div>
+                                </div>
+                            </div>
+
+                            <!-- Arabic Tab -->
+                            <div id="tab-arabic" class="form-tab hidden space-y-6" dir="rtl">
+                                <div class="p-4 rounded-xl bg-violet-600/10 border border-violet-500/20 mb-4">
+                                    <p class="text-sm text-violet-300 font-medium">الترجمة العربية. اترك الحقول فارغة للرجوع إلى اللغة الإنجليزية.</p>
+                                </div>
+                                <div class="space-y-2">
+                                    <label class="text-[11px] font-bold text-white/40 uppercase tracking-widest ml-1">اسم المنتج</label>
+                                    <input type="text" name="name_ar" class="form-input text-right" value="<?= e($editProduct['name_ar'] ?? '') ?>" placeholder="مثال: برنامج المبيعات">
+                                </div>
+                                <div class="space-y-2">
+                                    <label class="text-[11px] font-bold text-white/40 uppercase tracking-widest ml-1">نبذة قصيرة</label>
+                                    <textarea name="short_description_ar" rows="2" class="form-input text-right" placeholder="ملخص قصير..."><?= e($editProduct['short_description_ar'] ?? '') ?></textarea>
+                                </div>
+                                <div class="space-y-2">
+                                    <label class="text-[11px] font-bold text-white/40 uppercase tracking-widest ml-1">الوصف الكامل</label>
+                                    <textarea name="description_ar" rows="4" class="form-input text-right" placeholder="وصف مفصل للمنتج..."><?= e($editProduct['description_ar'] ?? '') ?></textarea>
+                                </div>
+                                <div class="space-y-2">
+                                    <label class="text-[11px] font-bold text-white/40 uppercase tracking-widest ml-1">المميزات (ميزة واحدة في كل سطر)</label>
+                                    <textarea name="features_ar" rows="4" class="form-input text-right" placeholder="ميزة 1\nميزة 2..."><?= e($editProduct['features_ar'] ?? '') ?></textarea>
                                 </div>
                             </div>
 

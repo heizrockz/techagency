@@ -6,42 +6,75 @@
 function publicSoftwareStore(): void
 {
     $db = getDB();
+    $locale = getCurrentLocale();
     
     // 1. Fetch Featured Bento Apps (first 3)
-    $featured = $db->query("SELECT p.*, c.name as category_name, c.color as category_color 
+    $featured = $db->prepare("SELECT p.*, c.name as category_name, c.color as category_color,
+            COALESCE(t.name, p.name) as display_name,
+            COALESCE(t.short_description, p.short_description) as display_short_desc
         FROM app_products p 
         JOIN app_categories c ON p.category_id = c.id 
+        LEFT JOIN app_product_translations t ON p.id = t.product_id AND t.locale = ?
         WHERE p.is_active = 1 AND p.is_public = 1
-        ORDER BY p.created_at DESC LIMIT 3")->fetchAll();
+        ORDER BY p.created_at DESC LIMIT 3");
+    $featured->execute([$locale]);
+    $featured = $featured->fetchAll();
+
+    // Apply translations directly
+    foreach ($featured as &$f) {
+        $f['name'] = $f['display_name'];
+        $f['short_description'] = $f['display_short_desc'];
+    }
+    unset($f);
 
     // 2. Fetch Dynamic Sections with their products
     $sections = $db->query("SELECT * FROM app_sections WHERE is_active = 1 ORDER BY sort_order ASC")->fetchAll();
     
-    // Check if we have sections defined, if not or we just want everything, we'll append an "All Apps" section
-    $allProducts = $db->query("SELECT p.*, c.name as category_name, c.color as category_color 
+    // Fetch all products just in case there are unassigned or no sections
+    $allProductsStmt = $db->prepare("SELECT p.*, c.name as category_name, c.color as category_color,
+            COALESCE(t.name, p.name) as display_name,
+            COALESCE(t.short_description, p.short_description) as display_short_desc
         FROM app_products p 
         JOIN app_categories c ON p.category_id = c.id
+        LEFT JOIN app_product_translations t ON p.id = t.product_id AND t.locale = ?
         WHERE p.is_active = 1 AND p.is_public = 1
-        ORDER BY p.created_at DESC")->fetchAll();
+        ORDER BY p.created_at DESC");
+    $allProductsStmt->execute([$locale]);
+    $allProducts = $allProductsStmt->fetchAll();
+
+    foreach ($allProducts as &$p) {
+        $p['name'] = $p['display_name'];
+        $p['short_description'] = $p['display_short_desc'];
+    }
+    unset($p);
         
     if (empty($sections)) {
         $sections = [
             [
                 'id' => 0,
-                'title' => 'All Applications',
+                'title' => getCurrentLocale() === 'ar' ? 'جميع التطبيقات' : 'All Applications',
                 'products' => $allProducts
             ]
         ];
     } else {
         foreach ($sections as &$sec) {
-            $stmt = $db->prepare("SELECT p.*, c.name as category_name, c.color as category_color 
+            $stmt = $db->prepare("SELECT p.*, c.name as category_name, c.color as category_color,
+                    COALESCE(t.name, p.name) as display_name,
+                    COALESCE(t.short_description, p.short_description) as display_short_desc
                 FROM app_products p 
                 JOIN app_section_products sp ON p.id = sp.product_id 
                 JOIN app_categories c ON p.category_id = c.id
+                LEFT JOIN app_product_translations t ON p.id = t.product_id AND t.locale = ?
                 WHERE sp.section_id = ? AND p.is_active = 1 AND p.is_public = 1
                 ORDER BY sp.sort_order ASC");
-            $stmt->execute([$sec['id']]);
+            $stmt->execute([$locale, $sec['id']]);
             $sec['products'] = $stmt->fetchAll();
+
+            foreach ($sec['products'] as &$sp) {
+                $sp['name'] = $sp['display_name'];
+                $sp['short_description'] = $sp['display_short_desc'];
+            }
+            unset($sp);
         }
         
         // Find orphan products that aren't in any section
@@ -75,14 +108,27 @@ function publicSoftwareStore(): void
 function publicSoftwareDetails(string $slug): void
 {
     $db = getDB();
+    $locale = getCurrentLocale();
     
     // Fetch specific product
-    $stmt = $db->prepare("SELECT p.*, c.name as category_name, c.color as category_color 
+    $stmt = $db->prepare("SELECT p.*, c.name as category_name, c.color as category_color,
+            COALESCE(t.name, p.name) as display_name,
+            COALESCE(t.short_description, p.short_description) as display_short_desc,
+            COALESCE(t.description, p.description) as display_desc,
+            COALESCE(t.features, p.features) as display_features
         FROM app_products p 
         JOIN app_categories c ON p.category_id = c.id 
+        LEFT JOIN app_product_translations t ON p.id = t.product_id AND t.locale = ?
         WHERE p.slug = ? AND p.is_active = 1 LIMIT 1");
-    $stmt->execute([$slug]);
+    $stmt->execute([$locale, $slug]);
     $product = $stmt->fetch();
+
+    if ($product) {
+        $product['name'] = $product['display_name'];
+        $product['short_description'] = $product['display_short_desc'];
+        $product['description'] = $product['display_desc'];
+        $product['features'] = $product['display_features'];
+    }
 
     if (!$product) {
         require __DIR__ . '/../views/user/404.php';

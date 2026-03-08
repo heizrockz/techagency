@@ -8,12 +8,18 @@ if (!defined('APP_NAME')) die('Direct access prevented');
     <meta name="description" content="<?= e($product['meta_description'] ?: $product['description']) ?>">
     <meta name="keywords" content="<?= e($product['meta_keywords']) ?>">
     <?php require __DIR__ . '/admin/partials/_head_assets.php'; ?>
+    <!-- Required for Navbar -->
+    <link rel="stylesheet" href="<?= baseUrl('assets/css/style.css') ?>">
+
     <style>
         :root {
             --glass-bg: rgba(255, 255, 255, 0.03);
             --glass-border: rgba(255, 255, 255, 0.08);
         }
         body { background: #0b0e14; color: #fff; font-family: 'Inter', sans-serif; overflow-x: hidden; }
+        
+        /* Support navbar island */
+        .navbar-island { z-index: 1000 !important; }
         
         .product-nav {
             height: 70px;
@@ -31,7 +37,7 @@ if (!defined('APP_NAME')) die('Direct access prevented');
 
         .details-container {
             max-width: 1200px;
-            margin: 60px auto;
+            margin: 180px auto 60px; /* Increased top margin for navbar */
             padding: 0 20px;
             display: grid;
             grid-template-columns: 1fr 380px;
@@ -91,19 +97,22 @@ if (!defined('APP_NAME')) die('Direct access prevented');
         .rating-input input:checked ~ label { color: #f59e0b; }
 
         @media (max-width: 1024px) {
-            .details-container { grid-template-cols: 1fr; }
+            .details-container { grid-template-columns: 1fr; }
         }
     </style>
 </head>
 <body>
 
-    <nav class="product-nav">
+    <!-- Main Navigation Bar -->
+    <?php require __DIR__ . '/user/partials/navbar.php'; ?>
+
+    <nav class="product-nav mt-8"> <!-- Added margin top to separate from main nav slightly if needed, or could just rest below -->
         <a href="<?= baseUrl('software') ?>" class="flex items-center gap-2 text-white/60 hover:text-white transition-colors">
             <i class="ph ph-arrow-left"></i>
-            <span class="text-sm font-bold uppercase tracking-widest">Store</span>
+            <span class="text-sm font-bold uppercase tracking-widest"><?= getCurrentLocale() === 'ar' ? 'الرجوع للمتجر' : 'Store' ?></span>
         </a>
         <div class="flex items-center gap-4">
-            <span class="text-[10px] font-black uppercase tracking-widest text-white/20">Version <?= e($product['version']) ?></span>
+            <span class="text-[10px] font-black uppercase tracking-widest text-white/20"><?= getCurrentLocale() === 'ar' ? 'الإصدار' : 'Version' ?> <?= e($product['version']) ?></span>
             <div class="h-4 w-px bg-white/10"></div>
             <span class="text-[10px] font-black uppercase tracking-widest text-violet-400"><?= e($product['category_name']) ?></span>
         </div>

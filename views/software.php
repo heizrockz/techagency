@@ -7,6 +7,9 @@ if (!defined('APP_NAME')) die('Direct access prevented');
     <title>Software Store — <?= APP_NAME ?></title>
     <?php require __DIR__ . '/admin/partials/_head_assets.php'; ?>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+    <!-- Required for Navbar -->
+    <link rel="stylesheet" href="<?= baseUrl('assets/css/style.css') ?>">
+    
     <style>
         :root {
             --glass-bg: rgba(255, 255, 255, 0.02);
@@ -15,9 +18,12 @@ if (!defined('APP_NAME')) die('Direct access prevented');
             --font-main: 'Inter', sans-serif;
         }
         body { background: #0b0e14; color: #fff; font-family: var(--font-main); overflow-x: hidden; -webkit-font-smoothing: antialiased; }
+
+        /* Support navbar island */
+        .navbar-island { z-index: 1000 !important; }
         
         .store-hero {
-            padding: 140px 0 100px;
+            padding: 180px 0 100px; /* Increased top padding to accommodate fixed navbar */
             background: 
                 radial-gradient(circle at 50% -20%, rgba(139, 92, 246, 0.1) 0%, transparent 60%),
                 radial-gradient(circle at 100% 100%, rgba(236, 72, 153, 0.02) 0%, transparent 40%);
@@ -207,16 +213,22 @@ if (!defined('APP_NAME')) die('Direct access prevented');
 </head>
 <body dir="<?= isRTL() ? 'rtl' : 'ltr' ?>">
 
-    <section class="store-hero">
+    <!-- Main Navigation Bar -->
+    <?php require __DIR__ . '/user/partials/navbar.php'; ?>
+
+    <section class="store-hero pt-[180px]">
         <div class="container mx-auto px-6">
             <div class="text-center mb-16">
-                <h1 class="text-6xl font-black mb-4 tracking-tighter">MicoStore</h1>
-                <p class="text-white/30 max-w-xl mx-auto font-medium text-lg italic leading-relaxed">High performance apps curated for your forensic & data needs.</p>
+                <!-- Translated main title and subtitle -->
+                <h1 class="text-6xl font-black mb-4 tracking-tighter"><?= getCurrentLocale() === 'ar' ? 'متجر البرمجيات' : 'MicoStore' ?></h1>
+                <p class="text-white/30 max-w-xl mx-auto font-medium text-lg italic leading-relaxed">
+                    <?= getCurrentLocale() === 'ar' ? 'تطبيقات عالية الأداء لاحتياجاتك.' : 'High performance apps curated for your forensic & data needs.' ?>
+                </p>
             </div>
             
             <div class="search-bar-container">
                 <i class="ph ph-magnifying-glass search-icon"></i>
-                <input type="text" class="search-bar" placeholder="Search apps, tools, and platforms">
+                <input type="text" class="search-bar" placeholder="<?= getCurrentLocale() === 'ar' ? 'البحث عن التطبيقات، والأدوات، والمنصات' : 'Search apps, tools, and platforms' ?>">
             </div>
 
             <!-- Dynamic Sections -->
