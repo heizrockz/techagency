@@ -62,11 +62,11 @@ if (!defined('APP_NAME')) die('Direct access prevented');
             color: #fff;
         }
 
-        /* Copilot-Style App Tile Grid */
+        /* Store App Tile Grid */
         .app-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 40px;
+            gap: 16px;
             margin-bottom: 100px;
             padding: 0 12px;
         }
@@ -76,81 +76,87 @@ if (!defined('APP_NAME')) die('Direct access prevented');
             color: inherit;
             display: flex;
             flex-direction: column;
-            gap: 16px;
-            transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            background: #202024;
+            border-radius: 8px;
+            overflow: hidden;
+            transition: transform 0.3s ease, background 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
         }
-        .app-card:hover { transform: translateY(-10px); }
+        .app-card:hover { 
+            transform: translateY(-4px); 
+            background: #2d2d33;
+        }
 
         .app-visual {
             width: 100%;
-            aspect-ratio: 1;
-            border-radius: 36px;
-            overflow: hidden;
+            aspect-ratio: 16 / 13;
             position: relative;
-            background: #1c212b;
-            box-shadow: 
-                0 10px 30px -10px rgba(0,0,0,0.5),
-                inset 0 0 0 1px rgba(255,255,255,0.03);
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: all 0.4s;
-        }
-        .app-card:hover .app-visual {
-            box-shadow: 
-                0 30px 60px -12px rgba(0,0,0,0.6),
-                inset 0 0 0 1px rgba(255,255,255,0.08);
         }
 
         /* Dynamic Gradients for Backgrounds */
-        .bg-gradient-1 { background: linear-gradient(135deg, #FF6B6B 0%, #FEC260 100%); }
-        .bg-gradient-2 { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
-        .bg-gradient-3 { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
-        .bg-gradient-4 { background: linear-gradient(135deg, #2af598 0%, #009efd 100%); }
-        .bg-gradient-5 { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
-        .bg-auto { background: linear-gradient(135deg, #1c212b 0%, #2a313d 100%); }
+        .bg-gradient-1 { background: linear-gradient(135deg, #1f2c41 0%, #a23565 100%); }
+        .bg-gradient-2 { background: linear-gradient(135deg, #104245 0%, #203541 100%); }
+        .bg-gradient-3 { background: linear-gradient(135deg, #1c5fd1 0%, #25448c 100%); }
+        .bg-gradient-4 { background: linear-gradient(135deg, #c41e15 0%, #7e1610 100%); }
+        .bg-gradient-5 { background: linear-gradient(135deg, #2b6bf3 0%, #153e97 100%); }
+        .bg-auto { background: linear-gradient(135deg, #2b6bf3 0%, #153e97 100%); }
 
         .app-icon {
-            width: 55%;
-            height: 55%;
+            width: 48%;
+            height: 48%;
             object-fit: contain;
-            filter: drop-shadow(0 8px 16px rgba(0,0,0,0.2));
-            transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+            filter: drop-shadow(0 4px 12px rgba(0,0,0,0.15));
+            transition: transform 0.4s ease;
         }
-        .app-card:hover .app-icon { transform: scale(1.1) rotate(5deg); }
+        .app-card:hover .app-icon { transform: scale(1.05); }
         .app-icon-fallback { font-size: 56px; color: rgba(255,255,255,0.8); transition: transform 0.5s; }
         .app-card:hover .app-icon-fallback { transform: scale(1.1); }
 
-        .app-info { padding: 0 4px; }
+        .app-info { 
+            padding: 16px; 
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            flex-grow: 1;
+        }
         .app-name { 
-            font-size: 16px; 
-            font-weight: 700; 
-            margin-bottom: 6px; 
-            color: rgba(255,255,255,0.9);
-            white-space: nowrap;
+            font-size: 15px; 
+            font-weight: 500; 
+            margin-bottom: 16px; 
+            color: #ffffff;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
             overflow: hidden;
             text-overflow: ellipsis;
+            line-height: 1.3;
         }
         
         .app-meta {
             display: flex;
             align-items: center;
-            gap: 12px;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #a0a0a0;
+            margin-top: auto;
+        }
+        .app-rating { 
+            display: flex; 
+            align-items: center; 
+            gap: 4px; 
+            font-weight: 500;
+        }
+        .app-rating i { color: #a0a0a0; font-size: 11px; }
+        .app-status {
+            background: #141414;
+            padding: 4px 12px;
+            border-radius: 4px;
+            color: #ffffff;
             font-size: 12px;
             font-weight: 600;
-        }
-        .app-rating { display: flex; align-items: center; gap: 4px; color: rgba(255,255,255,0.3); }
-        .app-rating i { color: #f59e0b; font-size: 10px; }
-        .app-status {
-            background: rgba(255,255,255,0.05);
-            padding: 4px 10px;
-            border-radius: 8px;
-            color: rgba(255,255,255,0.4);
-            border: 1px solid rgba(255,255,255,0.05);
-            font-size: 10px;
-            font-weight: 800;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
         }
 
         .featured-hero {
@@ -247,7 +253,7 @@ if (!defined('APP_NAME')) die('Direct access prevented');
                                 <h3 class="app-name"><?= e($p['name']) ?></h3>
                                 <div class="app-meta">
                                     <div class="app-rating">
-                                        <i class="ph-fill ph-star"></i> 4.7
+                                        4.7 <i class="ph-fill ph-star"></i>
                                     </div>
                                     <div class="app-status">
                                         <?= $p['pricing_model'] === 'free' ? 'Free' : '$'.number_format($p['price'], 0) ?>
