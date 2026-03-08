@@ -219,23 +219,6 @@ if (!defined('APP_NAME')) die('Direct access prevented');
                 <input type="text" class="search-bar" placeholder="Search apps, tools, and platforms">
             </div>
 
-            <?php if(!empty($featured)): $f = $featured[0]; ?>
-            <!-- Hero Release -->
-            <div class="featured-hero">
-                <div class="hero-inner group">
-                    <img src="<?= $f['header_image'] ? (strpos($f['header_image'], 'http') === 0 ? e($f['header_image']) : baseUrl($f['header_image'])) : 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=1600&q=80' ?>" class="hero-bg group-hover:scale-105 transition-transform duration-1000">
-                    <div class="hero-overlay">
-                        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-violet-500/20 border border-violet-500/30 text-violet-400 text-[10px] font-black uppercase tracking-widest mb-6">
-                            <i class="ph-fill ph-sparkle"></i> Featured Release
-                        </div>
-                        <h2 class="text-5xl font-black mb-4 tracking-tighter max-w-lg"><?= e($f['name']) ?></h2>
-                        <p class="text-white/50 max-w-md text-lg mb-8 line-clamp-2"><?= e($f['description']) ?></p>
-                        <a href="<?= baseUrl('software/' . $f['slug']) ?>" class="inline-flex items-center justify-center px-8 py-4 bg-white text-black font-black uppercase tracking-widest rounded-2xl text-xs hover:bg-violet-400 hover:text-white transition-all">Explore App</a>
-                    </div>
-                </div>
-            </div>
-            <?php endif; ?>
-
             <!-- Dynamic Sections -->
             <?php foreach($sections as $secId => $sec): if(!empty($sec['products'])): ?>
                 <div class="section-header">
