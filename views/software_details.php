@@ -114,7 +114,16 @@ if (!defined('APP_NAME')) die('Direct access prevented');
             <!-- Gallery -->
             <div class="gallery-section mb-12">
                 <div class="gallery-main">
-                    <img src="<?= baseUrl($product['header_image'] ?: 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=1200&q=80') ?>" id="galleryMain">
+                    <?php 
+                    $mainImage = $product['header_image'];
+                    if (empty($mainImage) && !empty($gallery)) {
+                        $mainImage = $gallery[0]['image_path'];
+                    }
+                    if (empty($mainImage)) {
+                        $mainImage = 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=1200&q=80';
+                    }
+                    ?>
+                    <img src="<?= strpos($mainImage, 'http') === 0 ? e($mainImage) : baseUrl($mainImage) ?>" id="galleryMain">
                 </div>
                 <div class="thumbnail-grid">
                     <?php foreach ($gallery as $img): ?>

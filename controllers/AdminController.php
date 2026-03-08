@@ -2064,6 +2064,20 @@ function adminAppProducts(): void
         exit;
     }
 
+    if ($action === 'delete_image' && isset($_GET['id'])) {
+        $imgId = intval($_GET['id']);
+        $prodId = intval($_GET['product_id'] ?? 0);
+        $img = $db->query("SELECT * FROM app_product_images WHERE id = $imgId")->fetch();
+        if ($img) {
+            $filePath = __DIR__ . '/../' . $img['image_path'];
+            if (file_exists($filePath)) @unlink($filePath);
+            $db->prepare("DELETE FROM app_product_images WHERE id = ?")->execute([$imgId]);
+            setFlash('Image deleted.', 'success');
+        }
+        header('Location: ' . baseUrl('admin/app-products?action=edit&id=' . $prodId));
+        exit;
+    }
+
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $id = intval($_POST['id'] ?? 0);
         $catId = intval($_POST['category_id'] ?? 0);

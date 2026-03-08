@@ -225,7 +225,7 @@ if (!defined('APP_NAME')) die('Direct access prevented');
                                         <span class="text-[10px] text-white/20 px-2 py-0.5 rounded-full border border-white/10">Max 10 images</span>
                                     </div>
                                     
-                                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                                    <div id="galleryPreviewContainer" class="grid grid-cols-2 sm:grid-cols-4 gap-4">
                                         <?php foreach ($gallery as $img): ?>
                                             <div class="relative group aspect-video rounded-xl overflow-hidden bg-white/5 border border-white/10">
                                                 <img src="<?= baseUrl($img['image_path']) ?>" class="w-full h-full object-cover">
@@ -239,7 +239,7 @@ if (!defined('APP_NAME')) die('Direct access prevented');
                                         <label class="aspect-video rounded-xl border-2 border-dashed border-white/10 hover:border-violet-500/40 hover:bg-violet-500/5 transition-all flex flex-col items-center justify-center gap-2 cursor-pointer">
                                             <i class="ph ph-plus-circle text-2xl text-white/20"></i>
                                             <span class="text-[10px] font-bold text-white/20 uppercase">Add More</span>
-                                            <input type="file" name="gallery_files[]" multiple class="hidden">
+                                            <input type="file" name="gallery_files[]" multiple class="hidden" onchange="previewGallery(this)">
                                         </label>
                                     </div>
                                 </div>
@@ -264,9 +264,32 @@ if (!defined('APP_NAME')) die('Direct access prevented');
                     document.getElementById('tab-' + tabId).classList.add('active');
                     event.currentTarget.classList.add('active');
                 }
+
+                function previewGallery(input) {
+                    const container = document.getElementById('galleryPreviewContainer');
+                    if (input.files) {
+                        Array.from(input.files).forEach(file => {
+                            const reader = new FileReader();
+                            reader.onload = function(e) {
+                                const div = document.createElement('div');
+                                div.className = 'relative group aspect-video rounded-xl overflow-hidden bg-white/5 border border-white/10 opacity-60';
+                                div.innerHTML = `<img src="${e.target.result}" class="w-full h-full object-cover">
+                                    <div class="absolute inset-0 flex items-center justify-center">
+                                        <span class="text-[8px] font-black uppercase tracking-widest bg-black/40 px-2 py-1 rounded">Pending</span>
+                                    </div>`;
+                                container.insertBefore(div, container.lastElementChild);
+                            }
+                            reader.readAsDataURL(file);
+                        });
+                    }
+                }
+
                 function deleteImage(id) {
                     if (confirm('Delete this image from gallery?')) {
-                        // Implement ajax delete if needed
+                        // In a real app, this would be an AJAX call. 
+                        // For now, we'll just redirect to a delete endpoint if you can implement one, 
+                        // or provide a hint to the user.
+                        window.location.href = `<?= baseUrl('admin/app-products?action=delete_image&id=') ?>${id}&product_id=<?= $editProduct['id'] ?? 0 ?>`;
                     }
                     event.preventDefault();
                 }

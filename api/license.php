@@ -163,7 +163,8 @@ try {
             'expires_at' => $license['expires_at'],
             'use_count' => (int)$license['use_count'],
             'max_use_count' => (int)$license['max_use_count'],
-            'label' => $license['label']
+            'label' => $license['label'],
+            'customer_name' => $license['label'] ?: ''
         ]);
 
     }
