@@ -163,13 +163,23 @@ if (!defined('APP_NAME')) die('Direct access prevented');
   "type": "pro",
   "product": "Forensic Recovery Pro",
   "max_devices": 1,
+  "use_count": 0,
+  "max_use_count": -1,
   "expires_at": "2027-12-31 23:59:59",
   "features": {
     "bound_hardware_id": "HW-12345-ABCDE",
     "advanced_recovery": "true"
   },
-  "customer_name": "John Doe"
+  "customer_name": "John Doe",
+  "about_text": "Mico Sage Forensic Tool\nLicensed to: John Doe"
 }</pre>
+                        
+                        <h4 class="text-sm font-bold text-white mb-2 mt-6">Understanding License Limits</h4>
+                        <p class="text-sm text-white/70 mb-4 text-justify">
+                            <strong class="text-white"><code>max_use_count</code></strong>: Determines the total number of operations (e.g., successful recoveries) allowed by this license. A value of <code>-1</code> means unlimited usage.<br>
+                            <strong class="text-white"><code>use_count</code></strong>: The current number of operations already performed. You must implement local tracking and sync this count via the Heartbeat API.<br>
+                            <strong class="text-white"><code>expires_at</code></strong>: A datetime string indicating when the license expires. If the license is permanent, this may be null.
+                        </p>
                         
                         <h4 class="text-sm font-bold text-white mb-2 mt-6">Error Responses</h4>
                         <pre>{"status": "invalid", "error": "Invalid license key"} // 404 Not Found
