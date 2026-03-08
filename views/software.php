@@ -94,26 +94,36 @@ if (!defined('APP_NAME')) die('Direct access prevented');
             display: flex;
             align-items: center;
             justify-content: center;
+            padding: 24px;
         }
 
         /* Dynamic Gradients for Backgrounds */
-        .bg-gradient-1 { background: linear-gradient(135deg, #1f2c41 0%, #a23565 100%); }
-        .bg-gradient-2 { background: linear-gradient(135deg, #104245 0%, #203541 100%); }
-        .bg-gradient-3 { background: linear-gradient(135deg, #1c5fd1 0%, #25448c 100%); }
-        .bg-gradient-4 { background: linear-gradient(135deg, #c41e15 0%, #7e1610 100%); }
-        .bg-gradient-5 { background: linear-gradient(135deg, #2b6bf3 0%, #153e97 100%); }
-        .bg-auto { background: linear-gradient(135deg, #2b6bf3 0%, #153e97 100%); }
+        .bg-gradient-1 { background: linear-gradient(135deg, #2b1f41 0%, #aa2f6e 100%); }
+        .bg-gradient-2 { background: linear-gradient(135deg, #184145 0%, #2b4556 100%); }
+        .bg-gradient-3 { background: linear-gradient(135deg, #266cf1 0%, #153c9f 100%); }
+        .bg-gradient-4 { background: linear-gradient(135deg, #d31e13 0%, #901610 100%); }
+        .bg-gradient-5 { background: linear-gradient(135deg, #1c72f7 0%, #0d3eb8 100%); }
+        .bg-auto { background: linear-gradient(135deg, #1e2638 0%, #2f3a52 100%); }
 
-        .app-icon {
-            width: 48%;
-            height: 48%;
-            object-fit: contain;
-            filter: drop-shadow(0 4px 12px rgba(0,0,0,0.15));
+        .app-icon-container {
+            width: 100px;
+            height: 100px;
+            background: #ffffff;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.15);
             transition: transform 0.4s ease;
         }
-        .app-card:hover .app-icon { transform: scale(1.05); }
-        .app-icon-fallback { font-size: 56px; color: rgba(255,255,255,0.8); transition: transform 0.5s; }
-        .app-card:hover .app-icon-fallback { transform: scale(1.1); }
+
+        .app-icon {
+            width: 65%;
+            height: 65%;
+            object-fit: contain;
+        }
+        .app-card:hover .app-icon-container { transform: scale(1.05); }
+        .app-icon-fallback { font-size: 50px; color: rgba(0,0,0,0.4); }
 
         .app-info { 
             padding: 16px; 
@@ -243,11 +253,13 @@ if (!defined('APP_NAME')) die('Direct access prevented');
                     ?>
                         <a href="<?= baseUrl('software/' . $p['slug']) ?>" class="app-card">
                             <div class="app-visual <?= $gradClass ?>">
-                                <?php if($iconUrl): ?>
-                                    <img src="<?= e($iconUrl) ?>" class="app-icon shadow-2xl">
-                                <?php else: ?>
-                                    <i class="ph ph-cube app-icon-fallback"></i>
-                                <?php endif; ?>
+                                <div class="app-icon-container">
+                                    <?php if($iconUrl): ?>
+                                        <img src="<?= e($iconUrl) ?>" class="app-icon">
+                                    <?php else: ?>
+                                        <i class="ph ph-cube app-icon-fallback"></i>
+                                    <?php endif; ?>
+                                </div>
                             </div>
                             <div class="app-info">
                                 <h3 class="app-name"><?= e($p['name']) ?></h3>
