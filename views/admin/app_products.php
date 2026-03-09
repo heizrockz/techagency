@@ -144,6 +144,10 @@ if (!defined('APP_NAME')) die('Direct access prevented');
                                     <textarea name="long_description" rows="5" class="form-input" placeholder="Full descriptive text of the software..."><?= e($editProduct['long_description'] ?? '') ?></textarea>
                                 </div>
                                 <div class="space-y-2">
+                                    <label class="text-[11px] font-bold text-white/40 uppercase tracking-widest ml-1">Requirements (Comma Separated)</label>
+                                    <input type="text" name="os_requirements" class="form-input" placeholder="Windows 10+, 64-bit Architecture" value="<?= e($editProduct['os_requirements'] ?? 'Windows 10+, 64-bit Architecture') ?>">
+                                </div>
+                                <div class="space-y-2">
                                     <label class="text-[11px] font-bold text-white/40 uppercase tracking-widest ml-1">Full Specifications (One per line)</label>
                                     <textarea name="features" rows="4" class="form-input" placeholder="Feature 1\nFeature 2..."><?= e($editProduct['features'] ?? '') ?></textarea>
                                 </div>
@@ -228,6 +232,10 @@ if (!defined('APP_NAME')) die('Direct access prevented');
                                 <div class="space-y-2">
                                     <label class="text-[11px] font-bold text-white/40 uppercase tracking-widest ml-1">الوصف الكامل</label>
                                     <textarea name="long_description_ar" rows="5" class="form-input text-right" placeholder="وصف مفصل للمنتج..."><?= e($editProduct['long_description_ar'] ?? '') ?></textarea>
+                                </div>
+                                <div class="space-y-2">
+                                    <label class="text-[11px] font-bold text-white/40 uppercase tracking-widest ml-1">متطلبات التشغيل (مفصول بفواصل)</label>
+                                    <input type="text" name="os_requirements_ar" class="form-input text-right" placeholder="ويندوز 10 فأحدث، معمارية 64 بت" value="<?= e($editProduct['os_requirements_ar'] ?? 'ويندوز 10 فأحدث، معمارية 64 بت') ?>">
                                 </div>
                                 <div class="space-y-2">
                                     <label class="text-[11px] font-bold text-white/40 uppercase tracking-widest ml-1">المميزات (ميزة واحدة في كل سطر)</label>

@@ -643,7 +643,9 @@ safeExec($db, "
 ", "Table `app_product_translations`");
 
 addColumn($db, 'app_products', 'long_description', 'TEXT DEFAULT NULL AFTER description');
+addColumn($db, 'app_products', 'os_requirements', "varchar(255) DEFAULT 'Windows 10+, 64-bit Architecture' AFTER long_description");
 addColumn($db, 'app_product_translations', 'long_description', 'TEXT DEFAULT NULL AFTER description');
+addColumn($db, 'app_product_translations', 'os_requirements', "varchar(255) DEFAULT 'Windows 10+, 64-bit Architecture' AFTER long_description");
 
     out("STEP 12 — Cleanup old scripts", 'head');
 
