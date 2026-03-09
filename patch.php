@@ -641,6 +641,10 @@ safeExec($db, "
       CONSTRAINT `fk_app_prod_trans` FOREIGN KEY (`product_id`) REFERENCES `app_products` (`id`) ON DELETE CASCADE
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 ", "Table `app_product_translations`");
+
+addColumn($db, 'app_products', 'long_description', 'TEXT DEFAULT NULL AFTER description');
+addColumn($db, 'app_product_translations', 'long_description', 'TEXT DEFAULT NULL AFTER description');
+
     out("STEP 12 — Cleanup old scripts", 'head');
 
     $publicFilesToDelete = [

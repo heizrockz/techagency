@@ -2158,6 +2158,7 @@ function adminAppProducts(): void
         $iconUrl = trim($_POST['icon_url'] ?? '');
         $headerImage = trim($_POST['header_image'] ?? '');
         $desc = trim($_POST['description'] ?? '');
+        $longDesc = trim($_POST['long_description'] ?? '');
         $features = trim($_POST['features'] ?? '');
         $downloadUrl = trim($_POST['download_url'] ?? '');
         $buyUrl = trim($_POST['buy_url'] ?? '');
@@ -2201,33 +2202,33 @@ function adminAppProducts(): void
         }
 
         if ($id > 0) {
-            $db->prepare('UPDATE app_products SET category_id=?, name=?, slug=?, version=?, icon_url=?, header_image=?, description=?, features=?, download_url=?, buy_url=?, show_buy_button=?, pricing_model=?, price=?, is_active=?, is_public=?, show_price=?, meta_description=?, meta_keywords=? WHERE id=?')
-                ->execute([$catId, $name, $slug, $version, $iconUrl, $headerImage, $desc, $features, $downloadUrl, $buyUrl, $showBuy, $model, $price, $active, $isPublic, $showPrice, $metaDesc, $metaKeys, $id]);
+            $db->prepare('UPDATE app_products SET category_id=?, name=?, slug=?, version=?, icon_url=?, header_image=?, description=?, long_description=?, features=?, download_url=?, buy_url=?, show_buy_button=?, pricing_model=?, price=?, is_active=?, is_public=?, show_price=?, meta_description=?, meta_keywords=? WHERE id=?')
+                ->execute([$catId, $name, $slug, $version, $iconUrl, $headerImage, $desc, $longDesc, $features, $downloadUrl, $buyUrl, $showBuy, $model, $price, $active, $isPublic, $showPrice, $metaDesc, $metaKeys, $id]);
         }
         else {
-            $db->prepare('INSERT INTO app_products (category_id, name, slug, version, icon_url, header_image, description, features, download_url, buy_url, show_buy_button, pricing_model, price, is_active, is_public, show_price, meta_description, meta_keywords) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)')
-                ->execute([$catId, $name, $slug, $version, $iconUrl, $headerImage, $desc, $features, $downloadUrl, $buyUrl, $showBuy, $model, $price, $active, $isPublic, $showPrice, $metaDesc, $metaKeys]);
+            $db->prepare('INSERT INTO app_products (category_id, name, slug, version, icon_url, header_image, description, long_description, features, download_url, buy_url, show_buy_button, pricing_model, price, is_active, is_public, show_price, meta_description, meta_keywords) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)')
+                ->execute([$catId, $name, $slug, $version, $iconUrl, $headerImage, $desc, $longDesc, $features, $downloadUrl, $buyUrl, $showBuy, $model, $price, $active, $isPublic, $showPrice, $metaDesc, $metaKeys]);
             $id = $db->lastInsertId();
         }
 
         // Handle Arabic translations
         $nameAr = trim($_POST['name_ar'] ?? '');
         $shortDescAr = trim($_POST['short_description_ar'] ?? '');
-        $descriptionAr = trim($_POST['description_ar'] ?? '');
+        $longDescAr = trim($_POST['long_description_ar'] ?? '');
         $featuresAr = trim($_POST['features_ar'] ?? '');
 
         // If any translation field is populated, either insert or update
-        if (!empty($nameAr) || !empty($shortDescAr) || !empty($descriptionAr) || !empty($featuresAr)) {
+        if (!empty($nameAr) || !empty($shortDescAr) || !empty($longDescAr) || !empty($featuresAr)) {
             $transStmt = $db->prepare("SELECT id FROM app_product_translations WHERE product_id = ? AND locale = 'ar'");
             $transStmt->execute([$id]);
             $exists = $transStmt->fetch();
 
             if ($exists) {
-                $db->prepare("UPDATE app_product_translations SET name=?, short_description=?, description=?, features=? WHERE id=?")
-                   ->execute([$nameAr, $shortDescAr, $descriptionAr, $featuresAr, $exists['id']]);
+                $db->prepare("UPDATE app_product_translations SET name=?, short_description=?, long_description=?, features=? WHERE id=?")
+                   ->execute([$nameAr, $shortDescAr, $longDescAr, $featuresAr, $exists['id']]);
             } else {
-                $db->prepare("INSERT INTO app_product_translations (product_id, locale, name, short_description, description, features) VALUES (?, 'ar', ?, ?, ?, ?)")
-                   ->execute([$id, $nameAr, $shortDescAr, $descriptionAr, $featuresAr]);
+                $db->prepare("INSERT INTO app_product_translations (product_id, locale, name, short_description, long_description, features) VALUES (?, 'ar', ?, ?, ?, ?)")
+                   ->execute([$id, $nameAr, $shortDescAr, $longDescAr, $featuresAr]);
             }
         } else {
              // If all empty, clear the translation if it existed

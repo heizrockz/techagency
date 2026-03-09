@@ -140,6 +140,10 @@ if (!defined('APP_NAME')) die('Direct access prevented');
                                     <textarea name="description" rows="2" class="form-input" placeholder="Brief summary for list view..."><?= e($editProduct['description'] ?? '') ?></textarea>
                                 </div>
                                 <div class="space-y-2">
+                                    <label class="text-[11px] font-bold text-white/40 uppercase tracking-widest ml-1">Long Description (About Text)</label>
+                                    <textarea name="long_description" rows="5" class="form-input" placeholder="Full descriptive text of the software..."><?= e($editProduct['long_description'] ?? '') ?></textarea>
+                                </div>
+                                <div class="space-y-2">
                                     <label class="text-[11px] font-bold text-white/40 uppercase tracking-widest ml-1">Full Specifications (One per line)</label>
                                     <textarea name="features" rows="4" class="form-input" placeholder="Feature 1\nFeature 2..."><?= e($editProduct['features'] ?? '') ?></textarea>
                                 </div>
@@ -218,12 +222,12 @@ if (!defined('APP_NAME')) die('Direct access prevented');
                                     <input type="text" name="name_ar" class="form-input text-right" value="<?= e($editProduct['name_ar'] ?? '') ?>" placeholder="مثال: برنامج المبيعات">
                                 </div>
                                 <div class="space-y-2">
-                                    <label class="text-[11px] font-bold text-white/40 uppercase tracking-widest ml-1">نبذة قصيرة</label>
+                                    <label class="text-[11px] font-bold text-white/40 uppercase tracking-widest ml-1">النبذة القصيرة</label>
                                     <textarea name="short_description_ar" rows="2" class="form-input text-right" placeholder="ملخص قصير..."><?= e($editProduct['short_description_ar'] ?? '') ?></textarea>
                                 </div>
                                 <div class="space-y-2">
                                     <label class="text-[11px] font-bold text-white/40 uppercase tracking-widest ml-1">الوصف الكامل</label>
-                                    <textarea name="description_ar" rows="4" class="form-input text-right" placeholder="وصف مفصل للمنتج..."><?= e($editProduct['description_ar'] ?? '') ?></textarea>
+                                    <textarea name="long_description_ar" rows="5" class="form-input text-right" placeholder="وصف مفصل للمنتج..."><?= e($editProduct['long_description_ar'] ?? '') ?></textarea>
                                 </div>
                                 <div class="space-y-2">
                                     <label class="text-[11px] font-bold text-white/40 uppercase tracking-widest ml-1">المميزات (ميزة واحدة في كل سطر)</label>

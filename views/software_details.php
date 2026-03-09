@@ -181,10 +181,40 @@ if (!defined('APP_NAME')) die('Direct access prevented');
             </div>
 
             <!-- Content -->
-            <div class="space-y-6 mb-20">
+            <div class="space-y-6 mb-12">
                 <h1 class="text-5xl font-black tracking-tighter"><?= e($product['name']) ?></h1>
-                <p class="text-xl text-white/60 leading-relaxed"><?= e($product['description']) ?></p>
+                
+                <!-- Short Description (Lead) -->
+                <?php if (!empty($product['short_description'])): ?>
+                    <p class="text-2xl text-violet-300/90 font-medium leading-relaxed"><?= e($product['short_description']) ?></p>
+                <?php endif; ?>
+                
+                <!-- Long Description -->
+                <?php if (!empty($product['long_description'])): ?>
+                    <div class="text-lg text-white/70 leading-loose prose prose-invert max-w-none text-justify whitespace-pre-line">
+                        <?= e($product['long_description']) ?>
+                    </div>
+                <?php endif; ?>
             </div>
+            
+            <!-- Features List -->
+            <?php if (!empty(trim($product['features']))): ?>
+                <div class="mb-20">
+                    <h2 class="text-2xl font-bold mb-6"><?= getCurrentLocale() === 'ar' ? 'أبرز المميزات' : 'Key Features & Specialties' ?></h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <?php 
+                        $featureLines = array_filter(array_map('trim', explode("\n", $product['features'])));
+                        foreach($featureLines as $feat): 
+                            if(empty($feat)) continue;
+                        ?>
+                            <div class="flex items-start gap-4 p-4 rounded-2xl bg-white/5 border border-white/10">
+                                <i class="ph-fill ph-check-circle text-emerald-400 text-xl mt-1 shrink-0"></i>
+                                <span class="text-white/80 leading-relaxed font-medium"><?= e($feat) ?></span>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+            <?php endif; ?>
 
             <!-- Reviews Section -->
             <div id="reviews" class="space-y-8">

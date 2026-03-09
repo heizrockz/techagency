@@ -159,7 +159,7 @@ function publicSoftwareDetails(string $slug): void
         $stmt = $db->prepare("SELECT p.*, c.name as category_name, c.color as category_color,
                 COALESCE(t.name, p.name) as display_name,
                 COALESCE(t.short_description, p.description) as display_short_desc,
-                COALESCE(t.description, p.description) as display_desc,
+                COALESCE(t.long_description, p.long_description) as display_long_desc,
                 COALESCE(t.features, p.features) as display_features
             FROM app_products p 
             JOIN app_categories c ON p.category_id = c.id 
@@ -169,7 +169,7 @@ function publicSoftwareDetails(string $slug): void
     } else {
         $stmt = $db->prepare("SELECT p.*, c.name as category_name, c.color as category_color,
                 p.name as display_name, p.description as display_short_desc,
-                p.description as display_desc, p.features as display_features
+                p.long_description as display_long_desc, p.features as display_features
             FROM app_products p 
             JOIN app_categories c ON p.category_id = c.id 
             WHERE p.slug = ? AND p.is_active = 1 LIMIT 1");
@@ -180,7 +180,7 @@ function publicSoftwareDetails(string $slug): void
     if ($product) {
         $product['name'] = $product['display_name'];
         $product['short_description'] = $product['display_short_desc'] ?? $product['short_description'] ?? '';
-        $product['description'] = $product['display_desc'] ?? $product['description'] ?? '';
+        $product['long_description'] = $product['display_long_desc'] ?? $product['long_description'] ?? '';
         $product['features'] = $product['display_features'] ?? $product['features'] ?? '';
     }
 
