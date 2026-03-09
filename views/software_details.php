@@ -410,9 +410,9 @@ if (!defined('APP_NAME')) die('Direct access prevented');
     <script>
         window.chatbotData = <?= json_encode($chatbotData) ?>;
     </script>
-    <script src="<?= baseUrl('assets/js/chatbot.js') ?>"></script>
     <?php endif; ?>
 
-    <script src="<?= baseUrl('assets/js/script.js') ?>"></script>
+    <script src="<?= baseUrl('assets/js/app.js') ?>" defer></script>
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
 </body>
 </html>
